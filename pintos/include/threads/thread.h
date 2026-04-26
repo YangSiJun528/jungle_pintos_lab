@@ -109,6 +109,9 @@ struct thread {
 	int priority;                       /* Priority. */
 	/* priority 값. */
 
+	// wakeup_tick은 sleep 상황에서만 의미 가짐.
+	int64_t wakeup_tick;                /* thread가 wakeup 해야 할 tick. */
+
 	/* Shared between thread.c and synch.c. */
 	/* thread.c와 synch.c가 공유한다. */
 	struct list_elem elem;              /* List element. */
@@ -160,6 +163,8 @@ const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
+void thread_sleep (int64_t wakeup_tick);
+void threads_wakeup (int64_t ticks);
 
 int thread_get_priority (void);
 void thread_set_priority (int);

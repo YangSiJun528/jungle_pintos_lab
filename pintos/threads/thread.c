@@ -35,6 +35,9 @@
    실행 중이 아닌 프로세스들의 리스트이다. */
 static struct list ready_list;
 
+/* 특정 타이머 tick까지 잠든 프로세스들의 리스트. */
+static struct list sleep_list;
+
 /* Idle thread. */
 /* idle 스레드. */
 static struct thread *idle_thread;
@@ -151,6 +154,7 @@ thread_init (void) {
 	/* 전역 스레드 컨텍스트를 초기화한다. */
 	lock_init (&tid_lock);
 	list_init (&ready_list);
+	list_init (&sleep_list);
 	list_init (&destruction_req);
 
 	/* Set up a thread structure for the running thread. */
@@ -403,6 +407,48 @@ thread_yield (void) {
 		list_push_back (&ready_list, &curr->elem);
 	do_schedule (THREAD_READY);
 	intr_set_level (old_level);
+}
+
+/* Puts the current thread to sleep until WAKEUP_TICK. */
+/* 현재 스레드를 WAKEUP_TICK까지 재우고 스케줄 대상에서 제외한다. */
+// ASSERT: 인터럽트 핸들러에 의해서 호출될 수 없다.
+void
+thread_sleep (int64_t wakeup_tick) {
+	struct thread *curr = thread_current ();
+	enum intr_level old_level;
+
+	ASSERT (!intr_context ());
+
+	old_level = intr_disable ();
+	if (curr != idle_thread) {
+		curr->wakeup_tick = wakeup_tick;
+		list_push_back (&sleep_list, &curr->elem);
+		thread_block ();
+	}
+	intr_set_level (old_level);
+}
+
+/* Wakes every sleeping thread whose wakeup tick has arrived. */
+/* 깨어날 tick에 도달한 모든 sleeping thread를 ready 상태로 옮긴다. */
+// ASSERT: 인터럽트 핸들러에 의해서만 호출되어야 한다.
+void
+threads_wakeup (int64_t ticks) {
+	struct list_elem *e;
+
+	ASSERT (intr_context ());
+	ASSERT (intr_get_level () == INTR_OFF);
+
+	e = list_begin (&sleep_list);
+	while (e != list_end (&sleep_list)) {
+		struct thread *t = list_entry (e, struct thread, elem);
+
+		if (t->wakeup_tick <= ticks) {
+			e = list_remove (e);
+			thread_unblock (t);
+		} else {
+			e = list_next (e);
+		}
+	}
 }
 
 /* Sets the current thread's priority to NEW_PRIORITY. */
