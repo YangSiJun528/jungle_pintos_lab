@@ -28,6 +28,10 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
+static bool cmp_sema_priority(const struct list_elem* a,
+		const struct list_elem* b,
+		void *aux UNUSED);
+
 /* 세마포어 SEMA을 VALUE로 초기화합니다. 세마포어는
    음이 아닌 정수와 두 개의 원자 연산자
    조작하기:
@@ -74,8 +78,8 @@ sema_down (struct semaphore *sema) {
 
 	old_level = intr_disable ();
 	while (sema->value == 0) {
-		//TODO(schd-2): waiters를 priority 기준으로 정렬되게 추가
-		list_push_back (&sema->waiters, &thread_current ()->elem);
+		list_insert_ordered (&sema->waiters, &thread_current ()->elem,
+				cmp_priority, NULL);
 		thread_block ();
 	}
 	sema->value--;
@@ -127,11 +131,10 @@ sema_up (struct semaphore *sema) {
 
 	old_level = intr_disable ();
 	if (!list_empty (&sema->waiters))
-		//TODO(schd-2): 정렬되어있으므로 수정 필요 없음
 		thread_unblock (list_entry (list_pop_front (&sema->waiters),
 					struct thread, elem));
 	sema->value++;
-	//TODO(schd-1): thread_yield_if_needed 호출
+	thread_yield_if_needed();
 	intr_set_level (old_level);
 }
 
@@ -352,9 +355,14 @@ cond_wait (struct condition *cond, struct lock *lock) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	sema_init (&waiter.semaphore, 0);
-	//TODO(schd-2): waiters를 priority 기준으로 정렬되게 추가
 	list_push_back (&cond->waiters, &waiter.elem);
 	lock_release (lock);
+	//TODO: 보완하고 싶은 부분
+	//sema_down이 호출되야 condvar의 새로운 waiter에 thread가 들어감.
+	//그래서 앞에서 호출하면 의미 없음.
+	//그런데? 뒤에서 호출하면 이미 하나가 up 한 다음일거라 정렬 순서 보장이 안됨.
+	//지금은 cond_signal에서 정렬하는데, 여기서 처리 가능할거 같음.
+	//현재 스레드 값을 가지고 있으니까, waiters를 보고 넣는 위치를 수동으로 정해주면 될거 같긴 함.
 	sema_down (&waiter.semaphore);
 	lock_acquire (lock);
 }
@@ -379,12 +387,13 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED) {
 	ASSERT (!intr_context ());
 	ASSERT (lock_held_by_current_thread (lock));
 
-	if (!list_empty (&cond->waiters))
-		//TODO(schd-2): 정렬되어 있어서 수정 필요 없음
+	if (!list_empty (&cond->waiters)) {
+		//TODO: 보완하고 싶은 부분 - list_sort 없어도 가능할거 같은데
+		list_sort (&cond->waiters, cmp_sema_priority, NULL);
 		sema_up (&list_entry (list_pop_front (&cond->waiters),
 					struct semaphore_elem, elem)->semaphore);
+	}
 }
-
 /* COND을(를 통해 보호되는) 대기 중인 모든 스레드를 깨웁니다.
    LOCK). 이 함수를 호출하기 전에 LOCK을 보유해야 합니다.
 
@@ -401,7 +410,17 @@ cond_broadcast (struct condition *cond, struct lock *lock) {
 	ASSERT (cond != NULL);
 	ASSERT (lock != NULL);
 
-	//TODO(schd-2): cond_signal()이 순서 보장한다 가정하므로 수정 없음
 	while (!list_empty (&cond->waiters))
 		cond_signal (cond, lock);
+}
+
+
+static bool
+cmp_sema_priority(const struct list_elem* a, const struct list_elem* b,
+		void *aux UNUSED) {
+	struct semaphore_elem *sa = list_entry (a, struct semaphore_elem, elem);
+	struct semaphore_elem *sb = list_entry (b, struct semaphore_elem, elem);
+
+	return cmp_priority(list_front (&sa->semaphore.waiters),
+	                    list_front (&sb->semaphore.waiters), NULL);
 }
