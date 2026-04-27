@@ -86,6 +86,8 @@ static void init_thread (struct thread *, const char *name, int priority);
 static void do_schedule(int status);
 static void schedule (void);
 static tid_t allocate_tid (void);
+static bool cmp_wakeup_tick (const struct list_elem *a,
+		const struct list_elem *b, void *aux UNUSED);
 
 /* Returns true if T appears to point to a valid thread. */
 /* T가 유효한 스레드를 가리키는 것처럼 보이면 true를 리턴한다. */
@@ -422,7 +424,7 @@ thread_sleep (int64_t wakeup_tick) {
 	old_level = intr_disable ();
 	if (curr != idle_thread) {
 		curr->wakeup_tick = wakeup_tick;
-		list_push_back (&sleep_list, &curr->elem);
+		list_insert_ordered (&sleep_list, &curr->elem, cmp_wakeup_tick, NULL);
 		thread_block ();
 	}
 	intr_set_level (old_level);
@@ -446,7 +448,7 @@ threads_wakeup (int64_t ticks) {
 			e = list_remove (e);
 			thread_unblock (t);
 		} else {
-			e = list_next (e);
+			break;
 		}
 	}
 }
@@ -797,4 +799,13 @@ allocate_tid (void) {
 	lock_release (&tid_lock);
 
 	return tid;
+}
+
+static bool
+cmp_wakeup_tick (const struct list_elem *a, const struct list_elem *b,
+		void *aux UNUSED) {
+	const struct thread *ta = list_entry (a, struct thread, elem);
+	const struct thread *tb = list_entry (b, struct thread, elem);
+
+	return ta->wakeup_tick < tb->wakeup_tick;
 }
