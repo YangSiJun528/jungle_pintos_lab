@@ -477,7 +477,11 @@ threads_wakeup (int64_t ticks) {
 /* 현재 스레드의 priority를 NEW_PRIORITY로 설정한다. */
 void
 thread_set_priority (int new_priority) {
-	thread_current ()->priority = new_priority;
+	struct thread *cur = thread_current ();
+	cur->base_priority = new_priority;
+	if (cur->priority < new_priority) {
+		cur->priority = new_priority;
+	}
 	thread_yield_if_needed();
 }
 

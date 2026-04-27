@@ -237,34 +237,12 @@ lock_acquire (struct lock *lock) {
 	struct thread *holder = lock->holder;
 	struct thread *cur = thread_current ();
 	if (holder != NULL) {
-		cur->wait_on_lock = holder;
+		//printf("]----[ lock_acquire | holder name: %s\n", holder->name);
+		cur->wait_on_lock = lock;
 		list_push_back(&holder->donations, &cur->d_elem);
 		if (holder->priority < cur->priority) {
 			holder->priority = cur->priority;
-		}
-	}
-
-	sema_down (&lock->semaphore);
-	lock->holder = thread_current ();
-}
-
-void
-lock_acquire_backup (struct lock *lock) {
-	ASSERT (lock != NULL);
-	ASSERT (!intr_context ());
-	ASSERT (!lock_held_by_current_thread (lock));
-
-	// 항상 cur를 기준으로 holder
-	struct thread *holder = lock->holder;
-	struct thread *cur = thread_current ();
-	if (holder != NULL) {
-		cur->wait_on_lock = holder;
-		// 내가 holder보다 높은 우선순위를 가지는 경우 holder의 우선순위를 바꾸기
-		while (holder != NULL && holder->priority < cur->priority) {
-			holder->priority = cur->priority;
-			// 그려보면서 되는거 확인함.
-			cur = holder;
-			holder = holder->wait_on_lock;
+			//printf("]----[ lock_acquire | set: holder->priority: %d\n", holder->priority);
 		}
 	}
 
@@ -311,50 +289,37 @@ lock_release (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
 
-	struct thread *holder = lock->holder;
+	struct thread *cur = thread_current ();
 
 	struct list_elem *e;
-	e = list_begin (&holder->donations);
-	while (e != list_end (&holder->donations)) {
-		struct thread *t = list_entry (e, struct thread, d_elem);
-		if (t->wait_on_lock == holder) {
-			list_remove(&t->d_elem);
-			break;
+	e = list_begin (&cur->donations);
+	while (e != list_end(&cur->donations)) {
+		struct thread *t = list_entry(e, struct thread, d_elem);
+
+		if (t->wait_on_lock == lock) {
+			//printf("]----[ lock_release | list_remove name: %s\n", t->name);
+			e = list_remove(e);
+		} else {
+			e = list_next(e);
 		}
 	}
 
-	int max_priority = list_entry (list_max (&holder->donations, cmp_priority,
-					NULL), struct thread, elem)->priority;
-	if (holder->base_priority < max_priority) {
-		holder->priority = holder->base_priority;
-	} else {
-		holder->priority = max_priority;
-	}
-
-	lock->holder = NULL;
-	sema_up (&lock->semaphore);
-}
-
-void
-lock_release_backup (struct lock *lock) {
-	ASSERT (lock != NULL);
-	ASSERT (lock_held_by_current_thread (lock));
-
-	lock->holder = NULL;
-
-	struct thread *cur = thread_current ();
 	cur->priority = cur->base_priority;
 
-	while (cur->wait_on_lock != NULL) {
-		cur = cur->wait_on_lock;
+	if (!list_empty(&cur->donations)) {
+		int max_priority = list_entry (list_min (&cur->donations,
+				cmp_priority, NULL), struct thread, d_elem)->priority;
+
+		if (cur->priority < max_priority) {
+			cur->priority = max_priority;
+		}
+
+		// printf("]----[ lock_release | max_priority: %d\n", max_priority);
+		// printf("]----[ lock_release | holder->base_priority: %d\n", holder->base_priority);
+		// printf("]----[ lock_release | holder->priority: %d\n", holder->priority);
 	}
-	// 여기서부터 cur는 현재 락을 가지고 대기하고 있지않는, 실행 가능한 스레드임.
-	ASSERT (!list_empty(&cur->donations));
 
-	int max_priority = list_entry (list_max (&cur->donations, cmp_priority,
-					NULL), struct thread, elem)->priority;
-	cur->priority = max_priority;
-
+	lock->holder = NULL;
 	sema_up (&lock->semaphore);
 }
 
@@ -363,7 +328,6 @@ lock_release_backup (struct lock *lock) {
    a lock would be racy.) */
 /* 현재 스레드가 LOCK을 들고 있으면 true, 아니면 false를 리턴한다.
    다른 스레드가 lock을 들고 있는지 검사하는 것은 racy하다는 점에 주의한다. */
-// racy = 검사하는 동안/직후 다른 스레드가 상태를 바꿔서 race condition 발생이 가능하다는 의미.
 bool
 lock_held_by_current_thread (const struct lock *lock) {
 	ASSERT (lock != NULL);

@@ -122,7 +122,7 @@ struct thread {
 	int base_priority;
 
 	/* TODO(shcd): donations임. 설명 주석 달기 */
-	struct thread *wait_on_lock;
+	struct lock *wait_on_lock;
 
 	/* TODO(shcd): donations임. thread * 타입 요소를 가짐. 설명 주석 달기 */
 	struct list donations;
