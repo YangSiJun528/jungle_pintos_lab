@@ -291,10 +291,21 @@ lock_release (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
 
+	lock->holder = NULL;
+
 	struct thread *cur = thread_current ();
 	cur->priority = cur->base_priority;
 
-	lock->holder = NULL;
+	while (cur->wait_on_lock != NULL) {
+		cur = cur->wait_on_lock;
+	}
+	// 여기서부터 cur는 현재 락을 가지고 대기하고 있지않는, 실행 가능한 스레드임.
+	ASSERT (!list_empty(&cur->donations));
+
+	int max_priority = list_entry (list_max (&cur->donations, cmp_priority,
+					NULL), struct thread, elem)->priority;
+	cur->priority = max_priority;
+
 	sema_up (&lock->semaphore);
 }
 
