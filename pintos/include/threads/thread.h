@@ -110,7 +110,7 @@ struct thread {
 	/* priority 값. */
 
 	// wakeup_tick은 sleep 상황에서만 의미 가짐.
-	int64_t wakeup_tick;                /* thread가 wakeup 해야 할 tick. */
+	int64_t wakeup_ticks;                /* thread가 wakeup 해야 할 tick. */
 
 	/* Shared between thread.c and synch.c. */
 	/* thread.c와 synch.c가 공유한다. */

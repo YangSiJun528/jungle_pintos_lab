@@ -86,7 +86,7 @@ static void init_thread (struct thread *, const char *name, int priority);
 static void do_schedule(int status);
 static void schedule (void);
 static tid_t allocate_tid (void);
-static bool cmp_wakeup_tick (const struct list_elem *a,
+static bool cmp_wakeup_ticks (const struct list_elem *a,
 		const struct list_elem *b, void *aux UNUSED);
 
 /* Returns true if T appears to point to a valid thread. */
@@ -423,8 +423,8 @@ thread_sleep (int64_t wakeup_tick) {
 
 	old_level = intr_disable ();
 	if (curr != idle_thread) {
-		curr->wakeup_tick = wakeup_tick;
-		list_insert_ordered (&sleep_list, &curr->elem, cmp_wakeup_tick, NULL);
+		curr->wakeup_ticks = wakeup_tick;
+		list_insert_ordered (&sleep_list, &curr->elem, cmp_wakeup_ticks, NULL);
 		thread_block ();
 	}
 	intr_set_level (old_level);
@@ -444,7 +444,7 @@ threads_wakeup (int64_t ticks) {
 	while (e != list_end (&sleep_list)) {
 		struct thread *t = list_entry (e, struct thread, elem);
 
-		if (t->wakeup_tick <= ticks) {
+		if (t->wakeup_ticks <= ticks) {
 			e = list_remove (e);
 			thread_unblock (t);
 		} else {
@@ -802,13 +802,13 @@ allocate_tid (void) {
 }
 
 static bool
-cmp_wakeup_tick (const struct list_elem *a, const struct list_elem *b,
+cmp_wakeup_ticks (const struct list_elem *a, const struct list_elem *b,
 		void *aux UNUSED) {
 	const struct thread *ta = list_entry (a, struct thread, elem);
 	const struct thread *tb = list_entry (b, struct thread, elem);
 
-	if (ta->wakeup_tick == tb->wakeup_tick)
+	if (ta->wakeup_ticks == tb->wakeup_ticks)
 		return ta->priority > tb->priority;
 
-	return ta->wakeup_tick < tb->wakeup_tick;
+	return ta->wakeup_ticks < tb->wakeup_ticks;
 }
