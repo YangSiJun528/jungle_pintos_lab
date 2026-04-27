@@ -295,6 +295,8 @@ struct semaphore_elem {
 	/* 리스트 element. */
 	struct semaphore semaphore;         /* This semaphore. */
 	/* 이 세마포어. */
+
+	struct thread *thread;
 };
 
 /* Initializes condition variable COND.  A condition variable
@@ -355,14 +357,9 @@ cond_wait (struct condition *cond, struct lock *lock) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	sema_init (&waiter.semaphore, 0);
-	list_push_back (&cond->waiters, &waiter.elem);
+	waiter.thread = thread_current ();
+	list_insert_ordered (&cond->waiters, &waiter.elem, cmp_sema_priority, NULL);
 	lock_release (lock);
-	//TODO: 보완하고 싶은 부분
-	//sema_down이 호출되야 condvar의 새로운 waiter에 thread가 들어감.
-	//그래서 앞에서 호출하면 의미 없음.
-	//그런데? 뒤에서 호출하면 이미 하나가 up 한 다음일거라 정렬 순서 보장이 안됨.
-	//지금은 cond_signal에서 정렬하는데, 여기서 처리 가능할거 같음.
-	//현재 스레드 값을 가지고 있으니까, waiters를 보고 넣는 위치를 수동으로 정해주면 될거 같긴 함.
 	sema_down (&waiter.semaphore);
 	lock_acquire (lock);
 }
@@ -388,8 +385,6 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	if (!list_empty (&cond->waiters)) {
-		//TODO: 보완하고 싶은 부분 - list_sort 없어도 가능할거 같은데
-		list_sort (&cond->waiters, cmp_sema_priority, NULL);
 		sema_up (&list_entry (list_pop_front (&cond->waiters),
 					struct semaphore_elem, elem)->semaphore);
 	}
@@ -421,6 +416,5 @@ cmp_sema_priority(const struct list_elem* a, const struct list_elem* b,
 	struct semaphore_elem *sa = list_entry (a, struct semaphore_elem, elem);
 	struct semaphore_elem *sb = list_entry (b, struct semaphore_elem, elem);
 
-	return cmp_priority(list_front (&sa->semaphore.waiters),
-	                    list_front (&sb->semaphore.waiters), NULL);
+	return sa->thread->priority > sb->thread->priority;
 }
