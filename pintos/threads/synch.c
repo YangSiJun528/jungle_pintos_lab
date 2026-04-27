@@ -234,6 +234,26 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
 
+	struct thread *holder = lock->holder;
+	struct thread *cur = thread_current ();
+	if (holder != NULL) {
+		cur->wait_on_lock = holder;
+		list_push_back(&holder->donations, &cur->d_elem);
+		if (holder->priority < cur->priority) {
+			holder->priority = cur->priority;
+		}
+	}
+
+	sema_down (&lock->semaphore);
+	lock->holder = thread_current ();
+}
+
+void
+lock_acquire_backup (struct lock *lock) {
+	ASSERT (lock != NULL);
+	ASSERT (!intr_context ());
+	ASSERT (!lock_held_by_current_thread (lock));
+
 	// 항상 cur를 기준으로 holder
 	struct thread *holder = lock->holder;
 	struct thread *cur = thread_current ();
@@ -288,6 +308,35 @@ lock_try_acquire (struct lock *lock) {
    lock을 release하려고 하는 것은 의미가 없다. */
 void
 lock_release (struct lock *lock) {
+	ASSERT (lock != NULL);
+	ASSERT (lock_held_by_current_thread (lock));
+
+	struct thread *holder = lock->holder;
+
+	struct list_elem *e;
+	e = list_begin (&holder->donations);
+	while (e != list_end (&holder->donations)) {
+		struct thread *t = list_entry (e, struct thread, d_elem);
+		if (t->wait_on_lock == holder) {
+			list_remove(&t->d_elem);
+			break;
+		}
+	}
+
+	int max_priority = list_entry (list_max (&holder->donations, cmp_priority,
+					NULL), struct thread, elem)->priority;
+	if (holder->base_priority < max_priority) {
+		holder->priority = holder->base_priority;
+	} else {
+		holder->priority = max_priority;
+	}
+
+	lock->holder = NULL;
+	sema_up (&lock->semaphore);
+}
+
+void
+lock_release_backup (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
 
