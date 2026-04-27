@@ -807,5 +807,8 @@ cmp_wakeup_tick (const struct list_elem *a, const struct list_elem *b,
 	const struct thread *ta = list_entry (a, struct thread, elem);
 	const struct thread *tb = list_entry (b, struct thread, elem);
 
+	if (ta->wakeup_tick == tb->wakeup_tick)
+		return ta->priority > tb->priority;
+
 	return ta->wakeup_tick < tb->wakeup_tick;
 }
