@@ -94,11 +94,9 @@ struct list {
 	struct list_elem tail;      /* 꼬리를 나열하십시오. */
 };
 
-/* 목록 요소 LIST_ELEM에 대한 포인터를 포인터로 변환합니다.
-   LIST_ELEM이 내부에 포함된 구조입니다. 공급하다
-   외부 구조의 이름 STRUCT 및 멤버 이름 MEMBER
-   목록 요소의 상단의 큰댓글을 참고하세요
-   예시 파일입니다. */
+/* LIST_ELEM이 포함된 바깥 구조체의 포인터를 구한다.
+   STRUCT는 바깥 구조체 타입이고, MEMBER는 그 안에 있는 struct list_elem
+   멤버의 이름이다. 사용 예시는 파일 상단의 설명을 참고한다. */
 #define list_entry(LIST_ELEM, STRUCT, MEMBER)           \
 	((STRUCT *) ((uint8_t *) &(LIST_ELEM)->next     \
 		- offsetof (STRUCT, MEMBER.next)))
@@ -143,6 +141,12 @@ void list_reverse (struct list *);
 /* 주어진 두 목록 요소 A와 B의 값을 비교합니다.
    보조 데이터 AUX. A가 B보다 작으면 true를 반환합니다.
    A가 B보다 크거나 같으면 false입니다. */
+/* true를 반환하면 A가 B보다 앞에 와야 한다.
+   false를 반환하면 A가 B보다 앞에 오지 않는다. 즉, B가 A보다 앞서거나 같다.
+
+   A와 B가 같은 값일 때, (그리고 앞에서 탐색한다고 가정했을 때)
+   true를 반환하면 앞에서 붙어서 항상 먼저 찾아진다.
+   false를 반환하면 같은 요소들의 뒤에 붙어서 round-robin 순서를 유지한다.  */
 typedef bool list_less_func (const struct list_elem *a,
                              const struct list_elem *b,
                              void *aux);
