@@ -135,9 +135,11 @@ sema_up (struct semaphore *sema) {
 	ASSERT (sema != NULL);
 
 	old_level = intr_disable ();
-	if (!list_empty (&sema->waiters))
+	if (!list_empty (&sema->waiters)) {
+		list_sort(&sema->waiters, cmp_priority, NULL); // Priority Donation 떄문
 		thread_unblock (list_entry (list_pop_front (&sema->waiters),
 					struct thread, elem));
+	}
 	sema->value++;
 	thread_yield_if_needed();
 	intr_set_level (old_level);
@@ -244,10 +246,25 @@ lock_acquire (struct lock *lock) {
 			holder->priority = cur->priority;
 			//printf("]----[ lock_acquire | set: holder->priority: %d\n", holder->priority);
 		}
+
+		struct thread *t = holder;
+		while (t != NULL) { // 끝까지 가야 함. 중간에 끊기면 안됨.
+			if (t->priority < cur->priority) {
+				t->priority = cur->priority;
+			}
+			// printf("]----[ lock_acquire | cur priority chain: %s(%d - %d)\n",
+			// 		t->name, t->priority, cur->priority);
+			t->priority = cur->priority;
+			if (t->wait_on_lock == NULL) { // cur->priority 까진 해야하니까
+				break;
+			}
+			t = t->wait_on_lock->holder;
+		}
 	}
 
 	sema_down (&lock->semaphore);
-	lock->holder = thread_current ();
+	cur->wait_on_lock = NULL;
+	lock->holder = cur;
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -432,6 +449,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	if (!list_empty (&cond->waiters)) {
+		list_sort(&cond->waiters, cmp_sema_priority, NULL);//Priority Donation 때문
 		sema_up (&list_entry (list_pop_front (&cond->waiters),
 					struct semaphore_elem, elem)->semaphore);
 	}

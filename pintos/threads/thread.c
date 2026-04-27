@@ -418,6 +418,7 @@ thread_yield_if_needed (void) {
 	if (list_empty (&ready_list))
 		return;
 
+	list_sort(&ready_list, cmp_priority, NULL); // Priority Donation 떄문
 	struct thread *peek_t =
 		list_entry (list_front (&ready_list), struct thread, elem);
 	bool need_preemption = peek_t->priority > thread_current ()->priority;
@@ -633,8 +634,8 @@ static struct thread *
 next_thread_to_run (void) {
 	if (list_empty (&ready_list))
 		return idle_thread;
-	else
-		return list_entry (list_pop_front (&ready_list), struct thread, elem);
+	list_sort(&ready_list, cmp_priority, NULL); // Priority Donation 때매 정렬 필요
+	return list_entry (list_pop_front (&ready_list), struct thread, elem);
 }
 
 /* Use iretq to launch the thread */
