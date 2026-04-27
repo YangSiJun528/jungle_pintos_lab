@@ -234,6 +234,20 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
 
+	// 항상 cur를 기준으로 holder
+	struct thread *holder = lock->holder;
+	struct thread *cur = thread_current ();
+	if (holder != NULL) {
+		cur->wait_on_lock = holder;
+		// 내가 holder보다 높은 우선순위를 가지는 경우 holder의 우선순위를 바꾸기
+		while (holder != NULL && holder->priority < cur->priority) {
+			holder->priority = cur->priority;
+			// 그려보면서 되는거 확인함.
+			cur = holder;
+			holder = holder->wait_on_lock;
+		}
+	}
+
 	sema_down (&lock->semaphore);
 	lock->holder = thread_current ();
 }
@@ -277,6 +291,9 @@ lock_release (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
 
+	struct thread *cur = thread_current ();
+	cur->priority = cur->base_priority;
+
 	lock->holder = NULL;
 	sema_up (&lock->semaphore);
 }
@@ -286,6 +303,7 @@ lock_release (struct lock *lock) {
    a lock would be racy.) */
 /* 현재 스레드가 LOCK을 들고 있으면 true, 아니면 false를 리턴한다.
    다른 스레드가 lock을 들고 있는지 검사하는 것은 racy하다는 점에 주의한다. */
+// racy = 검사하는 동안/직후 다른 스레드가 상태를 바꿔서 race condition 발생이 가능하다는 의미.
 bool
 lock_held_by_current_thread (const struct lock *lock) {
 	ASSERT (lock != NULL);

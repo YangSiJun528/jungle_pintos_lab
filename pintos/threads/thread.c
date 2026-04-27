@@ -608,6 +608,11 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	t->priority = priority;
 	t->magic = THREAD_MAGIC;
+	t->wait_on_lock = NULL;
+	list_init(&t->donations);
+	//TODO(shcd): d_elem은 필요없나?
+	// elem도 없긴 한데, 이건 항상 쓰는 값이라...
+	// wait_on_lock 여부로 확인할 수는 있어보임.
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should

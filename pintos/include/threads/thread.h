@@ -118,6 +118,18 @@ struct thread {
 	struct list_elem elem;              /* List element. */
 	/* 리스트 element. */
 
+	/* TODO(shcd): base_priority임. 설명 주석 달기 */
+	int base_priority;
+
+	/* TODO(shcd): donations임. 설명 주석 달기 */
+	struct thread *wait_on_lock;
+
+	/* TODO(shcd): donations임. 설명 주석 달기 */
+	struct list donations;
+
+	/* TODO(shcd): d_elem임. 설명 주석 달기 */
+	struct list_elem d_elem;
+
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	/* userprog/process.c가 소유한다. */
