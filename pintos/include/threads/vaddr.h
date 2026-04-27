@@ -7,7 +7,7 @@
 
 #include "threads/loader.h"
 
-/* 가상 주소 작업을 위한 함수 및 매크로입니다.
+/* Functions and macros for working with virtual addresses.
  *
  * See pte.h for functions and macros specifically for x86
  * hardware page tables. */

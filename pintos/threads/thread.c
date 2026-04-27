@@ -113,15 +113,15 @@ static bool cmp_wakeup_ticks (const struct list_elem *a,
 // 먼저 임시 gdt를 설정해야 한다.
 static uint64_t gdt[3] = { 0, 0x00af9a000000ffff, 0x00cf92000000ffff };
 
-/* 코드를 변환하여 스레딩 시스템을 초기화합니다.
-   현재 스레드로 실행 중입니다. 이것은 작동하지 않습니다
-   일반적이며 이 경우에만 가능합니다. 왜냐하면 loader.S
-   스택의 맨 아래를 페이지 경계에 두도록 주의했습니다.
+/* Initializes the threading system by transforming the code
+   that's currently running into a thread.  This can't work in
+   general and it is possible in this case only because loader.S
+   was careful to put the bottom of the stack at a page boundary.
 
-   또한 실행 큐와 tid 잠금을 초기화합니다.
+   Also initializes the run queue and the tid lock.
 
-   이 함수를 호출한 후에는 반드시 페이지를 초기화하세요.
-   스레드를 생성하기 전에 할당자
+   After calling this function, be sure to initialize the page
+   allocator before trying to create any threads with
    thread_create().
 
    It is not safe to call thread_current() until this function
@@ -221,17 +221,17 @@ thread_print_stats (void) {
 			idle_ticks, kernel_ticks, user_ticks);
 }
 
-/* 주어진 초기값을 사용하여 NAME이라는 새 커널 스레드를 생성합니다.
-   AUX를 인수로 전달하여 FUNCTION을 실행하는 PRIORITY,
-   준비 대기열에 추가합니다. 스레드 식별자를 반환합니다.
-   새 스레드의 경우, 생성이 실패하면 TID_ERROR입니다.
+/* Creates a new kernel thread named NAME with the given initial
+   PRIORITY, which executes FUNCTION passing AUX as the argument,
+   and adds it to the ready queue.  Returns the thread identifier
+   for the new thread, or TID_ERROR if creation fails.
 
-   thread_start()이 호출된 경우 새 스레드는 다음과 같을 수 있습니다.
-   thread_create()이 반환되기 전에 예약되었습니다. 빠져나갈 수도 있다
-   thread_create()이 반환되기 전에. 그에 비해 원작은
-   스레드는 새 스레드가 생성되기 전까지 얼마 동안 실행될 수 있습니다.
-   예정. 세마포어 또는 다른 형태의 사용
-   주문을 보장해야 하는 경우 동기화.
+   If thread_start() has been called, then the new thread may be
+   scheduled before thread_create() returns.  It could even exit
+   before thread_create() returns.  Contrariwise, the original
+   thread may run for any amount of time before the new thread is
+   scheduled.  Use a semaphore or some other form of
+   synchronization if you need to ensure ordering.
 
    The code provided sets the new thread's `priority' member to
    PRIORITY, but no actual priority scheduling is implemented.
@@ -288,8 +288,8 @@ thread_create (const char *name, int priority,
 	return tid;
 }
 
-/* 현재 스레드를 절전 모드로 전환합니다. 예정되어 있지 않습니다
-   thread_unblock()에 의해 깨어날 때까지 다시.
+/* Puts the current thread to sleep.  It will not be scheduled
+   again until awoken by thread_unblock().
 
    This function must be called with interrupts turned off.  It
    is usually a better idea to use one of the synchronization
@@ -307,9 +307,9 @@ thread_block (void) {
 	schedule ();
 }
 
-/* 차단된 스레드 T를 실행 준비 상태로 전환합니다.
-   T가 차단되지 않은 경우 이는 오류입니다. (thread_yield()을(를) 사용하여
-   실행 중인 스레드를 준비합니다.)
+/* Transitions a blocked thread T to the ready-to-run state.
+   This is an error if T is not blocked.  (Use thread_yield() to
+   make the running thread ready.)
 
    This function does not preempt the running thread.  This can
    be important: if the caller had disabled interrupts itself,
@@ -523,7 +523,7 @@ thread_get_recent_cpu (void) {
 	return 0;
 }
 
-/* 유휴 스레드. 실행할 준비가 된 다른 스레드가 없을 때 실행됩니다.
+/* Idle thread.  Executes when no other thread is ready to run.
 
    The idle thread is initially put on the ready list by
    thread_start().  It will be scheduled once initially, at which
@@ -552,15 +552,15 @@ idle (void *idle_started_ UNUSED) {
 		intr_disable ();
 		thread_block ();
 
-		/* 인터럽트를 다시 활성화하고 다음 인터럽트를 기다립니다.
+		/* Re-enable interrupts and wait for the next one.
 
-		   `sti' 명령어는 다음이 나올 때까지 인터럽트를 비활성화합니다.
-		   다음 명령이 완료되었으므로 이 두 명령은
-		   명령어는 원자적으로 실행됩니다. 이 원자성은
+		   The `sti' instruction disables interrupts until the
+		   completion of the next instruction, so these two
+		   instructions are executed atomically.  This atomicity is
 		   important; otherwise, an interrupt could be handled
-		   인터럽트를 다시 활성화하고 다음을 기다리는 사이
-		   하나가 발생하면 1시계 틱만큼 낭비됩니다.
-		   시간.
+		   between re-enabling interrupts and waiting for the next
+		   one to occur, wasting as much as one clock tick worth of
+		   time.
 
 		   See [IA32-v2a] "HLT", [IA32-v2b] "STI", and [IA32-v3a]
 		   7.11.1 "HLT Instruction". */
@@ -593,7 +593,7 @@ kernel_thread (thread_func *function, void *aux) {
 }
 
 
-/* T의 기본 초기화를 차단된 스레드로 수행합니다.
+/* Does basic initialization of T as a blocked thread named
    NAME. */
 /* T를 NAME이라는 이름의 blocked 스레드로 기본 초기화한다. */
 static void
@@ -610,10 +610,10 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->magic = THREAD_MAGIC;
 }
 
-/* 예약할 다음 스레드를 선택하고 반환합니다. 해야 한다
-   실행 큐가 그렇지 않은 경우 실행 큐에서 스레드를 반환합니다.
-   비어 있는. (실행 중인 스레드가 계속 실행될 수 있으면
-   실행 큐에 있습니다.) 실행 큐가 비어 있으면 반환
+/* Chooses and returns the next thread to be scheduled.  Should
+   return a thread from the run queue, unless the run queue is
+   empty.  (If the running thread can continue running, then it
+   will be in the run queue.)  If the run queue is empty, return
    idle_thread. */
 /* 다음에 스케줄할 스레드를 선택해 리턴한다. run queue가 비어 있지 않다면 그
    안에서 스레드를 리턴해야 한다. 실행 중인 스레드가 계속 실행될 수 있다면 그
@@ -656,12 +656,12 @@ do_iret (struct intr_frame *tf) {
 			: : "g" ((uint64_t) tf) : "memory");
 }
 
-/* 새 스레드의 페이지를 활성화하여 스레드 전환
-   테이블을 삭제하고, 이전 스레드가 죽어가고 있으면 이를 삭제합니다.
+/* Switching the thread by activating the new thread's page
+   tables, and, if the previous thread is dying, destroying it.
 
-   이 함수를 호출하면 방금 스레드에서 전환했습니다.
-   PREV, 새 스레드가 이미 실행 중이고 인터럽트가 발생했습니다.
-   여전히 비활성화되어 있습니다.
+   At this function's invocation, we just switched from thread
+   PREV, the new thread is already running, and interrupts are
+   still disabled.
 
    It's not safe to call printf() until the thread switch is
    complete.  In practice that means that printf()s should be
@@ -711,25 +711,25 @@ thread_launch (struct thread *th) {
 			"movq %%rdi, 72(%%rax)\n"
 			"movq %%rbp, 80(%%rax)\n"
 			"movq %%rdx, 88(%%rax)\n"
-			"pop %%rbx\n"              // rcx를 저장했습니다.
+			"pop %%rbx\n"              // Saved rcx
 			"movq %%rbx, 96(%%rax)\n"
-			"pop %%rbx\n"              // 저장된 rbx
+			"pop %%rbx\n"              // Saved rbx
 			"movq %%rbx, 104(%%rax)\n"
-			"pop %%rbx\n"              // 저장된 랙스
+			"pop %%rbx\n"              // Saved rax
 			"movq %%rbx, 112(%%rax)\n"
 			"addq $120, %%rax\n"
 			"movw %%es, (%%rax)\n"
 			"movw %%ds, 8(%%rax)\n"
 			"addq $32, %%rax\n"
-			"call __next\n"         // 현재 찢어짐을 읽으십시오.
+			"call __next\n"         // read the current rip.
 			"__next:\n"
 			"pop %%rbx\n"
 			"addq $(out_iret -  __next), %%rbx\n"
-			"movq %%rbx, 0(%%rax)\n" // 찢다
+			"movq %%rbx, 0(%%rax)\n" // rip
 			"movw %%cs, 8(%%rax)\n"  // CS
 			"pushfq\n"
 			"popq %%rbx\n"
-			"mov %%rbx, 16(%%rax)\n" // 깃발
+			"mov %%rbx, 16(%%rax)\n" // eflags
 			"mov %%rsp, 24(%%rax)\n" // RSP
 			"movw %%ss, 32(%%rax)\n"
 			"mov %%rcx, %%rdi\n"
@@ -783,12 +783,12 @@ schedule (void) {
 #endif
 
 	if (curr != next) {
-		/* 전환한 스레드가 죽어가고 있으면 해당 스레드를 파괴하세요.
-		   실. thread_exit()이(가) 발생하지 않도록 이 작업이 늦게 발생해야 합니다.
-		   깔개를 꺼내십시오.
-		   페이지가 다음과 같기 때문에 여기에 페이지 무료 요청을 대기열에 추가합니다.
-		   현재 스택에서 사용됩니다.
-		   실제 파괴 로직은 시작 부분에서 호출됩니다.
+		/* If the thread we switched from is dying, destroy its struct
+		   thread. This must happen late so that thread_exit() doesn't
+		   pull out the rug under itself.
+		   We just queuing the page free reqeust here because the page is
+		   currently used by the stack.
+		   The real destruction logic will be called at the beginning of the
 		   schedule(). */
 		/* 전환되기 전의 스레드가 dying 상태라면 그 struct thread를 파괴한다.
 		   thread_exit()이 자기 자신이 기대고 있는 스택을 너무 일찍 없애지 않게

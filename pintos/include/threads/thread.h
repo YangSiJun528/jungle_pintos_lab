@@ -41,13 +41,13 @@ typedef int tid_t;
 #define PRI_MAX 63                      /* Highest priority. */
 /* 가장 높은 priority. */
 
-/* 커널 스레드 또는 사용자 프로세스.
+/* A kernel thread or user process.
  *
- * 각 스레드 구조는 자체 4kB 페이지에 저장됩니다. 그만큼
- * 스레드 구조 자체는 페이지 맨 아래에 위치합니다.
- * (오프셋 0에서). 페이지의 나머지 부분은 다음을 위해 예약되어 있습니다.
- * 스레드의 커널 스택은 스레드의 맨 위에서 아래로 성장합니다.
- * 페이지(오프셋 4kB). 다음은 예시입니다.
+ * Each thread structure is stored in its own 4 kB page.  The
+ * thread structure itself sits at the very bottom of the page
+ * (at offset 0).  The rest of the page is reserved for the
+ * thread's kernel stack, which grows downward from the top of
+ * the page (at offset 4 kB).  Here's an illustration:
  *
  *      4 kB +---------------------------------+
  *           |          kernel stack           |
@@ -72,32 +72,32 @@ typedef int tid_t;
  *           |              status             |
  *      0 kB +---------------------------------+
  *
- * 이것의 결과는 두 가지입니다:
+ * The upshot of this is twofold:
  *
- *    1. 첫째, `struct thread'가 너무 커지는 것을 허용해서는 안 됩니다.
- *       큰. 그렇게 되면 공간이 부족해
- *       커널 스택. 우리의 기본 `구조 스레드'는 단지
- *       크기는 몇 바이트입니다. 아마도 1 미만으로 유지되어야 할 것입니다.
+ *    1. First, `struct thread' must not be allowed to grow too
+ *       big.  If it does, then there will not be enough room for
+ *       the kernel stack.  Our base `struct thread' is only a
+ *       few bytes in size.  It probably should stay well under 1
  *       kB.
  *
- *    2. 둘째, 커널 스택이 너무 커지면 안 됩니다.
- *       크기가 큰. 스택이 오버플로되면 스레드가 손상됩니다.
- *       상태. 따라서 커널 함수는 큰 할당을 해서는 안 됩니다.
- *       비정적 지역 변수로 구조체나 배열을 사용합니다. 사용
- *       malloc() 또는 palloc_get_page()을 사용한 동적 할당
- *       대신에.
+ *    2. Second, kernel stacks must not be allowed to grow too
+ *       large.  If a stack overflows, it will corrupt the thread
+ *       state.  Thus, kernel functions should not allocate large
+ *       structures or arrays as non-static local variables.  Use
+ *       dynamic allocation with malloc() or palloc_get_page()
+ *       instead.
  *
- * 이러한 문제 중 하나의 첫 번째 증상은 아마도 다음과 같습니다.
- * thread_current() 의 어설션 실패, 이를 확인합니다.
- * 실행 중인 스레드의 `struct thread' 안 `magic' 멤버가
- * THREAD_MAGIC 으로 설정합니다. 스택 오버플로는 일반적으로 이를 변경합니다.
- * 값, 어설션을 트리거합니다. */
-/* `elem' 멤버는 두 가지 목적을 가지고 있습니다. 의 요소가 될 수 있습니다.
- * 실행 큐(thread.c) 또는
- * 세마포어 대기 목록(synch.c). 이 두 가지 방법으로 사용할 수 있습니다
- * 단지 그것들은 상호 배타적이기 때문입니다.
- * 준비 상태는 실행 대기열에 있는 반면,
- * 차단된 상태는 세마포어 대기 목록에 있습니다. */
+ * The first symptom of either of these problems will probably be
+ * an assertion failure in thread_current(), which checks that
+ * the `magic' member of the running thread's `struct thread' is
+ * set to THREAD_MAGIC.  Stack overflow will normally change this
+ * value, triggering the assertion. */
+/* The `elem' member has a dual purpose.  It can be an element in
+ * the run queue (thread.c), or it can be an element in a
+ * semaphore wait list (synch.c).  It can be used these two ways
+ * only because they are mutually exclusive: only a thread in the
+ * ready state is on the run queue, whereas only a thread in the
+ * blocked state is on a semaphore wait list. */
 struct thread {
 	/* Owned by thread.c. */
 	/* thread.c가 소유한다. */

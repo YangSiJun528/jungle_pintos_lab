@@ -7,9 +7,9 @@
 /* How to allocate pages. */
 /* 페이지를 할당하는 방식. */
 enum palloc_flags {
-	PAL_ASSERT = 001,           /* 실패 시 패닉을 발생시킵니다. */
-	PAL_ZERO = 002,             /* 페이지 내용을 0으로 채웁니다. */
-	PAL_USER = 004              /* 사용자 페이지. */
+	PAL_ASSERT = 001,           /* Panic on failure. */
+	PAL_ZERO = 002,             /* Zero page contents. */
+	PAL_USER = 004              /* User page. */
 };
 
 /* Maximum number of pages to put in user pool. */
