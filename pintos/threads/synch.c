@@ -74,6 +74,7 @@ sema_down (struct semaphore *sema) {
 
 	old_level = intr_disable ();
 	while (sema->value == 0) {
+		//TODO(schd-2): waiters를 priority 기준으로 정렬되게 추가
 		list_push_back (&sema->waiters, &thread_current ()->elem);
 		thread_block ();
 	}
@@ -126,9 +127,11 @@ sema_up (struct semaphore *sema) {
 
 	old_level = intr_disable ();
 	if (!list_empty (&sema->waiters))
+		//TODO(schd-2): 정렬되어있으므로 수정 필요 없음
 		thread_unblock (list_entry (list_pop_front (&sema->waiters),
 					struct thread, elem));
 	sema->value++;
+	//TODO(schd-1): thread_yield_if_needed 호출
 	intr_set_level (old_level);
 }
 
@@ -349,6 +352,7 @@ cond_wait (struct condition *cond, struct lock *lock) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	sema_init (&waiter.semaphore, 0);
+	//TODO(schd-2): waiters를 priority 기준으로 정렬되게 추가
 	list_push_back (&cond->waiters, &waiter.elem);
 	lock_release (lock);
 	sema_down (&waiter.semaphore);
@@ -376,6 +380,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	if (!list_empty (&cond->waiters))
+		//TODO(schd-2): 정렬되어 있어서 수정 필요 없음
 		sema_up (&list_entry (list_pop_front (&cond->waiters),
 					struct semaphore_elem, elem)->semaphore);
 }
@@ -396,6 +401,7 @@ cond_broadcast (struct condition *cond, struct lock *lock) {
 	ASSERT (cond != NULL);
 	ASSERT (lock != NULL);
 
+	//TODO(schd-2): cond_signal()이 순서 보장한다 가정하므로 수정 없음
 	while (!list_empty (&cond->waiters))
 		cond_signal (cond, lock);
 }

@@ -88,6 +88,8 @@ static void schedule (void);
 static tid_t allocate_tid (void);
 static bool cmp_wakeup_ticks (const struct list_elem *a,
 		const struct list_elem *b, void *aux UNUSED);
+static bool cmp_priority (const struct list_elem *a,
+		const struct list_elem *b, void *aux UNUSED);
 
 /* Returns true if T appears to point to a valid thread. */
 /* T가 유효한 스레드를 가리키는 것처럼 보이면 true를 리턴한다. */
@@ -283,6 +285,7 @@ thread_create (const char *name, int priority,
 	/* Add to run queue. */
 	/* run queue에 추가한다. */
 	thread_unblock (t);
+	//TODO(schd-1): thread_yield_if_needed 호출
 
 	return tid;
 }
@@ -329,6 +332,7 @@ thread_unblock (struct thread *t) {
 
 	old_level = intr_disable ();
 	ASSERT (t->status == THREAD_BLOCKED);
+	//TODO(schd-1): ready_list는 priority 순서 지키면서 추가
 	list_push_back (&ready_list, &t->elem);
 	t->status = THREAD_READY;
 	intr_set_level (old_level);
@@ -406,9 +410,24 @@ thread_yield (void) {
 
 	old_level = intr_disable ();
 	if (curr != idle_thread)
+		//TODO(schd-1): ready_list는 priority 순서 지키면서 추가
 		list_push_back (&ready_list, &curr->elem);
+	//TODO(schd-1): 여기는 스케줄링하니까 thread_yield_if_needed 필요 없음
 	do_schedule (THREAD_READY);
 	intr_set_level (old_level);
+}
+
+/* 만약 ready_list 중 현재 스레드보다 우선순위가 높은게 있으면 preemption(yield 호출) 한다. */
+void thread_yield_if_needed (void) {
+	//TODO(schd-1): 현재 실행 중인 thread보다
+	// ready_list 중 priority가 높은게 있으면 preemption.
+	//
+	// 모든 ready_list가 추가되는 상황에서 호출되어야 함.
+	// (단, unblock 제외, 선점을 하지 말라고 주석에 적혀있음.
+	//  지금은 그냥 해도 상관없을거 같긴 한데, 나중에 필요하다 할 거 같음.)
+	//
+	// 그냥 뒤에 붙여만 놔도 동작하게 함.
+	// 헬퍼가 필요하다는 구상 자체는 했었는데, 역할 분리나 네이밍은 AI 추천 받음.
 }
 
 /* Puts the current thread to sleep until WAKEUP_TICK. */
@@ -451,6 +470,7 @@ threads_wakeup (int64_t ticks) {
 			break;
 		}
 	}
+	//TODO(schd-1): thread_yield_if_needed 호출
 }
 
 /* Sets the current thread's priority to NEW_PRIORITY. */
@@ -458,6 +478,7 @@ threads_wakeup (int64_t ticks) {
 void
 thread_set_priority (int new_priority) {
 	thread_current ()->priority = new_priority;
+	//TODO(schd-1): thread_yield_if_needed 호출
 }
 
 /* Returns the current thread's priority. */
@@ -600,6 +621,7 @@ init_thread (struct thread *t, const char *name, int priority) {
    리턴한다. */
 static struct thread *
 next_thread_to_run (void) {
+	//TODO(schd-1): 정렬되어 있으므로 수정 필요 없음.
 	if (list_empty (&ready_list))
 		return idle_thread;
 	else
@@ -811,4 +833,10 @@ cmp_wakeup_ticks (const struct list_elem *a, const struct list_elem *b,
 		return ta->priority > tb->priority;
 
 	return ta->wakeup_ticks < tb->wakeup_ticks;
+}
+
+bool cmp_priority(const struct list_elem* a, const struct list_elem* b,
+		void *aux UNUSED) {
+	//TODO(schd-1): 같은 우선순위가 들어오면 나중에 오게하기.
+	// pop했을 때, 동일한 우선순위라면 round robin 방식으로 switching 되도록
 }
