@@ -35,6 +35,9 @@
 static bool cmp_sema_priority (const struct list_elem *a,
 		const struct list_elem *b,
 		void *aux UNUSED);
+static void loop_donors_chain_set_priority (struct thread *cur,
+		struct lock* lock);
+static void remove_lock_in_donors (struct lock* lock, struct thread* cur);
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
@@ -236,24 +239,8 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
 
-	struct thread *holder = lock->holder;
-	struct thread *cur = thread_current ();
-	if (holder != NULL) {
-		cur->wait_on_lock = lock;
-		list_push_back (&holder->donations, &cur->d_elem);
-
-		// lock holder 체인의 끝(편의상 root)까지 순회하며 이동
-		struct thread *t = holder;
-		while (t != NULL) {
-			if (t->priority < cur->priority) { // 내 우선순위보다 작으면 갱신
-				t->priority = cur->priority;
-			}
-			if (t->wait_on_lock == NULL) {
-				break;
-			}
-			t = t->wait_on_lock->holder;
-		}
-	}
+	struct thread* cur = thread_current ();
+	loop_donors_chain_set_priority(cur, lock);
 
 	sema_down (&lock->semaphore);
 	cur->wait_on_lock = NULL;
@@ -301,17 +288,7 @@ lock_release (struct lock *lock) {
 
 	struct thread *cur = thread_current ();
 
-	struct list_elem *e;
-	e = list_begin (&cur->donations);
-	while (e != list_end (&cur->donations)) {
-		struct thread *t = list_entry (e, struct thread, d_elem);
-
-		if (t->wait_on_lock == lock) {
-			e = list_remove (e);
-		} else {
-			e = list_next (e);
-		}
-	}
+	remove_lock_in_donors(lock, cur);
 
 	refresh_priority_in_donors ();
 
@@ -461,4 +438,41 @@ cmp_sema_priority (const struct list_elem *a, const struct list_elem *b,
 	struct semaphore_elem *sb = list_entry (b, struct semaphore_elem, elem);
 
 	return sa->thread->priority > sb->thread->priority;
+}
+
+static void
+loop_donors_chain_set_priority (struct thread *cur, struct lock* lock) {
+	struct thread *holder = lock->holder;
+	if (holder != NULL) {
+		cur->wait_on_lock = lock;
+		list_push_back (&holder->donations, &cur->d_elem);
+
+		// lock holder 체인의 끝(편의상 root)까지 순회하며 이동
+		struct thread *t = holder;
+		while (t != NULL) {
+			if (t->priority < cur->priority) { // 내 우선순위보다 작으면 갱신
+				t->priority = cur->priority;
+			}
+			if (t->wait_on_lock == NULL) {
+				break;
+			}
+			t = t->wait_on_lock->holder;
+		}
+	}
+}
+
+static void
+remove_lock_in_donors (struct lock* lock, struct thread* cur)
+{
+	struct list_elem *e;
+	e = list_begin (&cur->donations);
+	while (e != list_end (&cur->donations)) {
+		struct thread *t = list_entry (e, struct thread, d_elem);
+
+		if (t->wait_on_lock == lock) {
+			e = list_remove (e);
+		} else {
+			e = list_next (e);
+		}
+	}
 }
