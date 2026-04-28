@@ -136,7 +136,7 @@ sema_up (struct semaphore *sema) {
 
 	old_level = intr_disable ();
 	if (!list_empty (&sema->waiters)) {
-		list_sort(&sema->waiters, cmp_priority, NULL); // Priority Donation 떄문
+		list_sort (&sema->waiters, cmp_priority, NULL); // Priority Donation 떄문
 		thread_unblock (list_entry (list_pop_front (&sema->waiters),
 					struct thread, elem));
 	}
@@ -239,23 +239,19 @@ lock_acquire (struct lock *lock) {
 	struct thread *holder = lock->holder;
 	struct thread *cur = thread_current ();
 	if (holder != NULL) {
-		//printf("]----[ lock_acquire | holder name: %s\n", holder->name);
 		cur->wait_on_lock = lock;
 		list_push_back(&holder->donations, &cur->d_elem);
 		if (holder->priority < cur->priority) {
 			holder->priority = cur->priority;
-			//printf("]----[ lock_acquire | set: holder->priority: %d\n", holder->priority);
 		}
 
 		struct thread *t = holder;
-		while (t != NULL) { // 끝까지 가야 함. 중간에 끊기면 안됨.
-			if (t->priority < cur->priority) {
+		while (t != NULL) { // 끝(wait_on_lock이 없는 스레드)까지 가야 함.
+			if (t->priority < cur->priority) { // 중간에 큰 값이 있어도 멈추지 않고, 작으면 갱신
 				t->priority = cur->priority;
 			}
-			// printf("]----[ lock_acquire | cur priority chain: %s(%d - %d)\n",
-			// 		t->name, t->priority, cur->priority);
 			t->priority = cur->priority;
-			if (t->wait_on_lock == NULL) { // cur->priority 까진 해야하니까
+			if (t->wait_on_lock == NULL) {
 				break;
 			}
 			t = t->wait_on_lock->holder;
@@ -314,7 +310,6 @@ lock_release (struct lock *lock) {
 		struct thread *t = list_entry(e, struct thread, d_elem);
 
 		if (t->wait_on_lock == lock) {
-			//printf("]----[ lock_release | list_remove name: %s\n", t->name);
 			e = list_remove(e);
 		} else {
 			e = list_next(e);
@@ -330,10 +325,6 @@ lock_release (struct lock *lock) {
 		if (cur->priority < max_priority) {
 			cur->priority = max_priority;
 		}
-
-		// printf("]----[ lock_release | max_priority: %d\n", max_priority);
-		// printf("]----[ lock_release | holder->base_priority: %d\n", holder->base_priority);
-		// printf("]----[ lock_release | holder->priority: %d\n", holder->priority);
 	}
 
 	lock->holder = NULL;
@@ -449,7 +440,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	if (!list_empty (&cond->waiters)) {
-		list_sort(&cond->waiters, cmp_sema_priority, NULL);//Priority Donation 때문
+		list_sort (&cond->waiters, cmp_sema_priority, NULL);//Priority Donation 때문
 		sema_up (&list_entry (list_pop_front (&cond->waiters),
 					struct semaphore_elem, elem)->semaphore);
 	}
