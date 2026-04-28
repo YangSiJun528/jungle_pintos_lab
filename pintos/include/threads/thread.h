@@ -118,6 +118,18 @@ struct thread {
 	struct list_elem elem;              /* List element. */
 	/* 리스트 element. */
 
+	/* priority는 Donation으로 변하기 때문에, 순수하게 해당 스레드의 priority를 저장하는 역할 */
+	int base_priority;
+
+	/* 특정 락에 대기하고 있는 경우, 그 락을 바라본다. 그 외에는 NULL. */
+	struct lock *wait_on_lock;
+
+	/* d_elem 요소를 가짐. Donors(후원자)의 목록, Multiple Donation 표현 */
+	struct list donations;
+
+	/* donations로 관리되는 리스트, elem과는 별개로 관리되어야 하므로 필요함 */
+	struct list_elem d_elem;
+
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	/* userprog/process.c가 소유한다. */

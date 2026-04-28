@@ -418,6 +418,7 @@ thread_yield_if_needed (void) {
 	if (list_empty (&ready_list))
 		return;
 
+	list_sort(&ready_list, cmp_priority, NULL); // Priority Donation 떄문
 	struct thread *peek_t =
 		list_entry (list_front (&ready_list), struct thread, elem);
 	bool need_preemption = peek_t->priority > thread_current ()->priority;
@@ -477,7 +478,11 @@ threads_wakeup (int64_t ticks) {
 /* 현재 스레드의 priority를 NEW_PRIORITY로 설정한다. */
 void
 thread_set_priority (int new_priority) {
-	thread_current ()->priority = new_priority;
+	struct thread *cur = thread_current ();
+	cur->base_priority = new_priority;
+	if (cur->priority < new_priority) {
+		cur->priority = new_priority;
+	}
 	thread_yield_if_needed();
 }
 
@@ -607,7 +612,10 @@ init_thread (struct thread *t, const char *name, int priority) {
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	t->priority = priority;
+	t->base_priority = priority;
 	t->magic = THREAD_MAGIC;
+	t->wait_on_lock = NULL;
+	list_init(&t->donations);
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
@@ -623,8 +631,8 @@ static struct thread *
 next_thread_to_run (void) {
 	if (list_empty (&ready_list))
 		return idle_thread;
-	else
-		return list_entry (list_pop_front (&ready_list), struct thread, elem);
+	list_sort(&ready_list, cmp_priority, NULL); // Priority Donation 때매 정렬 필요
+	return list_entry (list_pop_front (&ready_list), struct thread, elem);
 }
 
 /* Use iretq to launch the thread */
