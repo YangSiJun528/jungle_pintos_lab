@@ -149,7 +149,13 @@ void list_reverse (struct list *);
 
    A와 B가 같은 값일 때, (그리고 앞에서 탐색한다고 가정했을 때)
    true를 반환하면 앞에서 붙어서 항상 먼저 찾아진다.
-   false를 반환하면 같은 요소들의 뒤에 붙어서 round-robin 순서를 유지한다.  */
+   false를 반환하면 같은 요소들의 뒤에 붙어서 round-robin 순서를 유지한다.
+
+   구현체 네이밍 기준:
+   {name}_less: 값이 작은게 앞에 위치함. 일반적인 생각과 비슷함.
+   {name}_more: 값이 큰게 앞에 위치함. 큰게 작은 걸로 처리됨.
+				따라서, min하면 가장 큰 값. max하면 가장 작은 값이 나옴.
+*/
 typedef bool list_less_func (const struct list_elem *a,
                              const struct list_elem *b,
                              void *aux);

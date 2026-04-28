@@ -86,7 +86,7 @@ static void init_thread (struct thread *, const char *name, int priority);
 static void do_schedule (int status);
 static void schedule (void);
 static tid_t allocate_tid (void);
-static bool cmp_wakeup_ticks (const struct list_elem *a,
+static bool cmp_wakeup_ticks_less (const struct list_elem *a,
 		const struct list_elem *b, void *aux UNUSED);
 
 /* Returns true if T appears to point to a valid thread. */
@@ -330,7 +330,7 @@ thread_unblock (struct thread *t) {
 
 	old_level = intr_disable ();
 	ASSERT (t->status == THREAD_BLOCKED);
-	list_insert_ordered (&ready_list, &t->elem, cmp_priority, NULL);
+	list_insert_ordered (&ready_list, &t->elem, cmp_priority_more, NULL);
 	t->status = THREAD_READY;
 	intr_set_level (old_level);
 }
@@ -407,7 +407,7 @@ thread_yield (void) {
 
 	old_level = intr_disable ();
 	if (curr != idle_thread)
-		list_insert_ordered (&ready_list, &curr->elem, cmp_priority, NULL);
+		list_insert_ordered (&ready_list, &curr->elem, cmp_priority_more, NULL);
 	do_schedule (THREAD_READY);
 	intr_set_level (old_level);
 }
@@ -418,7 +418,7 @@ thread_yield_if_needed (void) {
 	if (list_empty (&ready_list))
 		return;
 
-	list_sort (&ready_list, cmp_priority, NULL); // Priority Donation 때문
+	list_sort (&ready_list, cmp_priority_more, NULL); // Priority Donation 때문
 	struct thread *peek_t =
 		list_entry (list_front (&ready_list), struct thread, elem);
 	bool need_preemption = peek_t->priority > thread_current ()->priority;
@@ -444,7 +444,7 @@ thread_sleep (int64_t wakeup_tick) {
 	old_level = intr_disable ();
 	if (curr != idle_thread) {
 		curr->wakeup_ticks = wakeup_tick;
-		list_insert_ordered (&sleep_list, &curr->elem, cmp_wakeup_ticks, NULL);
+		list_insert_ordered (&sleep_list, &curr->elem, cmp_wakeup_ticks_less, NULL);
 		thread_block ();
 	}
 	intr_set_level (old_level);
@@ -628,7 +628,7 @@ static struct thread *
 next_thread_to_run (void) {
 	if (list_empty (&ready_list))
 		return idle_thread;
-	list_sort (&ready_list, cmp_priority, NULL); // Priority Donation 때문에 정렬 필요
+	list_sort (&ready_list, cmp_priority_more, NULL); // Priority Donation 때문에 정렬 필요
 	return list_entry (list_pop_front (&ready_list), struct thread, elem);
 }
 
@@ -828,7 +828,7 @@ allocate_tid (void) {
 }
 
 static bool
-cmp_wakeup_ticks (const struct list_elem *a, const struct list_elem *b,
+cmp_wakeup_ticks_less (const struct list_elem *a, const struct list_elem *b,
 		void *aux UNUSED) {
 	const struct thread *ta = list_entry (a, struct thread, elem);
 	const struct thread *tb = list_entry (b, struct thread, elem);
@@ -841,7 +841,7 @@ cmp_wakeup_ticks (const struct list_elem *a, const struct list_elem *b,
 
 /* 헷갈릴 수 있는데, 큰 게 앞에 위치하도록 조건을 명세의 반대로 한다. */
 bool
-cmp_priority (const struct list_elem *a, const struct list_elem *b,
+cmp_priority_more (const struct list_elem *a, const struct list_elem *b,
 		void *aux UNUSED) {
 	const struct thread *ta = list_entry (a, struct thread, elem);
 	const struct thread *tb = list_entry (b, struct thread, elem);
@@ -850,8 +850,9 @@ cmp_priority (const struct list_elem *a, const struct list_elem *b,
 	return ta->priority > tb->priority;
 }
 
+/* cmp_priority 와 동일하게 큰게 앞에(작은걸로 판단) 오게 처리. */
 bool
-cmp_donors_priority (const struct list_elem *a, const struct list_elem *b,
+cmp_donors_priority_more (const struct list_elem *a, const struct list_elem *b,
 		void *aux UNUSED) {
 	const struct thread *ta = list_entry (a, struct thread, d_elem);
 	const struct thread *tb = list_entry (b, struct thread, d_elem);
@@ -860,17 +861,17 @@ cmp_donors_priority (const struct list_elem *a, const struct list_elem *b,
 }
 
 /* priority를 donations를 순회하면서 올바르게 보정함.
- * donations에 변화가 생기거나,
- * lock chain?의 root의 우선순위 변경이 발생했을 때 항상 실행되어야 함.
- * cmp_priority 와 동일하게 큰게 앞에(작은걸로 판단) 오게 처리. */
+   donations에 변화가 생기거나,
+   lock chain?의 root의 우선순위 변경이 발생했을 때 항상 실행되어야 함. */
 void refresh_priority_in_donors (void) {
 	struct thread *cur = thread_current ();
 
 	cur->priority = cur->base_priority;
 
 	if (!list_empty (&cur->donations)) {
+		// _more 비교 함수라 min이 가장 큰 값을 반환함.
 		int max_priority = list_entry (list_min (&cur->donations,
-				cmp_donors_priority, NULL), struct thread, d_elem)->priority;
+				cmp_donors_priority_more, NULL), struct thread, d_elem)->priority;
 
 		if (cur->priority < max_priority) {
 			cur->priority = max_priority;
