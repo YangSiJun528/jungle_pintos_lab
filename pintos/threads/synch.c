@@ -240,7 +240,11 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!lock_held_by_current_thread (lock));
 
 	struct thread* cur = thread_current ();
-	loop_donors_chain_set_priority(cur, lock);
+	if (thread_mlfqs) { //TODO(mlfqs)
+		// do nothing...
+	} else {
+		loop_donors_chain_set_priority (cur, lock);
+	}
 
 	sema_down (&lock->semaphore);
 	cur->wait_on_lock = NULL;
@@ -287,10 +291,12 @@ lock_release (struct lock *lock) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	struct thread *cur = thread_current ();
-
-	remove_lock_in_donors(lock, cur);
-
-	refresh_priority_in_donors ();
+	if (thread_mlfqs) { //TODO(mlfqs)
+		// do nothing...
+	} else {
+		remove_lock_in_donors (lock, cur);
+		refresh_priority_in_donors ();
+	}
 
 	lock->holder = NULL;
 	sema_up (&lock->semaphore);

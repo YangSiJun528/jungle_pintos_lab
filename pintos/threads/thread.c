@@ -478,15 +478,20 @@ threads_wakeup (int64_t ticks) {
 /* 현재 스레드의 priority를 NEW_PRIORITY로 설정한다. */
 void
 thread_set_priority (int new_priority) {
-	thread_current ()->base_priority = new_priority;
-	refresh_priority_in_donors ();
-	thread_yield_if_needed ();
+	if (thread_mlfqs) { //TODO(mlfqs)
+		// do nothing...
+	} else {
+		thread_current ()->base_priority = new_priority;
+		refresh_priority_in_donors ();
+		thread_yield_if_needed ();
+	}
 }
 
 /* Returns the current thread's priority. */
 /* 현재 스레드의 priority를 리턴한다. */
 int
 thread_get_priority (void) {
+	//TODO(mlfqs): 아마? priority는 스케쥴러가 미리 정의해둔 값.
 	return thread_current ()->priority;
 }
 
@@ -608,8 +613,12 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->status = THREAD_BLOCKED;
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
-	t->priority = priority;
-	t->base_priority = priority;
+	if (thread_mlfqs) { //TODO(mlfqs)
+		// do nothing...
+	} else {
+		t->priority = priority;
+		t->base_priority = priority;
+	}
 	t->magic = THREAD_MAGIC;
 	t->wait_on_lock = NULL;
 	list_init (&t->donations);
