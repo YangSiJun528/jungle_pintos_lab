@@ -20,21 +20,21 @@
 
 /* mlfqs 구현을 위한 고정소수점 헬퍼 함수, 17.14 고정소수점을 처리한다. */
 
-int64_t FP_F = 1 << 14;
-typedef int64_t fp_64_t; // 읽기 쉽게 변환
+#define FP_F (1 << 14)
+typedef int64_t fp64_t; // 읽기 쉽게 변환
 
 // Convert n to fixed point
-fp_64_t fp(int64_t n) {
+fp64_t fp(const int64_t n) {
     return n * FP_F;
 }
 
 // Convert x to integer (rounding toward zero, 0 쪽으로 버림)
-int64_t fp_int_trunc(fp_64_t x) {
+int64_t fp_int_trunc(const fp64_t x) {
     return x / FP_F;
 }
 
 // Convert x to integer (rounding to nearest, 가장 가까운 값으로 반올림)
-int64_t fp_int_rnd(fp_64_t x) {
+int64_t fp_int_rnd(const fp64_t x) {
     if (x >= 0) {
         return (x + FP_F / 2) / FP_F;
     } else { // x <= 0
@@ -43,42 +43,42 @@ int64_t fp_int_rnd(fp_64_t x) {
 }
 
 // Add x and y
-int64_t fp_add(fp_64_t x, fp_64_t y) {
+fp64_t fp_add(const fp64_t x, const fp64_t y) {
     return x + y;
 }
 
 // Subtract y from x
-int64_t fp_sub(fp_64_t x, fp_64_t y) {
+fp64_t fp_sub(const fp64_t x, const fp64_t y) {
     return x - y;
 }
 
 // Add x and n
-int64_t fp_add_i(fp_64_t x, int64_t n) {
+fp64_t fp_add_i(const fp64_t x, const int64_t n) {
     return x + n * FP_F;
 }
 
 // Subtract n from x
-int64_t fp_sub_i(fp_64_t x, int64_t n) {
+fp64_t fp_sub_i(const fp64_t x, const int64_t n) {
     return x - n * FP_F;
 }
 
 // Multiply x by y
-int64_t fp_mul(fp_64_t x, fp_64_t y) {
+fp64_t fp_mul(const fp64_t x, const fp64_t y) {
     return ((int64_t) x) * y / FP_F;
 }
 
 // Multiply x by n
-int64_t fp_mul_i(fp_64_t x, int64_t n) {
+fp64_t fp_mul_i(const fp64_t x, const int64_t n) {
     return x * n;
 }
 
 // Divide x by y
-int64_t fp_div(fp_64_t x, fp_64_t y) {
+fp64_t fp_div(const fp64_t x, const fp64_t y) {
     return ((int64_t) x) * FP_F / y;
 }
 
 // Divide x by n
-int64_t fp_div_i(fp_64_t x, int64_t n) {
+fp64_t fp_div_i(const fp64_t x, const int64_t n) {
     return x / n;
 }
 
