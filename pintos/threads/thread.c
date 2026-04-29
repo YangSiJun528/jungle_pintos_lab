@@ -618,8 +618,11 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	if (thread_mlfqs) {
 		t->nice = 0;
-		//TODO: 실행 중인 스레드가 부모인가? 이건 확인 필요
-		t->recent_cpu = thread_current ()->recent_cpu;
+		if (t == initial_thread) {
+			t->recent_cpu = 0;
+		} else {
+			t->recent_cpu = thread_current ()->recent_cpu;
+		}
 		thread_mlfqs_recalc_priority(t);
 	} else {
 		t->priority = priority;
