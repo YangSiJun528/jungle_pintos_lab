@@ -199,10 +199,13 @@ void do_iret (struct intr_frame *tf);
 
 bool cmp_priority_more (const struct list_elem *a,
 		const struct list_elem *b, void *aux UNUSED);
+
+// Priority Donation
 bool cmp_donors_priority_more (const struct list_elem *a,
 		const struct list_elem *b, void *aux UNUSED);
-void refresh_priority_in_donors (void);
+void thread_donors_recalc_priorities (void);
 
+// mlfqs
 void thread_mlfqs_recalc_priorities (void);
 void thread_mlfqs_incr_recent_cpu (void);
 void thread_mlfqs_recalc_shcd_queue (void);
