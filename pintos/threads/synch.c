@@ -139,7 +139,10 @@ sema_up (struct semaphore *sema) {
 
 	old_level = intr_disable ();
 	if (!list_empty (&sema->waiters)) {
-		list_sort (&sema->waiters, cmp_priority_more, NULL); // Priority Donation 때문
+		if (!thread_mlfqs) {
+			// Priority Donation 때문에 정렬 필요
+			list_sort (&sema->waiters, cmp_priority_more, NULL);
+		}
 		thread_unblock (list_entry (list_pop_front (&sema->waiters),
 					struct thread, elem));
 	}
@@ -240,7 +243,11 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!lock_held_by_current_thread (lock));
 
 	struct thread* cur = thread_current ();
-	loop_donors_chain_set_priority(cur, lock);
+	if (thread_mlfqs) { //TODO(mlfqs)
+		// do nothing...
+	} else {
+		loop_donors_chain_set_priority (cur, lock);
+	}
 
 	sema_down (&lock->semaphore);
 	cur->wait_on_lock = NULL;
@@ -287,10 +294,12 @@ lock_release (struct lock *lock) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	struct thread *cur = thread_current ();
-
-	remove_lock_in_donors(lock, cur);
-
-	refresh_priority_in_donors ();
+	if (thread_mlfqs) { //TODO(mlfqs)
+		// do nothing...
+	} else {
+		remove_lock_in_donors (lock, cur);
+		thread_donors_recalc_priorities ();
+	}
 
 	lock->holder = NULL;
 	sema_up (&lock->semaphore);
@@ -405,7 +414,10 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	if (!list_empty (&cond->waiters)) {
-		list_sort (&cond->waiters, cmp_sema_priority, NULL); // Priority Donation 때문
+		if (!thread_mlfqs) {
+			// Priority Donation 때문에 정렬 필요
+			list_sort (&cond->waiters, cmp_sema_priority, NULL);
+		}
 		sema_up (&list_entry (list_pop_front (&cond->waiters),
 					struct semaphore_elem, elem)->semaphore);
 	}
