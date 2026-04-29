@@ -135,6 +135,7 @@ struct thread {
 	/* 4.4BSD Scheduler를 위한 필드 */
 	int nice;
 	fp32_t recent_cpu;
+	struct list_elem q_elem; // 스케쥴링 큐
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
@@ -202,8 +203,7 @@ bool cmp_donors_priority_more (const struct list_elem *a,
 		const struct list_elem *b, void *aux UNUSED);
 void refresh_priority_in_donors (void);
 
-void thread_mlfqs_recalc_priority_in_ready (void);
-void thread_mlfqs_recalc_priority (struct thread *t);
+void thread_mlfqs_recalc_priorities (void);
 void thread_mlfqs_incr_recent_cpu (void);
 void thread_mlfqs_recalc_shcd_queue (void);
 
