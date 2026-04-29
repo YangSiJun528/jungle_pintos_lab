@@ -8,7 +8,7 @@
 // 일단 구분을 위해 fp가 항상 앞에 붙음.
 // 변환 연산은 이름은 좀 별론거 같은데, 그나마 괜찮은거 붙인거긴 함.
 // 사칙연산도 범용적인 이름이 있을거 같은데, 이건 찾아보고 고치던가 하기
-// int가 들어간 사칙연산에는 _i를 붙임.
+// int가 들어간 사칙연산에는 _i를 붙임. - 값 범위가 작아서 int로도 충분할 듯.
 
 /* mlfqs 구현을 위한 고정소수점 헬퍼 함수, 17.14 고정소수점을 처리한다. */
 
@@ -18,17 +18,17 @@
 typedef int fp32_t; // 읽기 쉽게 변환
 
 // Convert n to fixed point
-fp32_t fp(const int n) {
+static inline fp32_t fp(const int n) {
     return n * FP_F;
 }
 
 // Convert x to integer (rounding toward zero, 0 쪽으로 버림)
-int fp_int_trunc(const fp32_t x) {
+static inline int fp_int_trunc(const fp32_t x) {
     return x / FP_F;
 }
 
 // Convert x to integer (rounding to nearest, 가장 가까운 값으로 반올림)
-int fp_int_rnd(const fp32_t x) {
+static inline int fp_int_rnd(const fp32_t x) {
     if (x >= 0) {
         return (x + FP_F / 2) / FP_F;
     } else { // x <= 0
@@ -37,42 +37,42 @@ int fp_int_rnd(const fp32_t x) {
 }
 
 // Add x and y
-fp32_t fp_add(const fp32_t x, const fp32_t y) {
+static inline fp32_t fp_add(const fp32_t x, const fp32_t y) {
     return x + y;
 }
 
 // Subtract y from x
-fp32_t fp_sub(const fp32_t x, const fp32_t y) {
+static inline fp32_t fp_sub(const fp32_t x, const fp32_t y) {
     return x - y;
 }
 
 // Add x and n
-fp32_t fp_add_i(const fp32_t x, const int n) {
+static inline fp32_t fp_add_i(const fp32_t x, const int n) {
     return x + n * FP_F;
 }
 
 // Subtract n from x
-fp32_t fp_sub_i(const fp32_t x, const int n) {
+static inline fp32_t fp_sub_i(const fp32_t x, const int n) {
     return x - n * FP_F;
 }
 
 // Multiply x by y
-fp32_t fp_mul(const fp32_t x, const fp32_t y) {
-    return ((int) x) * y / FP_F;
+static inline fp32_t fp_mul(const fp32_t x, const fp32_t y) {
+    return ((int64_t) x) * y / FP_F;
 }
 
 // Multiply x by n
-fp32_t fp_mul_i(const fp32_t x, const int n) {
+static inline fp32_t fp_mul_i(const fp32_t x, const int n) {
     return x * n;
 }
 
 // Divide x by y
-fp32_t fp_div(const fp32_t x, const fp32_t y) {
-    return ((int) x) * FP_F / y;
+static inline fp32_t fp_div(const fp32_t x, const fp32_t y) {
+    return ((int64_t) x) * FP_F / y;
 }
 
 // Divide x by n
-fp32_t fp_div_i(const fp32_t x, const int n) {
+static inline fp32_t fp_div_i(const fp32_t x, const int n) {
     return x / n;
 }
 
