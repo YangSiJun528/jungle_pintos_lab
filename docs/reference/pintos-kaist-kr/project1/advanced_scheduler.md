@@ -142,39 +142,16 @@ fixed-point number에 대한 많은 operation은 단순합니다. `x`와 `y`가 
 
 다음 table(표)은 fixed-point arithmetic operation을 C에서 구현하는 방법을 요약합니다. 표에서 `x`와 `y`는 fixed-point number, `n`은 integer, fixed-point number는 `p + q = 31`인 signed `p.q` format이고, `f`는 `1 << q`입니다.
 
-Arithmetic C
-
-Convert `n` to fixed point
-`n * f`
-
-Convert `x` to integer (rounding toward zero)
-`x / f`
-
-Convert `x` to integer (rounding to nearest)
-`(x + f / 2) / f` if `x >= 0`
-
-`(x - f / 2) / f` if `x <= 0`
-
-Add `x` and `y`
-`x + y`
-
-Subtract `y` from `x`
-`x - y`
-
-Add `x` and `n`
-`x + n * f`
-
-Subtract `n` from `x`
-`x - n * f`
-
-Multiply `x` by `y`
-`((int64_t) x) * y / f`
-
-Multiply `x` by `n`
-`x * n`
-
-Divide `x` by `y`
-`((int64_t) x) * f / y`
-
-Divide `x` by `n`
-`x / n`
+| Arithmetic | C |
+| --- | --- |
+| Convert `n` to fixed point | `n * f` |
+| Convert `x` to integer (rounding toward zero) | `x / f` |
+| Convert `x` to integer (rounding to nearest) | `(x + f / 2) / f` if `x >= 0`<br>`(x - f / 2) / f` if `x <= 0` |
+| Add `x` and `y` | `x + y` |
+| Subtract `y` from `x` | `x - y` |
+| Add `x` and `n` | `x + n * f` |
+| Subtract `n` from `x` | `x - n * f` |
+| Multiply `x` by `y` | `((int64_t) x) * y / f` |
+| Multiply `x` by `n` | `x * n` |
+| Divide `x` by `y` | `((int64_t) x) * f / y` |
+| Divide `x` by `n` | `x / n` |
