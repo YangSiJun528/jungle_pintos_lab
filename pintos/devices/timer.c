@@ -128,6 +128,16 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
 	threads_wakeup (ticks);
+
+	if (thread_mlfqs) {
+		thread_mlfqs_incr_recent_cpu(); // 매번 tick마다
+		if (ticks % 4 == 0) {
+			thread_mlfqs_recalc_priority(thread_current ());
+		}
+		if (ticks % TIMER_FREQ == 0) {
+			thread_mlfqs_recalc_shcd_queue();
+		}
+	}
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

@@ -15,6 +15,16 @@
 #include "userprog/process.h"
 #endif
 
+// mlfqs 처리를 돕는 헬퍼 매크로. 외부 공개가 필요 없어서 내부 선언
+// 근데 이게 좋은 패턴인지는 모르겠음
+#define NICE_MIN 20
+#define NICE_DEFAULT 0
+#define NICE_MAX (-20)
+
+#define DECAY ((2 * load_avg) / (2 * load_avg + 1))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
    of thread.h for details. */
@@ -62,6 +72,8 @@ static long long kernel_ticks;  /* # of timer ticks in kernel threads. */
 /* 커널 스레드에서 보낸 타이머 tick 수. */
 static long long user_ticks;    /* # of timer ticks in user programs. */
 /* 유저 프로그램에서 보낸 타이머 tick 수. */
+
+static int64_t load_avg; /* 최근 1분 동안 실행 준비가 된 thread 수의 이동 평균. mlfqs에 필요. */
 
 /* Scheduling. */
 /* 스케줄링. */
@@ -498,36 +510,29 @@ thread_get_priority (void) {
 /* Sets the current thread's nice value to NICE. */
 /* 현재 스레드의 nice 값을 NICE로 설정한다. */
 void
-thread_set_nice (int nice UNUSED) {
-	/* TODO: Your implementation goes here */
-	/* TODO: 여기에 구현을 작성한다. */
+thread_set_nice (int nice) {
+	thread_current ()->nice = nice;
 }
 
 /* Returns the current thread's nice value. */
 /* 현재 스레드의 nice 값을 리턴한다. */
 int
 thread_get_nice (void) {
-	/* TODO: Your implementation goes here */
-	/* TODO: 여기에 구현을 작성한다. */
-	return 0;
+	return thread_current ()->nice;
 }
 
 /* Returns 100 times the system load average. */
 /* 시스템 load average의 100배를 리턴한다. */
 int
 thread_get_load_avg (void) {
-	/* TODO: Your implementation goes here */
-	/* TODO: 여기에 구현을 작성한다. */
-	return 0;
+	return load_avg * 100;
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 /* 현재 스레드 recent_cpu 값의 100배를 리턴한다. */
 int
 thread_get_recent_cpu (void) {
-	/* TODO: Your implementation goes here */
-	/* TODO: 여기에 구현을 작성한다. */
-	return 0;
+	return thread_current ()->recent_cpu * 100;
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -613,8 +618,11 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->status = THREAD_BLOCKED;
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
-	if (thread_mlfqs) { //TODO(mlfqs)
-		// do nothing...
+	if (thread_mlfqs) {
+		t->nice = 0;
+		//TODO: 실행 중인 스레드가 부모인가? 이건 확인 필요
+		t->recent_cpu = thread_current ()->recent_cpu;
+		thread_mlfqs_recalc_priority(t);
 	} else {
 		t->priority = priority;
 		t->base_priority = priority;
@@ -886,4 +894,42 @@ void refresh_priority_in_donors (void) {
 			cur->priority = max_priority;
 		}
 	}
+}
+
+void
+thread_mlfqs_recalc_priority (struct thread *t) {
+	// 인터럽트 핸들러와 스레드 상태(init_thread 같은)에서 호출 가능
+	ASSERT (intr_get_level () == INTR_OFF); // 인터럽트 꺼짐 상태
+
+	t->priority = PRI_MAX - (t->recent_cpu / 4) - (t->nice * 2);
+
+	// 값이 범위를 넘지 않게 조정
+	t->priority = MIN(PRI_MAX, t->priority);
+	t->priority = MAX(PRI_MIN, t->priority);
+}
+
+void
+thread_mlfqs_incr_recent_cpu (void) {
+	ASSERT (intr_context ()); // 인터럽트 핸들러가 호출
+	ASSERT (intr_get_level () == INTR_OFF); // 인터럽트 꺼짐 상태
+
+	struct thread *curr = thread_current ();
+	if (curr != idle_thread) {
+		curr->recent_cpu += 1;
+	}
+}
+
+// 1초(틱 수가 TIMER_FREQ 배수)마다 읽어서 스케줄링 큐 개선
+void
+thread_mlfqs_recalc_shcd_queue (void) {
+	ASSERT (intr_context ()); // 인터럽트 핸들러가 호출
+	ASSERT (intr_get_level () == INTR_OFF); // 인터럽트 꺼짐 상태
+
+	struct list_elem *e = list_begin (&ready_list);
+	while (e != list_end (&ready_list)) {
+		struct thread *t = list_entry (e, struct thread, elem);
+		t->recent_cpu = DECAY * t-> recent_cpu + t->nice;
+	}
+
+	load_avg = (59 / 60) * load_avg + (1 / 60) * list_size(&ready_list);
 }
