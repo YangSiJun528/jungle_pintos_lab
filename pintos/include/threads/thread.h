@@ -133,8 +133,8 @@ struct thread {
 	struct list_elem d_elem;
 
 	/* 4.4BSD Scheduler를 위한 필드 */
-	fp64_t nice;
-	fp64_t recent_cpu;
+	int nice;
+	fp32_t recent_cpu;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */

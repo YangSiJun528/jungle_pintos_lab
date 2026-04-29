@@ -1,14 +1,6 @@
 #ifndef THREADS_FIXED_POINT_H
 #define THREADS_FIXED_POINT_H
 
-#include <stdint.h>
-
-#include "../lib/stdint.h"
-
-// 이거 인라인으로 바꾸면 좋을거 같긴 한데...
-// 매크로 처럼 잘 못 처리되는거 아닐지 몰라서 일단 냅둠.
-// 나중에 바꾸던가 하기
-
 // 그리고 지금 사용에서는 상황은 값 범위가 높지 않아서 괜찮은데,
 // 범용적으로 쓰려면 여러가지 고려하거나 알고 써야 할 듯?
 // 범위나 unsigned 처리나 그런거?
@@ -21,20 +13,22 @@
 /* mlfqs 구현을 위한 고정소수점 헬퍼 함수, 17.14 고정소수점을 처리한다. */
 
 #define FP_F (1 << 14)
-typedef int64_t fp64_t; // 읽기 쉽게 변환
+// 더 정확히 따지면 int가 16일수도 있어서 int32_t가 정확하긴 한데,
+// pintos는 64bit 환경 고정이라 여기선 괜찮을듯
+typedef int fp32_t; // 읽기 쉽게 변환
 
 // Convert n to fixed point
-fp64_t fp(const int64_t n) {
+fp32_t fp(const int n) {
     return n * FP_F;
 }
 
 // Convert x to integer (rounding toward zero, 0 쪽으로 버림)
-int64_t fp_int_trunc(const fp64_t x) {
+int fp_int_trunc(const fp32_t x) {
     return x / FP_F;
 }
 
 // Convert x to integer (rounding to nearest, 가장 가까운 값으로 반올림)
-int64_t fp_int_rnd(const fp64_t x) {
+int fp_int_rnd(const fp32_t x) {
     if (x >= 0) {
         return (x + FP_F / 2) / FP_F;
     } else { // x <= 0
@@ -43,42 +37,42 @@ int64_t fp_int_rnd(const fp64_t x) {
 }
 
 // Add x and y
-fp64_t fp_add(const fp64_t x, const fp64_t y) {
+fp32_t fp_add(const fp32_t x, const fp32_t y) {
     return x + y;
 }
 
 // Subtract y from x
-fp64_t fp_sub(const fp64_t x, const fp64_t y) {
+fp32_t fp_sub(const fp32_t x, const fp32_t y) {
     return x - y;
 }
 
 // Add x and n
-fp64_t fp_add_i(const fp64_t x, const int64_t n) {
+fp32_t fp_add_i(const fp32_t x, const int n) {
     return x + n * FP_F;
 }
 
 // Subtract n from x
-fp64_t fp_sub_i(const fp64_t x, const int64_t n) {
+fp32_t fp_sub_i(const fp32_t x, const int n) {
     return x - n * FP_F;
 }
 
 // Multiply x by y
-fp64_t fp_mul(const fp64_t x, const fp64_t y) {
-    return ((int64_t) x) * y / FP_F;
+fp32_t fp_mul(const fp32_t x, const fp32_t y) {
+    return ((int) x) * y / FP_F;
 }
 
 // Multiply x by n
-fp64_t fp_mul_i(const fp64_t x, const int64_t n) {
+fp32_t fp_mul_i(const fp32_t x, const int n) {
     return x * n;
 }
 
 // Divide x by y
-fp64_t fp_div(const fp64_t x, const fp64_t y) {
-    return ((int64_t) x) * FP_F / y;
+fp32_t fp_div(const fp32_t x, const fp32_t y) {
+    return ((int) x) * FP_F / y;
 }
 
 // Divide x by n
-fp64_t fp_div_i(const fp64_t x, const int64_t n) {
+fp32_t fp_div_i(const fp32_t x, const int n) {
     return x / n;
 }
 

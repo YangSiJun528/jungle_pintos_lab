@@ -21,7 +21,6 @@
 #define NICE_DEFAULT 0
 #define NICE_MAX (-20)
 
-#define DECAY ((2 * load_avg) / (2 * load_avg + 1))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
@@ -73,7 +72,7 @@ static long long kernel_ticks;  /* # of timer ticks in kernel threads. */
 static long long user_ticks;    /* # of timer ticks in user programs. */
 /* 유저 프로그램에서 보낸 타이머 tick 수. */
 
-static int64_t load_avg; /* 최근 1분 동안 실행 준비가 된 thread 수의 이동 평균. mlfqs에 필요. */
+static fp32_t load_avg; /* 최근 1분 동안 실행 준비가 된 thread 수의 이동 평균. mlfqs에 필요. */
 
 /* Scheduling. */
 /* 스케줄링. */
@@ -490,7 +489,7 @@ threads_wakeup (int64_t ticks) {
 /* 현재 스레드의 priority를 NEW_PRIORITY로 설정한다. */
 void
 thread_set_priority (int new_priority) {
-	if (thread_mlfqs) { //TODO(mlfqs)
+	if (thread_mlfqs) {
 		// do nothing...
 	} else {
 		thread_current ()->base_priority = new_priority;
@@ -503,7 +502,6 @@ thread_set_priority (int new_priority) {
 /* 현재 스레드의 priority를 리턴한다. */
 int
 thread_get_priority (void) {
-	//TODO(mlfqs): 아마? priority는 스케쥴러가 미리 정의해둔 값.
 	return thread_current ()->priority;
 }
 
@@ -525,14 +523,14 @@ thread_get_nice (void) {
 /* 시스템 load average의 100배를 리턴한다. */
 int
 thread_get_load_avg (void) {
-	return load_avg * 100;
+	return fp_int_rnd(fp_mul_i(load_avg, 100));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 /* 현재 스레드 recent_cpu 값의 100배를 리턴한다. */
 int
 thread_get_recent_cpu (void) {
-	return thread_current ()->recent_cpu * 100;
+	return fp_int_rnd(fp_mul_i(thread_current ()->recent_cpu, 100));
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -901,7 +899,11 @@ thread_mlfqs_recalc_priority (struct thread *t) {
 	// 인터럽트 핸들러와 스레드 상태(init_thread 같은)에서 호출 가능
 	ASSERT (intr_get_level () == INTR_OFF); // 인터럽트 꺼짐 상태
 
-	t->priority = PRI_MAX - (t->recent_cpu / 4) - (t->nice * 2);
+	//TODO: 이거 round인지 truncate인지 모르겠는데 일단 기본적으로 다 round로 세팅
+	// (t->recent_cpu / 4)
+	int rc_div_4 = fp_int_rnd(fp_div_i(t->recent_cpu, 4));
+	// PRI_MAX - [(t->recent_cpu / 4)] - (t->nice * 2);
+	t->priority = PRI_MAX - rc_div_4 - (t->nice * 2);
 
 	// 값이 범위를 넘지 않게 조정
 	t->priority = MIN(PRI_MAX, t->priority);
@@ -915,7 +917,7 @@ thread_mlfqs_incr_recent_cpu (void) {
 
 	struct thread *curr = thread_current ();
 	if (curr != idle_thread) {
-		curr->recent_cpu += 1;
+		curr->recent_cpu = fp_add_i(curr->recent_cpu, 1);
 	}
 }
 
@@ -928,8 +930,21 @@ thread_mlfqs_recalc_shcd_queue (void) {
 	struct list_elem *e = list_begin (&ready_list);
 	while (e != list_end (&ready_list)) {
 		struct thread *t = list_entry (e, struct thread, elem);
-		t->recent_cpu = DECAY * t-> recent_cpu + t->nice;
+
+		// ((load_avg * 2) / (load_avg * 2 + 1));
+		fp32_t decay = fp_div(fp_mul_i(load_avg, 2),
+				fp_add_i(fp_mul_i(load_avg, 2), 1));
+
+		// decay * t-> recent_cpu + t->nice
+		t->recent_cpu = fp_add_i(fp_mul(decay, t-> recent_cpu), t->nice);
 	}
 
-	load_avg = (59 / 60) * load_avg + (1 / 60) * list_size(&ready_list);
+	// (59 / 60) * load_avg
+	fp32_t la_a = fp_mul(fp_sub(fp(59), fp(60)), load_avg);
+
+	// (1 / 60) * list_size(&ready_list)
+	fp32_t la_b = fp_mul(fp_sub(fp(1), fp(60)), list_size(&ready_list));
+
+	// [(59 / 60) * load_avg] + [(1 / 60) * list_size(&ready_list)];
+	load_avg = fp_int_rnd(la_a) + fp_int_rnd(la_b);
 }
