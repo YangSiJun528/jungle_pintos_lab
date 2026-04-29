@@ -524,14 +524,14 @@ thread_get_nice (void) {
 /* 시스템 load average의 100배를 리턴한다. */
 int
 thread_get_load_avg (void) {
-	return fp_int_rnd(fp_mul_i(load_avg, 100));
+	return fp_int_trunc(fp_mul_i(load_avg, 100));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 /* 현재 스레드 recent_cpu 값의 100배를 리턴한다. */
 int
 thread_get_recent_cpu (void) {
-	return fp_int_rnd(fp_mul_i(thread_current ()->recent_cpu, 100));
+	return fp_int_trunc(fp_mul_i(thread_current ()->recent_cpu, 100));
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -620,7 +620,7 @@ init_thread (struct thread *t, const char *name, int priority) {
 	if (thread_mlfqs) {
 		t->nice = 0;
 		if (t == initial_thread) {
-			t->recent_cpu = 0;
+			t->recent_cpu = fp(0);
 		} else {
 			t->recent_cpu = thread_current ()->recent_cpu;
 		}
@@ -899,13 +899,29 @@ void refresh_priority_in_donors (void) {
 }
 
 void
-thread_mlfqs_recalc_priority (struct thread *t) {
-	// 인터럽트 핸들러와 스레드 상태(init_thread 같은)에서 호출 가능
+thread_mlfqs_recalc_priority_in_ready (void) {
+	ASSERT (intr_context ()); // 인터럽트 핸들러가 호출
 	ASSERT (intr_get_level () == INTR_OFF); // 인터럽트 꺼짐 상태
 
-	//TODO: 이거 round인지 truncate인지 모르겠는데 일단 기본적으로 다 round로 세팅
+	struct list_elem *e = list_begin (&ready_list);
+	while (e != list_end (&ready_list)) {
+		struct thread *t = list_entry (e, struct thread, elem);
+		thread_mlfqs_recalc_priority(t);
+		e = list_next(e);
+	}
+	thread_mlfqs_recalc_priority(thread_current ());
+	list_sort(&ready_list, cmp_priority_more, NULL);
+
+	thread_yield_if_needed(); // 선점을 위해서, 우선순위 바뀌었으니까
+}
+
+void
+thread_mlfqs_recalc_priority (struct thread *t) {
+	// 인터럽트 핸들러와 스레드 상태(init_thread 같은)에서 호출 가능
+	// 공유 가능한(외부에서 수정 가능한) 데이터를 수정하지 않으므로 인터럽트 신경 안써도 됨
+
 	// (t->recent_cpu / 4)
-	int rc_div_4 = fp_int_rnd(fp_div_i(t->recent_cpu, 4));
+	int rc_div_4 = fp_int_trunc(fp_div_i(t->recent_cpu, 4));
 	// PRI_MAX - [(t->recent_cpu / 4)] - (t->nice * 2);
 	t->priority = PRI_MAX - rc_div_4 - (t->nice * 2);
 
@@ -925,6 +941,16 @@ thread_mlfqs_incr_recent_cpu (void) {
 	}
 }
 
+void thread_mlfqs_recalc_recent_cpu(struct thread *t)
+{
+	// ((load_avg * 2) / (load_avg * 2 + 1));
+	fp32_t decay = fp_div(fp_mul_i(load_avg, 2),
+			fp_add_i(fp_mul_i(load_avg, 2), 1));
+
+	// decay * t->recent_cpu + t->nice
+	t->recent_cpu = fp_add_i(fp_mul(decay, t->recent_cpu), t->nice);
+}
+
 // 1초(틱 수가 TIMER_FREQ 배수)마다 읽어서 스케줄링 큐 개선
 void
 thread_mlfqs_recalc_shcd_queue (void) {
@@ -934,20 +960,23 @@ thread_mlfqs_recalc_shcd_queue (void) {
 	struct list_elem *e = list_begin (&ready_list);
 	while (e != list_end (&ready_list)) {
 		struct thread *t = list_entry (e, struct thread, elem);
-
-		// ((load_avg * 2) / (load_avg * 2 + 1));
-		fp32_t decay = fp_div(fp_mul_i(load_avg, 2),
-				fp_add_i(fp_mul_i(load_avg, 2), 1));
-
-		// decay * t-> recent_cpu + t->nice
-		t->recent_cpu = fp_add_i(fp_mul(decay, t-> recent_cpu), t->nice);
+		thread_mlfqs_recalc_recent_cpu(t);
+		e = list_next(e);
 	}
 
 	struct thread *curr = thread_current ();
 	bool on_idle = curr == idle_thread;
 
 	// 스레드 최대 갯수를 모르니까 size_t
-	size_t ready_threads = list_size(&ready_list) + (on_idle ? 0 : 1);
+	size_t ready_threads;
+	if (on_idle)
+	{
+		ready_threads = list_size(&ready_list); // 사실 0이여도 무관할듯?
+	} else
+	{
+		ready_threads = list_size(&ready_list) + 1;
+		thread_mlfqs_recalc_recent_cpu(thread_current());
+	}
 
 	// (59 / 60) * load_avg
 	fp32_t la_a = fp_mul(fp_div(fp(59), fp(60)), load_avg);
@@ -958,7 +987,6 @@ thread_mlfqs_recalc_shcd_queue (void) {
 	// []는 코드 읽기 쉬우라고 쪼갠거, 실제 공식에선 없음.
 	// [(59 / 60) * load_avg] + [(1 / 60) * ready_threads];
 	load_avg = fp_add(la_a, la_b);
-
 	// printf("on_idle: %d\n", on_idle);
 	// printf("ready_threads: %lld\n", ready_threads);
 	// printf("thread_get_load_avg(): %lld\n", thread_get_load_avg());

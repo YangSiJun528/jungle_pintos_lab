@@ -202,6 +202,7 @@ bool cmp_donors_priority_more (const struct list_elem *a,
 		const struct list_elem *b, void *aux UNUSED);
 void refresh_priority_in_donors (void);
 
+void thread_mlfqs_recalc_priority_in_ready (void);
 void thread_mlfqs_recalc_priority (struct thread *t);
 void thread_mlfqs_incr_recent_cpu (void);
 void thread_mlfqs_recalc_shcd_queue (void);
