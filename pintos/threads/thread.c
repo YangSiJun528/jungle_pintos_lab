@@ -511,6 +511,10 @@ thread_get_priority (void) {
 void
 thread_set_nice (int nice) {
 	thread_current ()->nice = nice;
+	thread_mlfqs_recalc_priority(thread_current ());
+	list_sort(&ready_list, cmp_priority_more, NULL);
+
+	thread_yield_if_needed(); // 선점을 위해서, 우선순위 바뀌었으니까
 }
 
 /* Returns the current thread's nice value. */
@@ -524,14 +528,14 @@ thread_get_nice (void) {
 /* 시스템 load average의 100배를 리턴한다. */
 int
 thread_get_load_avg (void) {
-	return fp_int_trunc(fp_mul_i(load_avg, 100));
+	return fp_int_rnd(fp_mul_i(load_avg, 100));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 /* 현재 스레드 recent_cpu 값의 100배를 리턴한다. */
 int
 thread_get_recent_cpu (void) {
-	return fp_int_trunc(fp_mul_i(thread_current ()->recent_cpu, 100));
+	return fp_int_rnd(fp_mul_i(thread_current ()->recent_cpu, 100));
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -618,11 +622,13 @@ init_thread (struct thread *t, const char *name, int priority) {
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	if (thread_mlfqs) {
-		t->nice = 0;
 		if (t == initial_thread) {
 			t->recent_cpu = fp(0);
+			t->nice = 0;
 		} else {
-			t->recent_cpu = thread_current ()->recent_cpu;
+			struct thread *parent = thread_current ();
+			t->recent_cpu = parent->recent_cpu;
+			t->nice = parent->nice;
 		}
 		thread_mlfqs_recalc_priority(t);
 	} else {
@@ -900,11 +906,19 @@ void refresh_priority_in_donors (void) {
 
 void
 thread_mlfqs_recalc_priority_in_ready (void) {
+	struct list_elem *e;
 	ASSERT (intr_context ()); // 인터럽트 핸들러가 호출
 	ASSERT (intr_get_level () == INTR_OFF); // 인터럽트 꺼짐 상태
 
-	struct list_elem *e = list_begin (&ready_list);
+	e = list_begin (&ready_list);
 	while (e != list_end (&ready_list)) {
+		struct thread *t = list_entry (e, struct thread, elem);
+		thread_mlfqs_recalc_priority(t);
+		e = list_next(e);
+	}
+
+	e = list_begin (&sleep_list);
+	while (e != list_end (&sleep_list)) {
 		struct thread *t = list_entry (e, struct thread, elem);
 		thread_mlfqs_recalc_priority(t);
 		e = list_next(e);
@@ -957,25 +971,16 @@ thread_mlfqs_recalc_shcd_queue (void) {
 	ASSERT (intr_context ()); // 인터럽트 핸들러가 호출
 	ASSERT (intr_get_level () == INTR_OFF); // 인터럽트 꺼짐 상태
 
-	struct list_elem *e = list_begin (&ready_list);
-	while (e != list_end (&ready_list)) {
-		struct thread *t = list_entry (e, struct thread, elem);
-		thread_mlfqs_recalc_recent_cpu(t);
-		e = list_next(e);
-	}
-
 	struct thread *curr = thread_current ();
 	bool on_idle = curr == idle_thread;
 
 	// 스레드 최대 갯수를 모르니까 size_t
 	size_t ready_threads;
-	if (on_idle)
-	{
-		ready_threads = list_size(&ready_list); // 사실 0이여도 무관할듯?
-	} else
-	{
+	if (on_idle) {
+		ready_threads = list_size(&ready_list);
+	} else {
 		ready_threads = list_size(&ready_list) + 1;
-		thread_mlfqs_recalc_recent_cpu(thread_current());
+		thread_mlfqs_recalc_recent_cpu(curr);
 	}
 
 	// (59 / 60) * load_avg
@@ -990,4 +995,19 @@ thread_mlfqs_recalc_shcd_queue (void) {
 	// printf("on_idle: %d\n", on_idle);
 	// printf("ready_threads: %lld\n", ready_threads);
 	// printf("thread_get_load_avg(): %lld\n", thread_get_load_avg());
+
+	struct list_elem *e;
+	e = list_begin (&ready_list);
+	while (e != list_end (&ready_list)) {
+		struct thread *t = list_entry (e, struct thread, elem);
+		thread_mlfqs_recalc_recent_cpu(t);
+		e = list_next(e);
+	}
+
+	e = list_begin (&sleep_list);
+	while (e != list_end (&sleep_list)) {
+		struct thread *t = list_entry (e, struct thread, elem);
+		thread_mlfqs_recalc_recent_cpu(t);
+		e = list_next(e);
+	}
 }
