@@ -169,6 +169,7 @@ thread_init (void) {
 	list_init (&ready_list);
 	list_init (&sleep_list);
 	list_init (&destruction_req);
+	load_avg = fp(0);
 
 	/* Set up a thread structure for the running thread. */
 	/* 현재 실행 중인 스레드를 위한 thread 구조체를 설정한다. */
@@ -942,12 +943,23 @@ thread_mlfqs_recalc_shcd_queue (void) {
 		t->recent_cpu = fp_add_i(fp_mul(decay, t-> recent_cpu), t->nice);
 	}
 
+	struct thread *curr = thread_current ();
+	bool on_idle = curr == idle_thread;
+
+	// 스레드 최대 갯수를 모르니까 size_t
+	size_t ready_threads = list_size(&ready_list) + (on_idle ? 0 : 1);
+
 	// (59 / 60) * load_avg
-	fp32_t la_a = fp_mul(fp_sub(fp(59), fp(60)), load_avg);
+	fp32_t la_a = fp_mul(fp_div(fp(59), fp(60)), load_avg);
 
-	// (1 / 60) * list_size(&ready_list)
-	fp32_t la_b = fp_mul(fp_sub(fp(1), fp(60)), list_size(&ready_list));
+	// (1 / 60) * ready_threads
+	fp32_t la_b = fp_mul_i(fp_div(fp(1), fp(60)), ready_threads);
 
-	// [(59 / 60) * load_avg] + [(1 / 60) * list_size(&ready_list)];
-	load_avg = fp_int_rnd(la_a) + fp_int_rnd(la_b);
+	// []는 코드 읽기 쉬우라고 쪼갠거, 실제 공식에선 없음.
+	// [(59 / 60) * load_avg] + [(1 / 60) * ready_threads];
+	load_avg = fp_add(la_a, la_b);
+
+	// printf("on_idle: %d\n", on_idle);
+	// printf("ready_threads: %lld\n", ready_threads);
+	// printf("thread_get_load_avg(): %lld\n", thread_get_load_avg());
 }
