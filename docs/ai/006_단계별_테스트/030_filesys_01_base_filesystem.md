@@ -12,8 +12,8 @@
 
 ## 참고한 reference 문서
 
-- `docs/reference/pintos-kaist-kr/project4/introduction.md`
-- `docs/reference/pintos-kaist-kr/project4/indexed_and_extensible_files.md`
+- `docs/reference/pintos-kaist-kr/4_project4/0_introduction.md`
+- `docs/reference/pintos-kaist-kr/4_project4/1_indexed_and_extensible_files.md`
 - `pintos/filesys/Make.vars`
 - `pintos/tests/filesys/base/Make.tests`
 

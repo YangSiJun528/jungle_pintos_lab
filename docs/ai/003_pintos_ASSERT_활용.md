@@ -159,7 +159,7 @@ Pintos에서 `ASSERT`는 단순히 프로그램을 죽이는 코드가 아니라
 
 ## 참고 자료
 
-- [Pintos KAIST Debugging Tools](../reference/pintos-kaist-kr/appendix/debugging_tools.md)
+- [Pintos KAIST Debugging Tools](../reference/pintos-kaist-kr/5_appendix/5_debugging_tools.md)
 - [Pintos `ASSERT` 구현](../../pintos/include/lib/debug.h)
 - [Pintos `debug_panic()` 구현](../../pintos/lib/kernel/debug.c)
 - [Assert 사용 시 주의해야 할 점](https://blog.popekim.com/ko/2025/02/11/assert-mistakes.html)

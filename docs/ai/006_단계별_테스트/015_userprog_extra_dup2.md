@@ -12,8 +12,8 @@
 
 ## 참고한 reference 문서
 
-- `docs/reference/pintos-kaist-kr/project2/dup.md`
-- `docs/reference/pintos-kaist-kr/project2/system_call.md`
+- `docs/reference/pintos-kaist-kr/2_project2/6_dup.md`
+- `docs/reference/pintos-kaist-kr/2_project2/3_system_call.md`
 - `pintos/userprog/Make.vars`
 - `pintos/tests/userprog/dup2/Make.tests`
 

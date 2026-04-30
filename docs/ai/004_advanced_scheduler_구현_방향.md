@@ -152,7 +152,7 @@ FAQ는 timer interrupt handler가 너무 오래 걸리면 Advanced Scheduler 테
 
 | 문서 | 반영한 내용 |
 | --- | --- |
-| [pintos-kaist-kr/project1/advanced_scheduler.md](../reference/pintos-kaist-kr/project1/advanced_scheduler.md) | Advanced Scheduler의 목표, `-mlfqs`와 `thread_mlfqs`, priority 직접 제어 비활성화, donation 제외, `nice`, `recent_cpu`, `load_avg`, fixed-point arithmetic, 갱신 시점 |
-| [pintos-kaist-kr/project1/FAQ.md](../reference/pintos-kaist-kr/project1/FAQ.md) | 하나의 queue 사용 가능성, donation과 Advanced Scheduler를 동시에 테스트하지 않는다는 점, timer interrupt 작업량 관련 주의 |
+| [pintos-kaist-kr/1_project1/3_advanced_scheduler.md](../reference/pintos-kaist-kr/1_project1/3_advanced_scheduler.md) | Advanced Scheduler의 목표, `-mlfqs`와 `thread_mlfqs`, priority 직접 제어 비활성화, donation 제외, `nice`, `recent_cpu`, `load_avg`, fixed-point arithmetic, 갱신 시점 |
+| [pintos-kaist-kr/1_project1/4_FAQ.md](../reference/pintos-kaist-kr/1_project1/4_FAQ.md) | 하나의 queue 사용 가능성, donation과 Advanced Scheduler를 동시에 테스트하지 않는다는 점, timer interrupt 작업량 관련 주의 |
 | [kaist-oslab-pintos-slides-kr/scripts/[Week02] Pintos Project1-2 BSD.md](<../reference/kaist-oslab-pintos-slides-kr/scripts/[Week02] Pintos Project1-2 BSD.md>) | Basic implementation 흐름, 수정 대상 함수, fixed-point 필요성, 4 tick/1초 단위 갱신 요약 |
 

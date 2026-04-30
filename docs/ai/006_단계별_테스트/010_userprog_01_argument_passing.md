@@ -11,8 +11,8 @@
 
 ## 참고한 reference 문서
 
-- `docs/reference/pintos-kaist-kr/project2/argument_passing.md`
-- `docs/reference/pintos-kaist-kr/project2/introduction.md`
+- `docs/reference/pintos-kaist-kr/2_project2/1_argument_passing.md`
+- `docs/reference/pintos-kaist-kr/2_project2/0_introduction.md`
 - `pintos/tests/userprog/Make.tests`
 
 ## 공통 준비

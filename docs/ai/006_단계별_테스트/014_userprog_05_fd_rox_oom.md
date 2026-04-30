@@ -13,9 +13,9 @@
 
 ## 참고한 reference 문서
 
-- `docs/reference/pintos-kaist-kr/project2/system_call.md`
-- `docs/reference/pintos-kaist-kr/project2/deny_write.md`
-- `docs/reference/pintos-kaist-kr/project2/process_termination.md`
+- `docs/reference/pintos-kaist-kr/2_project2/3_system_call.md`
+- `docs/reference/pintos-kaist-kr/2_project2/5_deny_write.md`
+- `docs/reference/pintos-kaist-kr/2_project2/4_process_termination.md`
 - `pintos/tests/userprog/Make.tests`
 - `pintos/tests/userprog/no-vm/Make.tests`
 

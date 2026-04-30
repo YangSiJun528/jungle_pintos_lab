@@ -11,9 +11,9 @@
 
 ## 참고한 reference 문서
 
-- `docs/reference/pintos-kaist-kr/project2/system_call.md`
-- `docs/reference/pintos-kaist-kr/project2/process_termination.md`
-- `docs/reference/pintos-kaist-kr/project2/user_memory.md`
+- `docs/reference/pintos-kaist-kr/2_project2/3_system_call.md`
+- `docs/reference/pintos-kaist-kr/2_project2/4_process_termination.md`
+- `docs/reference/pintos-kaist-kr/2_project2/2_user_memory.md`
 - `pintos/tests/userprog/Make.tests`
 
 ## 공통 준비

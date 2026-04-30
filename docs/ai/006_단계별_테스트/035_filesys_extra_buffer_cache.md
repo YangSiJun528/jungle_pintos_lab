@@ -12,8 +12,8 @@
 
 ## 참고한 reference 문서
 
-- `docs/reference/pintos-kaist-kr/project4/buffer_cache.md`
-- `docs/reference/pintos-kaist-kr/project4/synchronization.md`
+- `docs/reference/pintos-kaist-kr/4_project4/3_buffer_cache.md`
+- `docs/reference/pintos-kaist-kr/4_project4/4_synchronization.md`
 - `pintos/filesys/Make.vars`
 - `pintos/tests/filesys/buffer-cache/Make.tests`
 - `pintos/tests/filesys/buffer-cache/Rubric`

@@ -13,9 +13,9 @@
 
 ## 참고한 reference 문서
 
-- `docs/reference/pintos-kaist-kr/project3/memory_mapped_files.md`
-- `docs/reference/pintos-kaist-kr/project3/vm_management.md`
-- `docs/reference/pintos-kaist-kr/project3/FAQ.md`
+- `docs/reference/pintos-kaist-kr/3_project3/4_memory_mapped_files.md`
+- `docs/reference/pintos-kaist-kr/3_project3/1_vm_management.md`
+- `docs/reference/pintos-kaist-kr/3_project3/7_FAQ.md`
 - `pintos/tests/vm/Make.tests`
 
 ## 공통 준비

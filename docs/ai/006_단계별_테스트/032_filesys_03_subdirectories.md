@@ -13,8 +13,8 @@
 
 ## 참고한 reference 문서
 
-- `docs/reference/pintos-kaist-kr/project4/subdirectories.md`
-- `docs/reference/pintos-kaist-kr/project4/synchronization.md`
+- `docs/reference/pintos-kaist-kr/4_project4/2_subdirectories.md`
+- `docs/reference/pintos-kaist-kr/4_project4/4_synchronization.md`
 - `pintos/tests/filesys/extended/Make.tests`
 - `pintos/tests/filesys/extended/Rubric.functionality`
 - `pintos/tests/filesys/extended/Rubric.robustness`
