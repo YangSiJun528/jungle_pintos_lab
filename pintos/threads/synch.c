@@ -35,9 +35,9 @@
 static bool cmp_sema_priority (const struct list_elem *a,
 		const struct list_elem *b,
 		void *aux UNUSED);
-static void loop_donors_chain_set_priority (struct thread *cur,
+static void lock_donors_donate_priority_chain (struct thread *cur,
 		struct lock* lock);
-static void remove_lock_in_donors (struct lock* lock, struct thread* cur);
+static void lock_donors_remove (struct lock* lock);
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
@@ -140,7 +140,7 @@ sema_up (struct semaphore *sema) {
 	old_level = intr_disable ();
 	if (!list_empty (&sema->waiters)) {
 		if (!thread_mlfqs) {
-			// Priority Donation 때문에 정렬 필요
+			// Priority Donation 때문에 정렬 필요, list_pop_front를 해야하니까
 			list_sort (&sema->waiters, cmp_priority_more, NULL);
 		}
 		thread_unblock (list_entry (list_pop_front (&sema->waiters),
@@ -243,10 +243,8 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!lock_held_by_current_thread (lock));
 
 	struct thread* cur = thread_current ();
-	if (thread_mlfqs) { //TODO(mlfqs)
-		// do nothing...
-	} else {
-		loop_donors_chain_set_priority (cur, lock);
+	if (!thread_mlfqs) {
+		lock_donors_donate_priority_chain (cur, lock);
 	}
 
 	sema_down (&lock->semaphore);
@@ -293,11 +291,8 @@ lock_release (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
 
-	struct thread *cur = thread_current ();
-	if (thread_mlfqs) { //TODO(mlfqs)
-		// do nothing...
-	} else {
-		remove_lock_in_donors (lock, cur);
+	if (!thread_mlfqs) {
+		lock_donors_remove (lock);
 		thread_donors_recalc_priorities ();
 	}
 
@@ -415,7 +410,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED) {
 
 	if (!list_empty (&cond->waiters)) {
 		if (!thread_mlfqs) {
-			// Priority Donation 때문에 정렬 필요
+			// Priority Donation 때문에 정렬 필요, list_pop_front를 해야하니까
 			list_sort (&cond->waiters, cmp_sema_priority, NULL);
 		}
 		sema_up (&list_entry (list_pop_front (&cond->waiters),
@@ -453,7 +448,7 @@ cmp_sema_priority (const struct list_elem *a, const struct list_elem *b,
 }
 
 static void
-loop_donors_chain_set_priority (struct thread *cur, struct lock* lock) {
+lock_donors_donate_priority_chain (struct thread *cur, struct lock* lock) {
 	struct thread *holder = lock->holder;
 	if (holder != NULL) {
 		cur->wait_on_lock = lock;
@@ -474,11 +469,15 @@ loop_donors_chain_set_priority (struct thread *cur, struct lock* lock) {
 }
 
 static void
-remove_lock_in_donors (struct lock* lock, struct thread* cur)
-{
+lock_donors_remove (struct lock* lock) {
+	ASSERT (lock != NULL);
+	ASSERT (lock_held_by_current_thread (lock));
+
+	struct thread *holder = lock->holder; // holder는 curr로 ASSERT 됨
+
 	struct list_elem *e;
-	e = list_begin (&cur->donations);
-	while (e != list_end (&cur->donations)) {
+	e = list_begin (&holder->donations);
+	while (e != list_end (&holder->donations)) {
 		struct thread *t = list_entry (e, struct thread, d_elem);
 
 		if (t->wait_on_lock == lock) {

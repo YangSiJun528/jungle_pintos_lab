@@ -98,8 +98,8 @@ static struct list all_thread_list;
 
 static fp32_t load_avg; /* 최근 1분 동안 실행 준비가 된 thread 수의 이동 평균. */
 
-static void kernel_thread (thread_func *, void *aux);
 
+static void kernel_thread (thread_func *, void *aux);
 static void idle (void *aux UNUSED);
 static struct thread *next_thread_to_run (void);
 static void init_thread (struct thread *, const char *name, int priority);
@@ -458,7 +458,7 @@ thread_yield_if_needed (void) {
 		return;
 
 	if (!thread_mlfqs) {
-		// Priority Donation 때문에 정렬 필요
+		// Priority Donation 때문에 정렬 필요, list_pop_front를 해야하니까
 		list_sort (&ready_list, cmp_priority_more, NULL);
 	}
 
@@ -521,9 +521,7 @@ threads_wakeup (int64_t ticks) {
 /* 현재 스레드의 priority를 NEW_PRIORITY로 설정한다. */
 void
 thread_set_priority (int new_priority) {
-	if (thread_mlfqs) {
-		// do nothing...
-	} else {
+	if (!thread_mlfqs) {
 		thread_current ()->base_priority = new_priority;
 		thread_donors_recalc_priorities ();
 		thread_yield_if_needed ();
@@ -683,7 +681,7 @@ next_thread_to_run (void) {
 		return idle_thread;
 
 	if (!thread_mlfqs) {
-		// Priority Donation 때문에 정렬 필요
+		// Priority Donation 때문에 정렬 필요, list_pop_front를 해야하니까
 		list_sort (&ready_list, cmp_priority_more, NULL);
 	}
 
