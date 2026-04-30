@@ -21,6 +21,9 @@ size: 16:9
 #
 # 노트만 추출:
 # marp docs/ai/003_pintos_ASSERT_발표.marp.md --notes -o docs/ai/003_pintos_ASSERT_발표_notes.txt
+
+
+# TODO: 이거 2분 목표로 할꺼면 대본의 텍스트 양을 넉넉하게 60% 정도로 줄여야 함.
 ---
 
 <!-- _class: lead -->
