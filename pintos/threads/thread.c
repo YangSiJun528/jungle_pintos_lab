@@ -180,7 +180,7 @@ thread_init (void) {
 	list_init (&sleep_list);
 	list_init (&destruction_req);
 	list_init (&all_thread_list);
-	load_avg = fp(0);
+	load_avg = fp (0);
 
 	/* Set up a thread structure for the running thread. */
 	/* 현재 실행 중인 스레드를 위한 thread 구조체를 설정한다. */
@@ -942,12 +942,14 @@ void
 thread_mlfqs_recalc_priorities (void) {
 	// 인터럽트 핸들러와 스레드 상태(init_thread 같은)에서 호출 가능
 	enum intr_level old_level;
+	struct list_elem *e;
+	struct thread *t;
 
 	old_level = intr_disable ();
 
-	struct list_elem *e = list_begin (&all_thread_list);
+	e = list_begin (&all_thread_list);
 	while (e != list_end (&all_thread_list)) {
-		struct thread *t = list_entry (e, struct thread, q_elem);
+		t = list_entry (e, struct thread, q_elem);
 		thread_mlfqs_recalc_priority(t);
 
 		e = list_next(e);
@@ -983,20 +985,25 @@ thread_mlfqs_incr_recent_cpu (void) {
 // 1초(틱 수가 TIMER_FREQ 배수)마다 읽어서 스케줄링 큐 개선
 void
 thread_mlfqs_recalc_shcd_queue (void) {
+	bool on_idle;
+	size_t ready_threads;
+	struct list_elem *e;
+	struct thread *t;
+
 	ASSERT (intr_context ());				// 인터럽트 핸들러가 호출
 	ASSERT (intr_get_level () == INTR_OFF); // 인터럽트 꺼짐 상태
 
-	bool on_idle = thread_current () == idle_thread;
+	on_idle = thread_current () == idle_thread;
 
-	size_t ready_threads = list_size(&ready_list) + (on_idle ? 0 : 1);
+	ready_threads = list_size(&ready_list) + (on_idle ? 0 : 1);
 	load_avg = fp_add (
 					fp_mul (fp_div (fp (59), fp (60)), load_avg),
 					fp_mul_i (fp_div (fp (1), fp (60)), ready_threads)
 	);
 
-	struct list_elem *e = list_begin (&all_thread_list);
+	e = list_begin (&all_thread_list);
 	while (e != list_end (&all_thread_list)) {
-		struct thread *t = list_entry (e, struct thread, q_elem);
+		t = list_entry (e, struct thread, q_elem);
 		t->recent_cpu = fp_add_i(fp_mul(fp_div(fp_mul_i(load_avg, 2),
 				fp_add_i(fp_mul_i(load_avg, 2), 1)), t->recent_cpu), t->nice);
 
