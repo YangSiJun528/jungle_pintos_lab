@@ -238,12 +238,6 @@ process_exec (void *f_name) {
 	*end_argv = NULL;
 	printf("==================== 4\n");
 
-
-	// for (int i = 0; i < argc; i++) {
-	// 	printf("==================== 4.1 %s\n", argv_for_test[argc]);
-	// }
-	printf("==================== 5\n");
-
 	printf("hex dump ================================\n\n");
 	hex_dump (
 		(uintptr_t) argv,
@@ -253,8 +247,15 @@ process_exec (void *f_name) {
 	);
 	printf("hex dump ================================\n\n");
 
+	char *argv_ptr = argv;
+	for (int i = 0; i < argc; i++) {
+		printf("arg %d = %s\n", i, argv_ptr);
+		printf("==================== 4.1 arg %s\n", argv_ptr);
+		argv_ptr += strlen(argv_ptr) + 1;
+	}
+	printf("==================== 5\n");
+
 	ASSERT(PGSIZE < (uintptr_t) argv);
-	ASSERT(((char **) argv)[argc] == NULL);
 	// parsing 종료
 
 
