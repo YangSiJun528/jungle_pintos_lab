@@ -199,6 +199,11 @@ error:
  * 실패하면 -1을 리턴한다. */
 int
 process_exec (void *f_name) {
+	// parsing 시작
+
+
+	// parsing 종료
+
 	char *file_name = f_name;
 	bool success;
 
@@ -503,7 +508,11 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	/* Start address. */
 	/* 시작 주소. */
+	// if_는 intr_frame
 	if_->rip = ehdr.e_entry;
+	if_->rsp = USER_STACK;
+
+
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
