@@ -529,7 +529,6 @@ load (const char *cmd, struct intr_frame *if_) {
 
 	/* Start address. */
 	/* 시작 주소. */
-	if_->R.rdi = argc;
 	if_->rip = ehdr.e_entry;
 	if_->rsp = USER_STACK;
 
@@ -566,6 +565,9 @@ load (const char *cmd, struct intr_frame *if_) {
 		if_->rsp -= sizeof(uintptr_t);
 		*(uintptr_t *) if_->rsp = stack_argv_addr[argc - i - 1];	// 역순으로 추가
 	}
+
+	if_->R.rsi = if_->rsp; // argv[0]의 위치
+	if_->R.rdi = argc;
 
 	if_->rsp -= sizeof(char *);
 	*(uintptr_t *) if_->rsp = 0;	// fake return address
