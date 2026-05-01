@@ -599,12 +599,14 @@ load (const char *file_name, const char *argv, int argc,
 	printf("==================== 6\n");
 
 	for (int i = 0; i < argc; i++) {
-		char *arg = (char *) argv_addr[i];
+		char *arg = (char *) argv_addr[argc - 1 - i];
 		printf("==================== 6.1 %d, %s\n", i, arg);
 		size_t arg_size = strlen(arg) + 1;
+
 		if_->rsp -= arg_size; // stack은 커질 때 값이 내려가니까 먼저 내리기
-		strlcpy ((void *) if_->rsp, arg, arg_size);
-		stack_argv_addr[argc] = if_->rsp;
+		strlcpy((void *) if_->rsp, arg, arg_size);
+
+		stack_argv_addr[argc - 1 - i] = if_->rsp;
 	}
 
 	printf("==================== 7\n");
@@ -613,13 +615,19 @@ load (const char *file_name, const char *argv, int argc,
 
 	if_->rsp = if_->rsp & ~7; // 비트 연산으로 8의 배수로 낮추기
 
+	if_->rsp -= sizeof(char *); // 스택은 바이트 단위로 이동
+	*(char **) if_->rsp = NULL;
 	for (int i = 0; i < argc; i++) {
-		if_->rsp -= sizeof(uintptr_t); //uintptr_t는 정수형 값이니까 포인터 증감이 안됨.
-		*(uintptr_t *) if_->rsp = stack_argv_addr[argc]; // 역순으로 써야 함
+		if_->rsp -= sizeof(uintptr_t);
+		*(uintptr_t *) if_->rsp = stack_argv_addr[argc - i - 1]; // 역순으로 추가
 	}
 
-	if_->rsp -= sizeof(uintptr_t);
+	if_->rsp -= sizeof(char *);
 	*(uintptr_t *) if_->rsp = 0; // fake return address
+
+	if_->rsp -= sizeof(char *); // 최종 위치
+
+	if_->R.rdi = argc; // rid 쓰기
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
