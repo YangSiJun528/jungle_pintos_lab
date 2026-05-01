@@ -18,12 +18,14 @@
 #include "threads/mmu.h"
 #include "threads/vaddr.h"
 #include "intrinsic.h"
+#include "threads/synch.h"
 #ifdef VM
 #include "vm/vm.h"
 #endif
 
 static void process_cleanup (void);
-static bool load (const char *file_name, struct intr_frame *if_);
+static bool load (const char *file_name, const char **argv, int argc,
+		struct intr_frame *if_);
 static void initd (void *f_name);
 static void __do_fork (void *);
 
@@ -200,11 +202,37 @@ error:
 int
 process_exec (void *f_name) {
 	// parsing 시작
+	//TODO: 이거 나중에 따로 함수로 뺴는게 읽기 좋을듯
+	// 그리고 이거 복사하는게 맞나 싶었는데,
+	// load 후에 free로 지워버리기 때문에 복사하는게 맞음.
 
+	char *save_ptr, *token;
+	size_t total_len = 0;
+	size_t limit_len = 4092; // Gitbook에서 4kb(a page size)를 추천함.
+	char *delim = " "; // 구분자, delimiter
+	char *argv[256]; // 딱히 제한필요하다는 말은 없는데, 넉넉하게 256개까지 인자 가질 수 있게
+	int argc = 0;
 
+	// 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 주석 참고
+	strtok_r (f_name, delim, &save_ptr);
+	for (token = strtok_r (f_name, delim, &save_ptr);
+			token != NULL; token = strtok_r
+			(NULL, delim, &save_ptr)) {
+		size_t token_len = strlen(token) + 1; // null 문자 포함
+		if (total_len + token_len > limit_len) {
+			return -1; // 사이즈 제한 넘어가면 실패
+		}
+		total_len += token_len;
+		argv[argc++] = token;
+	}
+	argv[argc] = NULL;
+
+	ASSERT(limit_len >= total_len);
+	ASSERT(strnlen(argv[0], SIZE_MAX) > 0);
+	ASSERT(argv[argc] == NULL) // 이래야 순회가 가능함
 	// parsing 종료
 
-	char *file_name = f_name;
+	char *file_name = argv[0];
 	bool success;
 
 	/* We cannot use the intr_frame in the thread structure.
@@ -223,7 +251,8 @@ process_exec (void *f_name) {
 
 	/* And then load the binary */
 	/* 그 다음 바이너리를 로드한다. */
-	success = load (file_name, &_if);
+	//TODO: 나중에 인자 넘기는거 정리하기
+	success = load (file_name, argv, argc, &_if);
 
 	/* If load failed, quit. */
 	/* 로드에 실패하면 종료한다. */
@@ -261,6 +290,11 @@ process_wait (tid_t child_tid UNUSED) {
 	 * XXX:       implementing the process_wait. */
 	/* XXX: Hint) process_wait(initd)에서 Pintos가 종료되므로, process_wait를
 	 * XXX:       구현하기 전에는 여기에 무한 루프를 넣는 것을 권장한다. */
+
+	//TODO: 나중에 적절하게 바꾸기
+	// 무한루프는 직접 꺼줘야 해서, 스택 확인용으로 적당히 돌다 꺼지게 함.
+	size_t wait = 1 << 20;
+	while (wait) barrier();
 	return -1;
 }
 
@@ -406,7 +440,8 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
  * 초기 stack pointer를 *RSP에 저장한다.
  * 성공하면 true, 아니면 false를 리턴한다. */
 static bool
-load (const char *file_name, struct intr_frame *if_) {
+load (const char *file_name, const char **argv, int argc,
+		struct intr_frame *if_) {
 	struct thread *t = thread_current ();
 	struct ELF ehdr;
 	struct file *file = NULL;
@@ -512,12 +547,41 @@ load (const char *file_name, struct intr_frame *if_) {
 	if_->rip = ehdr.e_entry;
 	if_->rsp = USER_STACK;
 
+	uintptr_t stack_arr_ptrs[256] = {0, };
 
+	// argv 먼저 쓰기
+	for (int i = 0; i < argc; i++) {
+		char* cur_arg_ptr = argv[argc - (i+1)]; // 역순으로 써야 함
+		size_t arg_size = strlen(cur_arg_ptr) + 1;
+		if_->rsp -= arg_size; // stack은 커질 때 값이 내려가니까 먼저 내리기
+		memcpy ((void *) if_->rsp, cur_arg_ptr, arg_size);
+		stack_arr_ptrs[argc] = (uintptr_t) cur_arg_ptr;
+	}
+
+	if_->rsp = if_->rsp & ~7; // 비트 연산으로 8의 배수로 낮추기
+
+	for (int i = 0; i < argc; i++) {
+		if_->rsp -= sizeof(char *); //uintptr_t는 정수형 값이니까 포인터 증감이 안됨.
+		if_->rsp = stack_arr_ptrs[argc - (i+1)]; // 역순으로 써야 함
+	}
+
+	if_->rsp -= sizeof(char *);
+	if_->rsp = 0; // fake return address
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
 	/* TODO: 여기에 코드를 작성한다.
 	 * TODO: argument passing을 구현한다(project2/argument_passing.html 참고). */
+
+	/* stack 구성을 끝낸 직후, do_iret() 전에 임시로 확인 */
+	printf("hex dump ================================\n\n");
+	hex_dump (
+		if_->rsp,          /* 출력에 표시할 시작 주소 */
+		(const void *) if_->rsp,       /* 실제로 덤프할 메모리 위치 */
+		USER_STACK - if_->rsp,
+		true                           /* ASCII도 같이 출력 */
+	);
+	printf("hex dump ================================\n\n");
 
 	success = true;
 
