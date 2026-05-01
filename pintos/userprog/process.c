@@ -278,8 +278,7 @@ process_exec (void *f_name) {
 
 	/* If load failed, quit. */
 	/* 로드에 실패하면 종료한다. */
-	palloc_free_page (file_name);
-	palloc_free_page (argv); // TODO: 여기 free 맞나 확인하기
+	palloc_free_page (argv);
 	if (!success)
 		return -1;
 
