@@ -264,15 +264,16 @@ process_exec (void *f_name) {
 	//TODO: 나중에 인자 넘기는거 정리하기
 	success = load (file_name, argv, argc, &_if);
 
-	/* stack 구성을 끝낸 직후, do_iret() 전에 임시로 확인 */
-	printf("hex dump ================================\n\n");
-	hex_dump (
-		_if.rsp,          /* 출력에 표시할 시작 주소 */
-		(const void *) _if.rsp,       /* 실제로 덤프할 메모리 위치 */
-		USER_STACK - _if.rsp,
-		true                           /* ASCII도 같이 출력 */
-	);
-	printf("hex dump ================================\n\n");
+	{
+		printf ("hex dump ================================\n\n");
+		hex_dump (
+			_if.rsp,
+			(const void *) _if.rsp,
+			USER_STACK - _if.rsp,
+			true
+		);
+		printf ("hex dump ================================\n\n");
+	}
 
 
 	/* If load failed, quit. */
@@ -590,29 +591,35 @@ load (const char *file_name, const char *argv, int argc,
 		char *argv_ptr = argv;
 		for (int i = 0; i < argc; i++) {
 			argv_addr[i] = (uintptr_t) argv_ptr;
+			printf("==================== 5.1 %d, %s, %llu\n" , i, argv_ptr, argv_addr[i]);
 			argv_ptr += strlen(argv_ptr) + 1;
 		}
 	}
 
 	printf("==================== 6\n");
 
-	for (int i = 0; i < (argc-1); i++) { // argv[argc]는 null이라 복사 안함
-		char *arg =  (char *) argv_addr;
+	for (int i = 0; i < argc; i++) {
+		char *arg = (char *) argv_addr[i];
+		printf("==================== 6.1 %d, %s\n", i, arg);
 		size_t arg_size = strlen(arg) + 1;
 		if_->rsp -= arg_size; // stack은 커질 때 값이 내려가니까 먼저 내리기
-		memcpy ((void *) if_->rsp, arg, arg_size);
-		stack_argv_addr[argc-(i+1)] = if_->rsp;
+		strlcpy ((void *) if_->rsp, arg, arg_size);
+		stack_argv_addr[argc] = if_->rsp;
 	}
+
+	printf("==================== 7\n");
+
+	printf("==================== 7.1 %llu, %llu \n", if_->rsp, if_->rsp & ~7);
 
 	if_->rsp = if_->rsp & ~7; // 비트 연산으로 8의 배수로 낮추기
 
 	for (int i = 0; i < argc; i++) {
 		if_->rsp -= sizeof(uintptr_t); //uintptr_t는 정수형 값이니까 포인터 증감이 안됨.
-		if_->rsp = stack_argv_addr[argc-(i+1)]; // 역순으로 써야 함
+		*(uintptr_t *) if_->rsp = stack_argv_addr[argc]; // 역순으로 써야 함
 	}
 
 	if_->rsp -= sizeof(uintptr_t);
-	if_->rsp = 0; // fake return address
+	*(uintptr_t *) if_->rsp = 0; // fake return address
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
