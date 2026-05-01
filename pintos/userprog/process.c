@@ -217,7 +217,6 @@ process_exec (void *f_name) {
 	printf("==================== 2\n");
 
 	// 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 주석 참고
-	strtok_r (f_name, delim, &save_ptr);
 	for (token = strtok_r (f_name, delim, &save_ptr);
 			token != NULL;
 			token = strtok_r (NULL, delim, &save_ptr)) {
@@ -239,10 +238,20 @@ process_exec (void *f_name) {
 	*end_argv = NULL;
 	printf("==================== 4\n");
 
-	for (int i = 0; i < argc; i++) {
-		printf("==================== 4.1 %s\n", ((char **) argv)[argc]);
-	}
+
+	// for (int i = 0; i < argc; i++) {
+	// 	printf("==================== 4.1 %s\n", argv_for_test[argc]);
+	// }
 	printf("==================== 5\n");
+
+	printf("hex dump ================================\n\n");
+	hex_dump (
+		(uintptr_t) argv,
+		argv,
+		PGSIZE,
+		true
+	);
+	printf("hex dump ================================\n\n");
 
 	ASSERT(PGSIZE < (uintptr_t) argv);
 	ASSERT(((char **) argv)[argc] == NULL);
@@ -256,7 +265,7 @@ process_exec (void *f_name) {
 	 * This is because when current thread rescheduled,
 	 * it stores the execution information to the member. */
 	/* 스레드 구조체 안의 intr_frame은 사용할 수 없다.
-	 * 현재 스레드가 다시 스케줄될 때 실행 정보를 그 멤버에 저장하기 때문이다. */
+	 * 현재 스레드가 다시 스케줄될 때 실행 정보를 그 멤yyyyyyyyy버에 저장하기 때문이다. */
 	struct intr_frame _if;
 	_if.ds = _if.es = _if.ss = SEL_UDSEG;
 	_if.cs = SEL_UCSEG;
