@@ -205,7 +205,6 @@ process_exec (void *f_name) {
 	//TODO: 이거 나중에 따로 함수로 뺴는게 읽기 좋을듯
 	// 그리고 이거 복사하는게 맞나 싶었는데,
 	// load 후에 free로 지워버리기 때문에 복사하는게 맞음.
-	printf("==================== 1\n");
 
 	void *argv = palloc_get_page (0);
 	size_t offset = 0;
@@ -214,46 +213,22 @@ process_exec (void *f_name) {
 	char *delim = " "; // 구분자, delimiter
 	int argc = 0;
 
-	printf("==================== 2\n");
-
 	// 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 주석 참고
 	for (token = strtok_r (f_name, delim, &save_ptr);
 			token != NULL;
 			token = strtok_r (NULL, delim, &save_ptr)) {
 		size_t token_size = strlen(token) + 1; // null 문자 포함
-		printf("==================== 2.1 %lu, %llu, %llu, %llu\n", token_size, (uintptr_t) argv, (uintptr_t) token, offset);
 		if (PGSIZE - (offset + token_size) < 0) {
 			// TODO: 근데 여기서 free 해줘야 함. goto 패턴 사용해서 바꾸기
 			//  아직 안바꾸면 메모리 에러남
 			return -1; // 사이즈 제한 넘어가면 실패
 		}
-		printf("==================== 2.2 %s\n", token);
 		strlcpy(argv+offset, token, token_size);
 		offset += token_size;
 		argc++;
-		printf("==================== 2.3 %lu, %llu, %llu, %llu\n", token_size, (uintptr_t) argv, (uintptr_t) token, offset);
 	}
-	printf("==================== 3\n");
 	char **end_argv = argv + offset;
 	*end_argv = NULL;
-	printf("==================== 4\n");
-
-	printf("hex dump ================================\n\n");
-	hex_dump (
-		(uintptr_t) argv,
-		argv,
-		PGSIZE,
-		true
-	);
-	printf("hex dump ================================\n\n");
-
-	char *argv_ptr = argv;
-	for (int i = 0; i < argc; i++) {
-		printf("arg %d = %s\n", i, argv_ptr);
-		printf("==================== 4.1 arg %s\n", argv_ptr);
-		argv_ptr += strlen(argv_ptr) + 1;
-	}
-	printf("==================== 5\n");
 
 	ASSERT(PGSIZE < (uintptr_t) argv);
 	// parsing 종료
