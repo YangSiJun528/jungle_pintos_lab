@@ -208,9 +208,9 @@ process_exec (void *f_name) {
 
 	char *save_ptr, *token;
 	size_t total_len = 0;
-	size_t limit_len = 4092; // Gitbook에서 4kb(a page size)를 추천함.
+	size_t limit_len = 512; // Gitbook에서 4kb(a page size)를 추천함.
 	char *delim = " "; // 구분자, delimiter
-	char *argv[256]; // 딱히 제한필요하다는 말은 없는데, 넉넉하게 256개까지 인자 가질 수 있게
+	char *argv[30]; // 딱히 제한필요하다는 말은 없는데, 넉넉하게 256개까지 인자 가질 수 있게
 	int argc = 0;
 
 	// 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 주석 참고
