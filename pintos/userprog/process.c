@@ -24,7 +24,7 @@
 #endif
 
 static void process_cleanup (void);
-static bool load (const char *file_name, const char **argv, int argc,
+static bool load (const char *file_name, const char *argv, int argc,
 		struct intr_frame *if_);
 static void initd (void *f_name);
 static void __do_fork (void *);
@@ -468,7 +468,7 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
  * 초기 stack pointer를 *RSP에 저장한다.
  * 성공하면 true, 아니면 false를 리턴한다. */
 static bool
-load (const char *file_name, const char **argv, int argc,
+load (const char *file_name, const char *argv, int argc,
 		struct intr_frame *if_) {
 	struct thread *t = thread_current ();
 	struct ELF ehdr;
@@ -575,25 +575,36 @@ load (const char *file_name, const char **argv, int argc,
 	if_->rip = ehdr.e_entry;
 	if_->rsp = USER_STACK;
 
-	uintptr_t stack_arr_ptrs[256] = {0, };
+	// 인자 수 256으로 임의로 제한
+	uintptr_t argv_addr[256] = {0, }; // 현재 제공된 argv의 메모리 위치
+	uintptr_t stack_argv_addr[256] = {0, }; // stack에 들어간 argv의 메모리 위치
 
-	// argv 먼저 쓰기
-	for (int i = 0; i < argc; i++) {
-		char* cur_arg_ptr = argv[argc - (i+1)]; // 역순으로 써야 함
-		size_t arg_size = strlen(cur_arg_ptr) + 1;
+	// 스택에 쓸 때 반대로 써야 해서 주소만 모아놓은 배열에 써둠
+	// 외부에서 argv_ptr에 접근하지 않게 scope 제한용 중첩
+	{
+		char *argv_ptr = argv;
+		for (int i = 0; i < argc; i++) {
+			argv_addr[i] = (uintptr_t) argv_ptr;
+			argv_ptr += strlen(argv_ptr) + 1;
+		}
+	}
+
+	for (int i = 0; i < (argc-1); i++) { // argv[argc]는 null이라 복사 안함
+		char *arg =  (char *) argv_addr;
+		size_t arg_size = strlen(arg) + 1;
 		if_->rsp -= arg_size; // stack은 커질 때 값이 내려가니까 먼저 내리기
-		memcpy ((void *) if_->rsp, cur_arg_ptr, arg_size);
-		stack_arr_ptrs[argc] = (uintptr_t) cur_arg_ptr;
+		memcpy ((void *) if_->rsp, arg, arg_size);
+		stack_argv_addr[argc-(i+1)] = if_->rsp;
 	}
 
 	if_->rsp = if_->rsp & ~7; // 비트 연산으로 8의 배수로 낮추기
 
 	for (int i = 0; i < argc; i++) {
-		if_->rsp -= sizeof(char *); //uintptr_t는 정수형 값이니까 포인터 증감이 안됨.
-		if_->rsp = stack_arr_ptrs[argc - (i+1)]; // 역순으로 써야 함
+		if_->rsp -= sizeof(uintptr_t); //uintptr_t는 정수형 값이니까 포인터 증감이 안됨.
+		if_->rsp = stack_argv_addr[argc-(i+1)]; // 역순으로 써야 함
 	}
 
-	if_->rsp -= sizeof(char *);
+	if_->rsp -= sizeof(uintptr_t);
 	if_->rsp = 0; // fake return address
 
 	/* TODO: Your code goes here.
