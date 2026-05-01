@@ -24,10 +24,10 @@
 #endif
 
 static void process_cleanup (void);
-static bool load (const char *file_name, const char *argv, int argc,
-		struct intr_frame *if_);
+static bool load (const char *cmd, struct intr_frame *if_);
 static void initd (void *f_name);
 static void __do_fork (void *);
+static int parse_arg(void* cmd, void* arg_buf);
 
 /* General process initializer for initd and other process. */
 /* initd와 다른 프로세스에 공통으로 쓰이는 프로세스 이니셜라이저. */
@@ -201,47 +201,7 @@ error:
  * 실패하면 -1을 리턴한다. */
 int
 process_exec (void *f_name) {
-	// parsing 시작
-	//TODO: 이거 나중에 따로 함수로 뺴는게 읽기 좋을듯
-	// 그리고 이거 복사하는게 맞나 싶었는데,
-	// load 후에 free로 지워버리기 때문에 복사하는게 맞음.
-
-	void *argv = palloc_get_page (0);
-	size_t offset = 0;
-
-	thread_current ();
-
-	char *save_ptr, *token;
-	char *delim = " "; // 구분자, delimiter
-	int argc = 0;
-
-	// 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 주석 참고
-	for (token = strtok_r (f_name, delim, &save_ptr);
-			token != NULL;
-			token = strtok_r (NULL, delim, &save_ptr)) {
-		size_t token_size = strlen(token) + 1; // null 문자 포함
-		if (PGSIZE - (offset + token_size) < 0) {
-			// TODO: 근데 여기서 free 해줘야 함. goto 패턴 사용해서 바꾸기
-			//  아직 안바꾸면 메모리 에러남
-			return -1; // 사이즈 제한 넘어가면 실패
-		}
-		strlcpy(argv+offset, token, token_size);
-		offset += token_size;
-		argc++;
-	}
-	char **end_argv = argv + offset;
-	*end_argv = NULL;
-
-	thread_current ();
-
-	ASSERT(PGSIZE < (uintptr_t) argv);
-	// parsing 종료
-
-
-	char *file_name = &argv[0];
 	bool success;
-
-	thread_current ();
 
 	/* We cannot use the intr_frame in the thread structure.
 	 * This is because when current thread rescheduled,
@@ -257,13 +217,11 @@ process_exec (void *f_name) {
 	/* 먼저 현재 컨텍스트를 정리한다. */
 	process_cleanup ();
 
-	thread_current ();
-
 	/* And then load the binary */
 	/* 그 다음 바이너리를 로드한다. */
-	//TODO: 나중에 인자 넘기는거 정리하기
-	success = load (file_name, argv, argc, &_if);
+	success = load (f_name, &_if);
 
+	//TODO: 이건 userprog 작업 끝나고 제거하기. 지금은 중간 확인 필요할 때 켜야해서
 	{
 		printf ("hex dump ================================\n\n");
 		hex_dump (
@@ -275,10 +233,9 @@ process_exec (void *f_name) {
 		printf ("hex dump ================================\n\n");
 	}
 
-
 	/* If load failed, quit. */
 	/* 로드에 실패하면 종료한다. */
-	palloc_free_page (argv);
+	palloc_free_page (f_name);
 	if (!success)
 		return -1;
 
@@ -462,8 +419,7 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
  * 초기 stack pointer를 *RSP에 저장한다.
  * 성공하면 true, 아니면 false를 리턴한다. */
 static bool
-load (const char *file_name, const char *argv, int argc,
-		struct intr_frame *if_) {
+load (const char *cmd, struct intr_frame *if_) {
 	struct thread *t = thread_current ();
 	struct ELF ehdr;
 	struct file *file = NULL;
@@ -471,7 +427,12 @@ load (const char *file_name, const char *argv, int argc,
 	bool success = false;
 	int i;
 
-	printf("==================== 1\n");
+	void *arg_buf = palloc_get_page (0);
+	int argc = parse_arg (cmd, arg_buf);
+	if (argc == -1) // 파싱 실패 시 전체 작업 실패
+		goto done;
+
+	char *file_name = arg_buf;
 
 	/* Allocate and activate page directory. */
 	/* 페이지 디렉터리를 할당하고 activate한다. */
@@ -480,7 +441,6 @@ load (const char *file_name, const char *argv, int argc,
 		goto done;
 	process_activate (thread_current ());
 
-	printf("==================== 2\n");
 
 	/* Open executable file. */
 	/* executable 파일을 연다. */
@@ -502,8 +462,6 @@ load (const char *file_name, const char *argv, int argc,
 		printf ("load: %s: error loading executable\n", file_name);
 		goto done;
 	}
-
-	printf("==================== 3\n");
 
 	/* Read program headers. */
 	/* 프로그램 헤더들을 읽는다. */
@@ -564,8 +522,6 @@ load (const char *file_name, const char *argv, int argc,
 		}
 	}
 
-	printf("==================== 4\n");
-
 	/* Set up stack. */
 	/* 스택을 설정한다. */
 	if (!setup_stack (if_))
@@ -573,74 +529,58 @@ load (const char *file_name, const char *argv, int argc,
 
 	/* Start address. */
 	/* 시작 주소. */
-	// if_는 intr_frame
+	if_->R.rdi = argc;
 	if_->rip = ehdr.e_entry;
 	if_->rsp = USER_STACK;
 
 	// 인자 수 32으로 임의로 제한
-	// TODO: 나중에 지원하는 개수 늘리고 page 할당해서 처리하게 하기
-	uintptr_t argv_addr[32] = {0, }; // 현재 제공된 argv의 메모리 위치
+	// TODO: 나중에 지원하는 개수 늘리고 page 할당해서 처리하게 하기 - 당장은 문제 없어보임.
+	uintptr_t arg_buf_addr[32] = {0, }; // 현재 제공된 arg_buf의 메모리 위치
 	uintptr_t stack_argv_addr[32] = {0, }; // stack에 들어간 argv의 메모리 위치
 
-	printf("==================== 5\n");
-
-	// 스택에 쓸 때 반대로 써야 해서 주소만 모아놓은 배열에 써둠
-	// 외부에서 argv_ptr에 접근하지 않게 scope 제한용 중첩
+	// 스택에 쓸 때 반대로 써야 해서 포인터 연산이 어려움. 인덱스로 접근 가능하게 배열에 넣기
+	// 외부에서 arg_p에 접근하지 못하게 scope 제한용 중첩
 	{
-		char *argv_ptr = argv;
+		char *arg_p = arg_buf;
 		for (int i = 0; i < argc; i++) {
-			argv_addr[i] = (uintptr_t) argv_ptr;
-			printf("==================== 5.1 %d, %s, %llu\n" , i, argv_ptr, argv_addr[i]);
-			argv_ptr += strlen(argv_ptr) + 1;
+			arg_buf_addr[i] = (uintptr_t) arg_p;
+			arg_p += strlen (arg_p) + 1;
 		}
 	}
 
-	printf("==================== 6\n");
 
 	for (int i = 0; i < argc; i++) {
-		char *arg = (char *) argv_addr[argc - 1 - i];
-		printf("==================== 6.1 %d, %s\n", i, arg);
-		size_t arg_size = strlen(arg) + 1;
-
-		if_->rsp -= arg_size; // stack은 커질 때 값이 내려가니까 먼저 내리기
-		strlcpy((void *) if_->rsp, arg, arg_size);
-
+		char *arg = (char *) arg_buf_addr[argc - 1 - i];
+		size_t arg_size = strlen (arg) + 1;
+		if_->rsp -= arg_size;		// stack은 커질 때 값이 내려가니까 먼저 내리기
+		strlcpy ((void *) if_->rsp, arg, arg_size);
 		stack_argv_addr[argc - 1 - i] = if_->rsp;
 	}
 
-	printf("==================== 7\n");
+	if_->rsp = if_->rsp & ~7;		// 비트 연산으로 8의 배수로 내림
 
-	printf("==================== 7.1 %llu, %llu \n", if_->rsp, if_->rsp & ~7);
-
-	if_->rsp = if_->rsp & ~7; // 비트 연산으로 8의 배수로 낮추기
-
-	if_->rsp -= sizeof(char *); // 스택은 바이트 단위로 이동
+	if_->rsp -= sizeof(char *);		// 스택은 바이트 단위로 이동
 	*(char **) if_->rsp = NULL;
+
 	for (int i = 0; i < argc; i++) {
 		if_->rsp -= sizeof(uintptr_t);
-		*(uintptr_t *) if_->rsp = stack_argv_addr[argc - i - 1]; // 역순으로 추가
+		*(uintptr_t *) if_->rsp = stack_argv_addr[argc - i - 1];	// 역순으로 추가
 	}
 
 	if_->rsp -= sizeof(char *);
-	*(uintptr_t *) if_->rsp = 0; // fake return address
+	*(uintptr_t *) if_->rsp = 0;	// fake return address
 
-	if_->rsp -= sizeof(char *); // 최종 위치
+	if_->rsp -= sizeof(char *);		// rsp를 최종 위치로 이동
 
-	if_->R.rdi = argc; // rid 쓰기
-
-	/* TODO: Your code goes here.
-	 * TODO: Implement argument passing (see project2/argument_passing.html). */
-	/* TODO: 여기에 코드를 작성한다.
-	 * TODO: argument passing을 구현한다(project2/argument_passing.html 참고). */
 	success = true;
 
 done:
 	/* We arrive here whether the load is successful or not. */
 	/* 로드 성공 여부와 관계없이 이 지점에 도달한다. */
 	file_close (file);
+	palloc_free_page (arg_buf);
 	return success;
 }
-
 
 /* Checks whether PHDR describes a valid, loadable segment in
  * FILE and returns true if so, false otherwise. */
@@ -926,3 +866,33 @@ setup_stack (struct intr_frame *if_) {
 	return success;
 }
 #endif /* VM */
+
+
+// 들어온 인자 파싱
+// 반환값은 파싱된 수(argc), 에러나면 -1 반환
+static int
+parse_arg(void* cmd, void* arg_buf) {
+	size_t offset = 0;
+
+	thread_current ();
+
+	char *save_ptr, *token;
+	char *delim = " "; // 구분자, delimiter
+	int argc = 0;
+
+	// 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 참고
+	for (token = strtok_r (cmd, delim, &save_ptr);
+		 token != NULL;
+		 token = strtok_r (NULL, delim, &save_ptr)) {
+		size_t token_size = strlen (token) + 1; // null 문자 포함
+		if (PGSIZE - (offset + token_size) < 0) {
+			return -1; // 사이즈 제한 넘어가면 실패
+		}
+		strlcpy (arg_buf + offset, token, token_size);
+		offset += token_size;
+		argc++;
+	}
+	*(char **)(arg_buf + offset) = NULL;
+
+	return argc;
+}
