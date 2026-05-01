@@ -205,34 +205,51 @@ process_exec (void *f_name) {
 	//TODO: 이거 나중에 따로 함수로 뺴는게 읽기 좋을듯
 	// 그리고 이거 복사하는게 맞나 싶었는데,
 	// load 후에 free로 지워버리기 때문에 복사하는게 맞음.
+	printf("==================== 1\n");
+
+	void *argv = palloc_get_page (0);
+	size_t offset = 0;
 
 	char *save_ptr, *token;
-	size_t total_len = 0;
-	size_t limit_len = 512; // Gitbook에서 4kb(a page size)를 추천함.
 	char *delim = " "; // 구분자, delimiter
-	char *argv[30]; // 딱히 제한필요하다는 말은 없는데, 넉넉하게 256개까지 인자 가질 수 있게
 	int argc = 0;
+
+	printf("==================== 2\n");
 
 	// 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 주석 참고
 	strtok_r (f_name, delim, &save_ptr);
 	for (token = strtok_r (f_name, delim, &save_ptr);
-			token != NULL; token = strtok_r
-			(NULL, delim, &save_ptr)) {
-		size_t token_len = strlen(token) + 1; // null 문자 포함
-		if (total_len + token_len > limit_len) {
+			token != NULL;
+			token = strtok_r (NULL, delim, &save_ptr)) {
+		size_t token_size = strlen(token) + 1; // null 문자 포함
+		printf("==================== 2.1 %lu, %llu, %llu, %llu\n", token_size, (uintptr_t) argv, (uintptr_t) token, offset);
+		if (PGSIZE - (offset + token_size) < 0) {
+			// TODO: 근데 여기서 free 해줘야 함. goto 패턴 사용해서 바꾸기
+			//  아직 안바꾸면 메모리 에러남
 			return -1; // 사이즈 제한 넘어가면 실패
 		}
-		total_len += token_len;
-		argv[argc++] = token;
+		printf("==================== 2.2 %s\n", token);
+		strlcpy(argv+offset, token, token_size);
+		offset += token_size;
+		argc++;
+		printf("==================== 2.3 %lu, %llu, %llu, %llu\n", token_size, (uintptr_t) argv, (uintptr_t) token, offset);
 	}
-	argv[argc] = NULL;
+	printf("==================== 3\n");
+	char **end_argv = argv + offset;
+	*end_argv = NULL;
+	printf("==================== 4\n");
 
-	ASSERT(limit_len >= total_len);
-	ASSERT(strnlen(argv[0], SIZE_MAX) > 0);
-	ASSERT(argv[argc] == NULL) // 이래야 순회가 가능함
+	for (int i = 0; i < argc; i++) {
+		printf("==================== 4.1 %s\n", ((char **) argv)[argc]);
+	}
+	printf("==================== 5\n");
+
+	ASSERT(PGSIZE < (uintptr_t) argv);
+	ASSERT(((char **) argv)[argc] == NULL);
 	// parsing 종료
 
-	char *file_name = argv[0];
+
+	char *file_name = &argv[0];
 	bool success;
 
 	/* We cannot use the intr_frame in the thread structure.
@@ -257,6 +274,7 @@ process_exec (void *f_name) {
 	/* If load failed, quit. */
 	/* 로드에 실패하면 종료한다. */
 	palloc_free_page (file_name);
+	palloc_free_page (argv); // TODO: 여기 free 맞나 확인하기
 	if (!success)
 		return -1;
 
