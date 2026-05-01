@@ -209,6 +209,8 @@ process_exec (void *f_name) {
 	void *argv = palloc_get_page (0);
 	size_t offset = 0;
 
+	thread_current ();
+
 	char *save_ptr, *token;
 	char *delim = " "; // 구분자, delimiter
 	int argc = 0;
@@ -230,6 +232,8 @@ process_exec (void *f_name) {
 	char **end_argv = argv + offset;
 	*end_argv = NULL;
 
+	thread_current ();
+
 	ASSERT(PGSIZE < (uintptr_t) argv);
 	// parsing 종료
 
@@ -237,11 +241,13 @@ process_exec (void *f_name) {
 	char *file_name = &argv[0];
 	bool success;
 
+	thread_current ();
+
 	/* We cannot use the intr_frame in the thread structure.
 	 * This is because when current thread rescheduled,
 	 * it stores the execution information to the member. */
 	/* 스레드 구조체 안의 intr_frame은 사용할 수 없다.
-	 * 현재 스레드가 다시 스케줄될 때 실행 정보를 그 멤yyyyyyyyy버에 저장하기 때문이다. */
+	 * 현재 스레드가 다시 스케줄될 때 실행 정보를 그 멤버에 저장하기 때문이다. */
 	struct intr_frame _if;
 	_if.ds = _if.es = _if.ss = SEL_UDSEG;
 	_if.cs = SEL_UCSEG;
@@ -251,10 +257,23 @@ process_exec (void *f_name) {
 	/* 먼저 현재 컨텍스트를 정리한다. */
 	process_cleanup ();
 
+	thread_current ();
+
 	/* And then load the binary */
 	/* 그 다음 바이너리를 로드한다. */
 	//TODO: 나중에 인자 넘기는거 정리하기
 	success = load (file_name, argv, argc, &_if);
+
+	/* stack 구성을 끝낸 직후, do_iret() 전에 임시로 확인 */
+	printf("hex dump ================================\n\n");
+	hex_dump (
+		_if.rsp,          /* 출력에 표시할 시작 주소 */
+		(const void *) _if.rsp,       /* 실제로 덤프할 메모리 위치 */
+		USER_STACK - _if.rsp,
+		true                           /* ASCII도 같이 출력 */
+	);
+	printf("hex dump ================================\n\n");
+
 
 	/* If load failed, quit. */
 	/* 로드에 실패하면 종료한다. */
@@ -452,12 +471,16 @@ load (const char *file_name, const char *argv, int argc,
 	bool success = false;
 	int i;
 
+	printf("==================== 1\n");
+
 	/* Allocate and activate page directory. */
 	/* 페이지 디렉터리를 할당하고 activate한다. */
 	t->pml4 = pml4_create ();
 	if (t->pml4 == NULL)
 		goto done;
 	process_activate (thread_current ());
+
+	printf("==================== 2\n");
 
 	/* Open executable file. */
 	/* executable 파일을 연다. */
@@ -479,6 +502,8 @@ load (const char *file_name, const char *argv, int argc,
 		printf ("load: %s: error loading executable\n", file_name);
 		goto done;
 	}
+
+	printf("==================== 3\n");
 
 	/* Read program headers. */
 	/* 프로그램 헤더들을 읽는다. */
@@ -539,6 +564,8 @@ load (const char *file_name, const char *argv, int argc,
 		}
 	}
 
+	printf("==================== 4\n");
+
 	/* Set up stack. */
 	/* 스택을 설정한다. */
 	if (!setup_stack (if_))
@@ -550,9 +577,12 @@ load (const char *file_name, const char *argv, int argc,
 	if_->rip = ehdr.e_entry;
 	if_->rsp = USER_STACK;
 
-	// 인자 수 256으로 임의로 제한
-	uintptr_t argv_addr[256] = {0, }; // 현재 제공된 argv의 메모리 위치
-	uintptr_t stack_argv_addr[256] = {0, }; // stack에 들어간 argv의 메모리 위치
+	// 인자 수 32으로 임의로 제한
+	// TODO: 나중에 지원하는 개수 늘리고 page 할당해서 처리하게 하기
+	uintptr_t argv_addr[32] = {0, }; // 현재 제공된 argv의 메모리 위치
+	uintptr_t stack_argv_addr[32] = {0, }; // stack에 들어간 argv의 메모리 위치
+
+	printf("==================== 5\n");
 
 	// 스택에 쓸 때 반대로 써야 해서 주소만 모아놓은 배열에 써둠
 	// 외부에서 argv_ptr에 접근하지 않게 scope 제한용 중첩
@@ -563,6 +593,8 @@ load (const char *file_name, const char *argv, int argc,
 			argv_ptr += strlen(argv_ptr) + 1;
 		}
 	}
+
+	printf("==================== 6\n");
 
 	for (int i = 0; i < (argc-1); i++) { // argv[argc]는 null이라 복사 안함
 		char *arg =  (char *) argv_addr;
@@ -586,17 +618,6 @@ load (const char *file_name, const char *argv, int argc,
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
 	/* TODO: 여기에 코드를 작성한다.
 	 * TODO: argument passing을 구현한다(project2/argument_passing.html 참고). */
-
-	/* stack 구성을 끝낸 직후, do_iret() 전에 임시로 확인 */
-	printf("hex dump ================================\n\n");
-	hex_dump (
-		if_->rsp,          /* 출력에 표시할 시작 주소 */
-		(const void *) if_->rsp,       /* 실제로 덤프할 메모리 위치 */
-		USER_STACK - if_->rsp,
-		true                           /* ASCII도 같이 출력 */
-	);
-	printf("hex dump ================================\n\n");
-
 	success = true;
 
 done:
