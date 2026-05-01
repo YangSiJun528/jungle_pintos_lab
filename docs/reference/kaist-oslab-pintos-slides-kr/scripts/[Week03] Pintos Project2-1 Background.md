@@ -34,7 +34,7 @@ Pintos나 다른 operating system에서 command line은 process를 실행하기 
 
 ## Starting a Process
 
-지금까지 thread가 생성되어 ready list에 들어갔습니다. KAIST code에서 다음으로 중요한 함수는 `process_exec()`입니다.
+지금까지 thread가 생성되어 ready list에 들어갔습니다. raw 강의 전사본에서는 이 단계를 예전 이름인 `start_process`로 설명합니다. 하지만 이 저장소의 현재 KAIST Pintos tree에는 별도의 `start_process()` 함수가 없고, 대응되는 흐름은 `process_create_initd()` -> `thread_create(..., initd, ...)` -> `initd()` -> `process_exec()`입니다.
 
 `process_exec()`는 실행하려는 binary file의 이름인 file name을 받습니다. 먼저 이 binary file을 disk에서 memory로 load해야 합니다. 그 binary file에서 실행할 instruction의 위치를 얻고, user stack의 stack-top pointer도 얻습니다. 이것이 `load()`의 역할입니다.
 
@@ -66,7 +66,7 @@ file을 load한다는 것은 많은 일을 포함합니다. binary file을 memor
 
 ## Functions to Modify
 
-이 project를 구현하는 방법은 여러 가지입니다. KAIST project document에서 argument passing을 위해 주로 확장해야 하는 함수는 `process_exec()`입니다.
+이 project를 구현하는 방법은 여러 가지입니다. raw 강의에서는 `start_process`를 언급하지만, 이 KAIST Pintos tree에서 argument passing을 위해 주로 확장해야 하는 함수는 project document 기준으로 `process_exec()`입니다.
 
 ## Parse the Arguments and Push Them to the Stack
 
@@ -82,7 +82,7 @@ file을 load한다는 것은 많은 일을 포함합니다. binary file을 memor
 
 ## `process_exec()`
 
-`process_exec()`에서는 Pintos가 interrupt frame을 allocate하고, program을 load하고, interrupt frame과 user stack을 initialize합니다. 그런 다음 argument를 설정하고 `do_iret()`을 통해 user program으로 jump합니다.
+raw 강의에서는 이 구간을 `start_process`로 소개합니다. 이 저장소의 KAIST Pintos code에서 대응되는 함수는 `process_exec()`입니다. `process_exec()`에서는 Pintos가 interrupt frame을 allocate하고, program을 load하고, interrupt frame과 user stack을 initialize합니다. 그런 다음 argument를 설정하고 `do_iret()`을 통해 user program으로 jump합니다.
 
 문제는 현재 Pintos가 user stack을 argument와 함께 initialize하는 mechanism을 갖고 있지 않다는 것입니다. 이 부분이 이 homework에서 구현해야 할 부분입니다.
 

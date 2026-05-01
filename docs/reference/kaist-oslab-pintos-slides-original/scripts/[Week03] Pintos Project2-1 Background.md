@@ -34,7 +34,7 @@ It also allocates a kernel stack. In the kernel stack, it initializes various fi
 
 ## Starting a Process
 
-So far, a thread has been created and put into the ready list. The next important function in the KAIST code is `process_exec()`.
+So far, a thread has been created and put into the ready list. The raw lecture transcript describes this step with the older name `start_process`. In the current KAIST Pintos tree used by this repository, there is no separate `start_process()` function; the corresponding path is `process_create_initd()` -> `thread_create(..., initd, ...)` -> `initd()` -> `process_exec()`.
 
 `process_exec()` gets a file name, which is the name of the binary file it wants to execute. The first thing it needs to do is load that binary file from disk to memory. Out of that binary file, it obtains the location of the instruction it wants to execute. It also obtains the stack-top pointer of the user stack. That is the role of `load()`.
 
@@ -66,7 +66,7 @@ For example, for an `echo` command, arguments such as `x`, `y`, and `z` should b
 
 ## Functions to Modify
 
-There are multiple possible ways to implement this project. In the KAIST project document, the main function to extend for argument passing is `process_exec()`.
+There are multiple possible ways to implement this project. The raw lecture mentions `start_process`, but in this KAIST Pintos tree the main function to extend for argument passing is `process_exec()`, as described in the KAIST project document.
 
 ## Parse the Arguments and Push Them to the Stack
 
@@ -82,7 +82,7 @@ In `process_exec()`, we have to parse the file name, tokenize the individual tok
 
 ## `process_exec()`
 
-In `process_exec()`, Pintos allocates an interrupt frame, loads the program, and initializes both the interrupt frame and the user stack. Then it sets up the arguments and jumps to the user program through `do_iret()`.
+In the raw lecture this section is introduced as `start_process`. In this repository's KAIST Pintos code, the corresponding function is `process_exec()`. In `process_exec()`, Pintos allocates an interrupt frame, loads the program, and initializes both the interrupt frame and the user stack. Then it sets up the arguments and jumps to the user program through `do_iret()`.
 
 The problem is that current Pintos does not have a mechanism to initialize the user stack with arguments. This is the part you have to implement in this homework.
 
