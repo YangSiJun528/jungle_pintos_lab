@@ -43,33 +43,50 @@ def reject_option_like(value: str, label: str) -> None:
         raise SystemExit(f"{label} must be a revision value, not an option: {value}")
 
 
+def pathspec_args(args: argparse.Namespace) -> list[str]:
+    if args.all_files:
+        return []
+    return ["--", "*.c", "*.h"]
+
+
 def build_commands(args: argparse.Namespace) -> tuple[list[str], list[str], str]:
     common = ["--no-ext-diff", "--find-renames", "--find-copies"]
     unified = f"--unified={args.context}"
+    pathspec = pathspec_args(args)
+    scope = "all files" if args.all_files else ".c/.h files"
 
     if args.commit:
         reject_option_like(args.commit, "--commit")
-        title = f"commit {args.commit}"
-        names = ["show", "--format=", "--name-status", *common, args.commit]
-        patch = ["show", "--format=medium", "--stat", "--patch", unified, *common, args.commit]
+        title = f"commit {args.commit} ({scope})"
+        names = ["show", "--format=", "--name-status", *common, args.commit, *pathspec]
+        patch = [
+            "show",
+            "--format=medium",
+            "--stat",
+            "--patch",
+            unified,
+            *common,
+            args.commit,
+            *pathspec,
+        ]
         return names, patch, title
 
     if args.range:
         reject_option_like(args.range, "--range")
-        title = f"range {args.range}"
-        names = ["diff", "--name-status", *common, args.range]
-        patch = ["diff", "--stat", "--patch", unified, *common, args.range]
+        title = f"range {args.range} ({scope})"
+        names = ["diff", "--name-status", *common, args.range, *pathspec]
+        patch = ["diff", "--stat", "--patch", unified, *common, args.range, *pathspec]
         return names, patch, title
 
     if args.staged:
-        title = "staged diff"
-        names = ["diff", "--cached", "--name-status", *common]
-        patch = ["diff", "--cached", "--stat", "--patch", unified, *common]
+        title = f"staged diff ({scope})"
+        names = ["diff", "--cached", "--name-status", *common, *pathspec]
+        patch = ["diff", "--cached", "--stat", "--patch", unified, *common, *pathspec]
         return names, patch, title
 
-    title = "worktree diff"
-    names = ["diff", "--name-status", *common]
-    patch = ["diff", "--stat", "--patch", unified, *common]
+    title = f"worktree diff ({scope})"
+    names = ["diff", "--name-status", *common, *pathspec]
+    patch = ["diff", "--stat", "--patch", unified, *common, *pathspec]
     return names, patch, title
 
 
@@ -87,6 +104,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         type=int,
         default=6,
         help="unified diff context lines to print, default: 6",
+    )
+    parser.add_argument(
+        "--all-files",
+        action="store_true",
+        help="include every changed file instead of the default .c/.h filter",
     )
     args = parser.parse_args(argv)
     if args.context < 0:
