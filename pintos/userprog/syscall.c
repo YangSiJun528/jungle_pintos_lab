@@ -100,8 +100,7 @@ init_syscall_entry(struct intr_frame *f, struct syscall_entry *entry) {
 	// handle_{syscall_name} 함수에서 이 값을 설정함
 	entry->rtn_val = NO_RETURN_VAL;
 
-	// TODO: 인자가 항상 6개는 아닐건데 어떻게 되는건지 아직 모르겠음. 자료에서 6개라해서 6개만 둠.
-	// args 할당
+	// args 할당 - Linux x86-64 system call ABI에선 인자를 6개로 제한함
 	entry->args[0] = f->R.rdi;
 	entry->args[1] = f->R.rsi;
 	entry->args[2] = f->R.rdx;
