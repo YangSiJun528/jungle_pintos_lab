@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pintos Style Commit Fix"
+  short_description: "Review Pintos commit style safely"
+  default_prompt: "Use $pintos-style-commit-fix to review the specified Pintos commit or diff and fix style-only issues."
