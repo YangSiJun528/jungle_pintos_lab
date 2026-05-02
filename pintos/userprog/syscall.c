@@ -7,9 +7,34 @@
 #include "userprog/gdt.h"
 #include "threads/flags.h"
 #include "intrinsic.h"
+#include "threads/synch.h"
+
+#define NO_RETURN_VAL (-1)
+
+struct syscall_entry {
+	uint64_t syscall_num;	// system call number
+	uint64_t rtn_val;		// return value (optional), 수정 가능?
+	uint64_t args[6];		// arguments, 문서에서 6개만 나와서 일단 그렇게 세팅함
+};
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
+static void init_syscall_entry (struct intr_frame *, struct syscall_entry *);
+static void dispatch_syscall (struct intr_frame *, struct syscall_entry *);
+static void handle_halt (struct intr_frame *, struct syscall_entry *);
+static void handle_exit (struct intr_frame *, struct syscall_entry *);
+static void handle_fork (struct intr_frame *, struct syscall_entry *);
+static void handle_exec (struct intr_frame *, struct syscall_entry *);
+static void handle_wait (struct intr_frame *, struct syscall_entry *);
+static void handle_create (struct intr_frame *, struct syscall_entry *);
+static void handle_remove (struct intr_frame *, struct syscall_entry *);
+static void handle_open (struct intr_frame *, struct syscall_entry *);
+static void handle_filesize (struct intr_frame *, struct syscall_entry *);
+static void handle_read (struct intr_frame *, struct syscall_entry *);
+static void handle_write (struct intr_frame *, struct syscall_entry *);
+static void handle_seek (struct intr_frame *, struct syscall_entry *);
+static void handle_tell (struct intr_frame *, struct syscall_entry *);
+static void handle_close (struct intr_frame *, struct syscall_entry *);
 
 /* System call.
  *
@@ -54,9 +79,180 @@ syscall_init (void) {
 /* The main system call interface */
 /* 메인 system call 인터페이스. */
 void
-syscall_handler (struct intr_frame *f UNUSED) {
-	// TODO: Your implementation goes here.
-	// TODO: 여기에 구현을 작성한다.
-	printf ("system call!\n");
-	thread_exit ();
+syscall_handler (struct intr_frame *f) {
+	struct syscall_entry entry;
+
+	init_syscall_entry(f, &entry);
+	dispatch_syscall(f, &entry);
+
+	if (entry.rtn_val != NO_RETURN_VAL) {
+		f->R.rax = entry.rtn_val;
+	}
+}
+
+static void
+init_syscall_entry(struct intr_frame *f, struct syscall_entry *entry) {
+	// system call number
+	entry->syscall_num = f->R.rax;
+
+	// return value (optional)
+	// 값을 리턴하는 syscall의 경우 해당 주소에 값을 씀
+	// handle_{syscall_name} 함수에서 이 값을 설정함
+	entry->rtn_val = NO_RETURN_VAL;
+
+	// TODO: 인자가 항상 6개는 아닐건데 어떻게 되는건지 아직 모르겠음. 자료에서 6개라해서 6개만 둠.
+	// args 할당
+	entry->args[0] = f->R.rdi;
+	entry->args[1] = f->R.rsi;
+	entry->args[2] = f->R.rdx;
+	entry->args[3] = f->R.r10;
+	entry->args[4] = f->R.r8;
+	entry->args[5] = f->R.r9;
+}
+
+static void
+dispatch_syscall(struct intr_frame *f, struct syscall_entry *entry) {
+	switch (entry->syscall_num) {
+		case SYS_HALT:
+			handle_halt(f, entry);
+			break;
+		case SYS_EXIT:
+			handle_exit(f, entry);
+			break;
+		case SYS_FORK:
+			handle_fork(f, entry);
+			break;
+		case SYS_EXEC:
+			handle_exec(f, entry);
+			break;
+		case SYS_WAIT:
+			handle_wait(f, entry);
+			break;
+		case SYS_CREATE:
+			handle_create(f, entry);
+			break;
+		case SYS_REMOVE:
+			handle_remove(f, entry);
+			break;
+		case SYS_OPEN:
+			handle_open(f, entry);
+			break;
+		case SYS_FILESIZE:
+			handle_filesize(f, entry);
+			break;
+		case SYS_READ:
+			handle_read(f, entry);
+			break;
+		case SYS_WRITE:
+			handle_write(f, entry);
+			break;
+		case SYS_SEEK:
+			handle_seek(f, entry);
+			break;
+		case SYS_TELL:
+			handle_tell(f, entry);
+			break;
+		case SYS_CLOSE:
+			handle_close(f, entry);
+			break;
+		default:
+			ASSERT(false); // 현재 처리할 수 없는 syscall
+	}
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_halt(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+static void
+handle_exit(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_fork(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_exec(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_wait(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_create(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_remove(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_open(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_filesize(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_read(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_write(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_seek(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_tell(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
+}
+
+//TODO: 구현하면 UNUSED, ASSERT 빼기
+static void
+handle_close(struct intr_frame *f UNUSED, struct syscall_entry *entry UNUSED) {
+	barrier();
+	ASSERT(false); // 현재 처리할 수 없는 syscall
 }
