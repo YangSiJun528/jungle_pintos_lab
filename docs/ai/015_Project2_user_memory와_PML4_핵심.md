@@ -70,7 +70,7 @@ x86-64 virtual address는 page table lookup을 위한 index들과 page offset으
 
 하위 12 bit는 page 안의 offset이다. 그 위의 bit들은 각 page table level의 index로 사용된다. page table walk는 이 index들을 따라 내려가며 최종적으로 physical frame을 찾고, virtual address의 offset을 그대로 더해 실제 접근 위치를 만든다.
 
-Pintos의 page table은 `pml4`라는 `uint64_t *`로 표현된다. `pml4_activate()`는 CPU가 사용할 active page table을 바꾸는 역할을 한다. Project 2 코드 대부분은 PML4 내부 구조를 직접 다루기보다 `mmu.h`의 `pml4_*` 인터페이스를 사용한다.
+Pintos의 page table은 `pml4`라는 `uint64_t *`로 표현된다. `pml4_activate()`는 CPU가 사용할 active page table을 바꾸는 역할을 한다. Project 2 코드는 PML4 내부 구조를 직접 다루는 세부 작업을 `mmu.h`의 `pml4_*` 인터페이스를 통해 수행한다.
 
 4-level 구조는 넓은 virtual address space를 sparse하게 관리하기 위한 계층 구조다. 사용하지 않는 큰 주소 영역에 대해 모든 page table entry를 한 번에 만들지 않고, 필요한 하위 table을 필요한 시점에 둔다.
 
@@ -127,7 +127,33 @@ mapping 조회와 갱신에 관련된 함수는 다음과 같다.
 
 accessed/dirty bit 관련 함수도 `mmu.h`에 있다. Project 2 핵심 흐름에서는 자주 다루지 않지만, Project 3의 page replacement, swap, mmap write-back 같은 기능에서 중요해진다.
 
-## 6. `upage`와 `kpage`
+## 6. kernel이 관리하는 physical frame
+
+physical memory의 page-size 조각인 frame은 kernel이 전역적으로 관리한다. Pintos의 page allocator는 memory를 kernel pool과 user pool로 나누어 관리한다. Project 2의 user page용 frame은 `palloc_get_page(PAL_USER)`로 user pool에서 얻는 흐름이 코드에 나타난다.
+
+kernel은 frame을 여러 용도로 사용할 수 있다.
+
+```text
+kernel 용도
+  -> kernel 자료구조, page table, buffer 등
+
+user process 용도
+  -> user page에 연결할 frame
+  -> executable segment, 초기 stack 등
+```
+
+user process가 사용할 frame도 kernel이 먼저 확보하고 초기화한다. kernel은 확보한 frame을 kernel virtual address로 접근할 수 있고, 이 주소가 Project 2 코드에서 `kpage`로 나타난다. 이후 process의 page table에 user virtual address인 `upage`가 같은 frame을 가리키도록 mapping을 설치한다.
+
+```text
+1. kernel이 user page용 frame을 확보한다.
+2. kernel이 frame을 kpage로 접근해 내용을 채운다.
+3. kernel이 process의 pml4에 upage -> frame mapping을 설치한다.
+4. user process가 upage로 같은 frame에 접근한다.
+```
+
+frame은 allocator 기준으로 available한 memory에서 얻는다. kernel 자료구조용 frame, page table용 frame, user page용 frame은 kernel의 allocator와 mapping 절차를 통해 용도가 구분된다.
+
+## 7. `upage`와 `kpage`
 
 `pml4_set_page()`의 핵심 인자는 `upage`와 `kpage`다.
 
@@ -149,9 +175,9 @@ bool pml4_set_page (uint64_t *pml4, void *upage, void *kpage, bool rw);
 upage -> kpage가 식별하는 physical frame
 ```
 
-page table entry에 `kpage`라는 virtual address 자체를 저장하는 흐름으로 이해하기보다, `kpage`가 가리키는 physical frame을 user virtual page인 `upage`에 연결한다고 이해하면 된다.
+실제 mapping의 핵심은 `kpage`가 가리키는 physical frame을 user virtual page인 `upage`에 연결하는 것이다.
 
-## 7. 하나의 physical frame을 바라보는 두 virtual mapping
+## 8. 하나의 physical frame을 바라보는 두 virtual mapping
 
 하나의 physical frame은 kernel virtual address와 user virtual address 양쪽에서 접근될 수 있다.
 
@@ -171,7 +197,7 @@ user virtual address:   upage ──┘
 
 이 구조는 kernel이 frame을 초기화하고 관리하면서도, user process가 자기 user virtual address로 같은 frame에 접근할 수 있게 만든다. user mode 접근 가능 여부와 writable 여부는 user mapping의 page table flag가 결정한다.
 
-## 8. Project 2 load와 stack 흐름
+## 9. Project 2 load와 stack 흐름
 
 Project 2의 executable segment load는 미리 frame을 확보하고 page table에 매핑하는 방식으로 이해하면 된다.
 
@@ -195,7 +221,7 @@ Project 2의 executable segment load는 미리 frame을 확보하고 page table�
 
 현재 `pintos/userprog/process.c`의 Project 2 전용 `load_segment()`와 `setup_stack()`은 이 흐름을 따른다.
 
-## 9. system call에서 user pointer 다루기
+## 10. system call에서 user pointer 다루기
 
 system call 인자로 받은 pointer 값과 그 pointer가 가리키는 memory 접근은 구분해서 봐야 한다.
 
@@ -223,7 +249,7 @@ reference는 user memory 접근을 처리하는 합리적인 방식으로 다음
 
 어느 방식을 선택하든 system call 중간에 lock이나 memory 같은 resource를 확보한 상태라면 invalid user pointer 처리 시 resource cleanup이 필요하다.
 
-## 10. Project 2 핵심 요약
+## 11. Project 2 핵심 요약
 
 Project 2의 핵심 관계는 다음과 같다.
 
@@ -252,7 +278,7 @@ kernel이 frame을 kpage로 채운 뒤, process의 pml4에 upage -> frame mappin
 
 Project 2에서는 이 흐름이 주로 executable segment load와 초기 stack setup에서 나타난다. system call에서 user pointer를 받을 때는 pointer 값의 범위와 실제 mapping 여부를 검증해야 한다.
 
-## 11. Project 3 이후 맛보기
+## 12. Project 3 이후 맛보기
 
 Project 3 VM부터는 Project 2의 eager mapping 흐름 위에 lazy loading, supplemental page table, stack growth, anonymous page, mmap, swap이 추가된다.
 
