@@ -23,11 +23,16 @@
 #include "vm/vm.h"
 #endif
 
+/* C99 표준 상 128까지는 필요하다지만,
+   그러면 포인터 메모리로만 1kb되버리고, 실제로 그렇게까지 필요한 케이스도 적을꺼라
+   임의로 더 낮은 값으로 설정 */
+#define MAX_ARGC 32
+
 static void process_cleanup (void);
 static bool load (const char *cmd, struct intr_frame *if_);
 static void initd (void *f_name);
 static void __do_fork (void *);
-static int parse_arg (void *cmd, void *arg_buf);
+static int parse_arg (char *cmd, char **arg_buf);
 
 /* General process initializer for initd and other process. */
 /* initd와 다른 프로세스에 공통으로 쓰이는 프로세스 이니셜라이저. */
@@ -426,13 +431,13 @@ load (const char *cmd, struct intr_frame *if_) {
 	bool success = false;
 	int i;
 
-	void *arg_buf = palloc_get_page (0);
+	char *arg_buf[128];
 	int argc = parse_arg (cmd, arg_buf);
 	/* 파싱 실패 시 전체 작업 실패. */
 	if (argc == -1)
 		goto done;
 
-	char *file_name = arg_buf;
+	char *file_name = arg_buf[0];
 
 	/* Allocate and activate page directory. */
 	/* 페이지 디렉터리를 할당하고 activate한다. */
@@ -531,32 +536,13 @@ load (const char *cmd, struct intr_frame *if_) {
 	if_->rip = ehdr.e_entry;
 	if_->rsp = USER_STACK;
 
-	/* 인자 수 32으로 임의로 제한.
-	 * TODO: 나중에 지원하는 개수 늘리고 page 할당해서 처리하게 하기.
-	 * 당장은 문제 없어보임. */
-	/* 현재 제공된 arg_buf의 메모리 위치. */
-	uintptr_t arg_buf_addr[32] = { 0, };
-	/* stack에 들어간 argv의 메모리 위치. */
-	uintptr_t stack_argv_addr[32] = { 0, };
-
-	/* 스택에 쓸 때 반대로 써야 해서 포인터 연산이 어려움.
-	 * 인덱스로 접근 가능하게 배열에 넣기. */
-	/* 외부에서 arg_p에 접근하지 못하게 scope 제한용 중첩. */
-	{
-		char *arg_p = arg_buf;
-		for (int i = 0; i < argc; i++) {
-			arg_buf_addr[i] = (uintptr_t) arg_p;
-			arg_p += strlen (arg_p) + 1;
-		}
-	}
-
 	for (int i = 0; i < argc; i++) {
-		char *arg = (char *) arg_buf_addr[argc - 1 - i];
+		char *arg = arg_buf[argc - 1 - i];
 		size_t arg_size = strlen (arg) + 1;
 		/* stack은 커질 때 값이 내려가니까 먼저 내리기. */
 		if_->rsp -= arg_size;
 		strlcpy ((void *) if_->rsp, arg, arg_size);
-		stack_argv_addr[argc - 1 - i] = if_->rsp;
+		arg_buf[argc - 1 - i] = (char *) if_->rsp;
 	}
 
 	/* 비트 연산으로 8의 배수로 내림. */
@@ -569,7 +555,7 @@ load (const char *cmd, struct intr_frame *if_) {
 	for (int i = 0; i < argc; i++) {
 		if_->rsp -= sizeof (uintptr_t);
 		/* 역순으로 추가. */
-		*(uintptr_t *) if_->rsp = stack_argv_addr[argc - i - 1];
+		*(uintptr_t *) if_->rsp = (uintptr_t) arg_buf[argc - i - 1];
 	}
 
 	/* argv[0], argc의 위치를 저장 */
@@ -589,7 +575,6 @@ done:
 	/* We arrive here whether the load is successful or not. */
 	/* 로드 성공 여부와 관계없이 이 지점에 도달한다. */
 	file_close (file);
-	palloc_free_page (arg_buf);
 	return success;
 }
 
@@ -881,9 +866,7 @@ setup_stack (struct intr_frame *if_) {
 /* 들어온 인자 파싱.
  * 반환값은 파싱된 수(argc), 에러나면 -1 반환. */
 static int
-parse_arg (void *cmd, void *arg_buf) {
-	size_t offset = 0;
-
+parse_arg (char *cmd, char **arg_buf) {
 	thread_current ();
 
 	char *save_ptr, *token;
@@ -894,17 +877,13 @@ parse_arg (void *cmd, void *arg_buf) {
 	/* 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 참고. */
 	for (token = strtok_r (cmd, delim, &save_ptr); token != NULL;
 			token = strtok_r (NULL, delim, &save_ptr)) {
-		/* null 문자 포함. */
-		size_t token_size = strlen (token) + 1;
-		if (PGSIZE - (offset + token_size) < 0) {
+		if (argc >= 128) {
 			/* 사이즈 제한 넘어가면 실패. */
 			return -1;
 		}
-		strlcpy (arg_buf + offset, token, token_size);
-		offset += token_size;
-		argc++;
+		arg_buf[argc++] = token;
 	}
-	*(char **) (arg_buf + offset) = NULL;
+	arg_buf[argc] = NULL;
 
 	return argc;
 }
