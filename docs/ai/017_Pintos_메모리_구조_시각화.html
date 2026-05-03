@@ -161,8 +161,7 @@
     }
 
     .map-canvas {
-      position: relative;
-      min-width: 1080px;
+      min-width: 1140px;
       height: 1180px;
       margin: 0 auto;
       background:
@@ -170,23 +169,99 @@
         linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0)) border-box;
     }
 
-    .connections {
-      position: absolute;
-      inset: 0;
-      width: 1080px;
+    .memory-svg {
+      display: block;
+      width: 1140px;
       height: 1180px;
-      pointer-events: none;
-      z-index: 2;
     }
 
-    .path-kernel {
+    .svg-title {
+      fill: var(--ink);
+      font-size: 14px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .svg-label {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .svg-note {
+      fill: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .mem-rect {
+      stroke: var(--ink);
+      stroke-width: 1;
+    }
+
+    .kernel-fill {
+      fill: var(--kernel);
+    }
+
+    .user-fill {
+      fill: var(--user);
+    }
+
+    .physical-fill {
+      fill: var(--physical);
+    }
+
+    .thread-fill {
+      fill: var(--thread);
+    }
+
+    .stack-fill {
+      fill: var(--stack);
+    }
+
+    .hatch-fill {
+      fill: url(#hatchPattern);
+    }
+
+    .seg-text {
+      fill: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .seg-small {
+      fill: var(--muted);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .num-dot {
+      fill: var(--primary);
+    }
+
+    .num-dot.warn {
+      fill: #c2453d;
+    }
+
+    .num-text {
+      fill: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .mapping-direct {
       fill: none;
       stroke: var(--primary);
       stroke-width: 2.2;
       marker-end: url(#arrowPrimary);
     }
 
-    .path-user {
+    .mapping-user {
       fill: none;
       stroke: var(--primary);
       stroke-width: 2.2;
@@ -194,221 +269,62 @@
       marker-end: url(#arrowPrimary);
     }
 
-    .path-blocked {
+    .route-badge {
+      fill: var(--primary-soft);
+      stroke: rgba(0, 102, 204, 0.16);
+    }
+
+    .route-text {
+      fill: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .kern-boundary {
       fill: none;
-      stroke: #c2453d;
-      stroke-width: 2;
-      stroke-dasharray: 5 6;
+      stroke: var(--dark);
+      stroke-width: 3;
+      stroke-linecap: square;
     }
 
-    .map-box {
-      position: absolute;
-      z-index: 3;
+    .permission-badge {
+      fill: #272729;
     }
 
-    .box-label {
-      margin-bottom: 10px;
-      color: var(--muted);
-      text-align: center;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0;
-    }
-
-    .mem-column,
-    .thread-column {
-      border: 1px solid var(--ink);
-      background: var(--canvas);
-    }
-
-    .virtual-box {
-      left: 320px;
-      top: 28px;
-      width: 300px;
-    }
-
-    .physical-box {
-      left: 820px;
-      top: 92px;
-      width: 230px;
-    }
-
-    .thread-box {
-      left: 34px;
-      top: 285px;
-      width: 174px;
-    }
-
-    .seg,
-    .thread-seg {
-      position: relative;
-      display: grid;
-      place-items: center;
-      min-height: 58px;
-      padding: 10px 12px;
-      border-top: 1px solid var(--ink);
-      text-align: center;
-      font-size: 13px;
-      line-height: 1.25;
-      letter-spacing: 0;
-    }
-
-    .seg:first-child,
-    .thread-seg:first-child {
-      border-top: 0;
-    }
-
-    .seg small,
-    .thread-seg small {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
+    .permission-text {
+      fill: #fff;
       font-size: 11px;
-      line-height: 1.25;
-    }
-
-    .kernel {
-      background: var(--kernel);
-    }
-
-    .user {
-      background: var(--user);
-    }
-
-    .physical {
-      background: var(--physical);
-    }
-
-    .thread {
-      background: var(--thread);
-    }
-
-    .stack {
-      background: var(--stack);
-    }
-
-    .hatch {
-      background:
-        repeating-linear-gradient(
-          -45deg,
-          #ffffff,
-          #ffffff 8px,
-          #e4e4e8 8px,
-          #e4e4e8 10px
-        );
-    }
-
-    .tall {
-      min-height: 116px;
-    }
-
-    .mid {
-      min-height: 76px;
-    }
-
-    .short {
-      min-height: 48px;
-    }
-
-    .thin {
-      min-height: 30px;
-    }
-
-    .wall {
-      min-height: 32px;
-      padding: 0 10px;
-      background: var(--dark);
-      color: #fff;
-      border-top: 1px solid var(--ink);
-      border-bottom: 1px solid var(--ink);
-      font-weight: 600;
-      font-size: 12px;
+      font-weight: 700;
       letter-spacing: 0;
     }
 
-    .marker {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      width: 23px;
-      height: 23px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--primary);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 1;
+    .leader {
+      fill: none;
+      stroke: var(--hairline);
+      stroke-width: 1;
     }
 
-    .marker.warn {
-      background: #c2453d;
-    }
-
-    .route-label {
-      position: absolute;
-      z-index: 4;
-      width: 150px;
-      padding: 7px 10px;
-      border-radius: var(--radius-pill);
-      background: var(--primary-soft);
-      color: var(--primary);
-      text-align: center;
-      font-size: 12px;
-      line-height: 1.25;
+    .addr-text {
+      fill: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 650;
       letter-spacing: 0;
     }
 
-    .route-direct {
-      left: 640px;
-      top: 154px;
-    }
-
-    .route-user {
-      left: 646px;
-      top: 650px;
-    }
-
-    .route-block {
-      left: 216px;
-      top: 506px;
-      width: 104px;
-      padding: 6px 8px;
-      background: #ffe9e6;
-      color: #b2322c;
-    }
-
-    .mode-label {
-      position: absolute;
-      z-index: 4;
-      left: 250px;
-      width: 48px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.2;
-      text-align: right;
+    .addr-subtext {
+      fill: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 400;
       letter-spacing: 0;
     }
 
-    .mode-kernel {
-      top: 230px;
-    }
-
-    .mode-user {
-      top: 632px;
-    }
-
-    .axis-note {
-      position: absolute;
-      z-index: 4;
-      left: 320px;
-      top: 1118px;
-      width: 300px;
-      color: var(--muted);
-      text-align: center;
-      font-size: 12px;
-      letter-spacing: 0;
+    .range-brace {
+      fill: none;
+      stroke: var(--muted);
+      stroke-width: 1.5;
     }
 
     .legend {
@@ -433,6 +349,49 @@
       height: 16px;
       border: 1px solid rgba(0, 0, 0, 0.12);
       border-radius: 4px;
+      flex: 0 0 auto;
+    }
+
+    .line-sample {
+      width: 28px;
+      height: 0;
+      border-top: 1px solid var(--hairline);
+      flex: 0 0 auto;
+    }
+
+    .arrow-sample {
+      position: relative;
+      width: 34px;
+      height: 0;
+      border-top: 2px solid var(--primary);
+      flex: 0 0 auto;
+    }
+
+    .arrow-sample.dashed {
+      border-top-style: dashed;
+    }
+
+    .arrow-sample::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -5px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid var(--primary);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+    }
+
+    .brace-sample {
+      width: 18px;
+      height: 22px;
+      display: inline-grid;
+      place-items: center;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 22px;
+      line-height: 1;
       flex: 0 0 auto;
     }
 
@@ -605,98 +564,183 @@
           <h2>Memory map</h2>
           <p>가운데는 현재 process의 virtual address space입니다. 위쪽 kernel 영역은 모든 process에서 공통이고, 아래쪽 user 영역은 process마다 다릅니다. 오른쪽은 실제 RAM입니다.</p>
         </div>
-        <span class="pill">solid = kernel direct map, dashed = user page table map</span>
+        <span class="pill">solid arrow = kernel direct map, dashed arrow = user page table map</span>
       </div>
 
       <div class="map-scroll">
         <div class="map-canvas">
-          <svg class="connections" viewBox="0 0 1080 1180" aria-hidden="true">
+          <svg class="memory-svg" viewBox="0 0 1140 1180" role="img" aria-labelledby="memoryMapTitle memoryMapDesc">
+            <title id="memoryMapTitle">Pintos memory map</title>
+            <desc id="memoryMapDesc">Pintos의 virtual address space, physical memory, per-thread kernel page 사이의 direct mapping과 page table mapping 관계를 같은 SVG 좌표계에서 보여 준다.</desc>
             <defs>
+              <pattern id="hatchPattern" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+                <rect width="10" height="10" fill="#fff"></rect>
+                <rect width="2" height="10" fill="#e4e4e8"></rect>
+              </pattern>
               <marker id="arrowPrimary" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#0066cc"></path>
               </marker>
             </defs>
 
-            <path class="path-kernel" d="M 620 158 C 690 158, 735 138, 820 138"></path>
-            <path class="path-kernel" d="M 620 278 C 695 278, 735 266, 820 266"></path>
-            <path class="path-kernel" d="M 620 384 C 700 384, 735 382, 820 382"></path>
-            <path class="path-user" d="M 620 735 C 720 735, 708 196, 820 176"></path>
-            <path class="path-blocked" d="M 238 536 C 262 536, 288 536, 318 536"></path>
+            <!-- Coordinate reference:
+                 virtual map: x=380, width=300
+                 physical map: x=880, width=230
+                 thread page: x=35, width=174
+            -->
+
+            <text class="svg-title" x="530" y="42" text-anchor="middle">current process virtual address space</text>
+            <text class="svg-title" x="995" y="42" text-anchor="middle">physical memory</text>
+            <text class="svg-title" x="122" y="326" text-anchor="middle">per-thread kernel page</text>
+            <text class="svg-note" x="530" y="1112" text-anchor="middle">위쪽은 높은 virtual address, 아래쪽은 낮은 virtual address로 읽습니다.</text>
+
+            <rect class="mem-rect hatch-fill" x="380" y="76" width="300" height="36"></rect>
+            <rect class="mem-rect kernel-fill" x="380" y="112" width="300" height="126"></rect>
+            <rect class="mem-rect kernel-fill" x="380" y="238" width="300" height="50"></rect>
+            <rect class="mem-rect kernel-fill" x="380" y="288" width="300" height="90"></rect>
+            <rect class="mem-rect kernel-fill" x="380" y="378" width="300" height="47"></rect>
+            <rect class="mem-rect kernel-fill" x="380" y="425" width="300" height="47"></rect>
+            <rect class="mem-rect kernel-fill" x="380" y="472" width="300" height="58"></rect>
+            <rect class="mem-rect kernel-fill" x="380" y="530" width="300" height="30"></rect>
+            <rect class="mem-rect hatch-fill" x="380" y="560" width="300" height="76"></rect>
+            <rect class="mem-rect user-fill" x="380" y="636" width="300" height="132"></rect>
+            <rect class="mem-rect hatch-fill" x="380" y="768" width="300" height="122"></rect>
+            <rect class="mem-rect user-fill" x="380" y="890" width="300" height="46"></rect>
+            <rect class="mem-rect user-fill" x="380" y="936" width="300" height="46"></rect>
+            <rect class="mem-rect user-fill" x="380" y="982" width="300" height="58"></rect>
+            <rect class="mem-rect hatch-fill" x="380" y="1040" width="300" height="28"></rect>
+
+            <rect class="mem-rect physical-fill" x="880" y="112" width="230" height="126"></rect>
+            <rect class="mem-rect physical-fill" x="880" y="238" width="230" height="140"></rect>
+            <rect class="mem-rect physical-fill" x="880" y="378" width="230" height="47"></rect>
+            <rect class="mem-rect physical-fill" x="880" y="425" width="230" height="47"></rect>
+            <rect class="mem-rect physical-fill" x="880" y="472" width="230" height="58"></rect>
+            <rect class="mem-rect physical-fill" x="880" y="530" width="230" height="30"></rect>
+
+            <rect class="mem-rect thread-fill" x="35" y="354" width="174" height="48"></rect>
+            <rect class="mem-rect thread-fill" x="35" y="402" width="174" height="56"></rect>
+            <rect class="mem-rect stack-fill" x="35" y="458" width="174" height="110"></rect>
+            <rect class="mem-rect thread-fill" x="35" y="568" width="174" height="60"></rect>
+
+            <path class="mapping-direct" d="M 680 175 C 750 175, 810 175, 880 175"></path>
+            <path class="mapping-direct" d="M 680 333 C 750 333, 810 333, 880 333"></path>
+            <path class="mapping-direct" d="M 680 501 C 750 501, 810 501, 880 501"></path>
+            <path class="mapping-user" d="M 680 913 C 790 913, 770 206, 880 206"></path>
+
+            <path class="range-brace" d="M 380 112 C 360 112, 356 132, 356 152 L 356 304 C 356 326, 344 326, 344 336 C 344 346, 356 346, 356 368 L 356 520 C 356 540, 360 560, 380 560"></path>
+            <path class="range-brace" d="M 380 560 C 360 560, 356 586, 356 616 L 356 782 C 356 804, 344 804, 344 814 C 344 824, 356 824, 356 846 L 356 1018 C 356 1044, 360 1068, 380 1068"></path>
+
+            <line class="leader" x1="316" y1="112" x2="380" y2="112"></line>
+            <line class="leader" x1="316" y1="176" x2="380" y2="176"></line>
+            <line class="leader" x1="316" y1="560" x2="380" y2="560"></line>
+            <line class="leader" x1="316" y1="636" x2="380" y2="636"></line>
+            <line class="leader" x1="316" y1="913" x2="380" y2="913"></line>
+            <line class="leader" x1="316" y1="1040" x2="380" y2="1040"></line>
+            <line class="leader" x1="316" y1="1068" x2="380" y2="1068"></line>
+
+            <line class="kern-boundary" x1="380" y1="560" x2="680" y2="560"></line>
+            <rect class="permission-badge" x="696" y="546" width="128" height="28" rx="14"></rect>
+            <text class="permission-text" x="760" y="564" text-anchor="middle">KERN_BASE boundary</text>
+
+            <g>
+              <circle class="num-dot" cx="400" cy="132" r="12"></circle>
+              <text class="num-text" x="400" y="136" text-anchor="middle">1</text>
+              <circle class="num-dot" cx="400" cy="308" r="12"></circle>
+              <text class="num-text" x="400" y="312" text-anchor="middle">2</text>
+              <circle class="num-dot warn" cx="400" cy="560" r="12"></circle>
+              <text class="num-text" x="400" y="564" text-anchor="middle">3</text>
+              <circle class="num-dot" cx="400" cy="656" r="12"></circle>
+              <text class="num-text" x="400" y="660" text-anchor="middle">4</text>
+              <circle class="num-dot" cx="400" cy="1002" r="12"></circle>
+              <text class="num-text" x="400" y="1006" text-anchor="middle">5</text>
+              <circle class="num-dot" cx="900" cy="132" r="12"></circle>
+              <text class="num-text" x="900" y="136" text-anchor="middle">6</text>
+            </g>
+
+            <text class="seg-text" x="530" y="99" text-anchor="middle">unused high kernel virtual area</text>
+            <text class="seg-text" x="530" y="164" text-anchor="middle">
+              <tspan x="530">user pool을 보는</tspan>
+              <tspan x="530" dy="16">kernel virtual mapping</tspan>
+              <tspan class="seg-small" x="530" dy="16">KERN_BASE + physical address</tspan>
+            </text>
+            <text class="seg-text" x="530" y="268" text-anchor="middle">allocator / page metadata</text>
+            <text class="seg-text" x="530" y="325" text-anchor="middle">
+              <tspan x="530">kernel pool mapping</tspan>
+              <tspan class="seg-small" x="530" dy="16">kernel 전용 frame 접근</tspan>
+            </text>
+            <text class="seg-text" x="530" y="407" text-anchor="middle">kernel BSS</text>
+            <text class="seg-text" x="530" y="454" text-anchor="middle">kernel initialized data</text>
+            <text class="seg-text" x="530" y="506" text-anchor="middle">kernel code segment</text>
+            <text class="seg-text" x="530" y="550" text-anchor="middle">bootstrap mapping</text>
+            <text class="seg-text" x="530" y="606" text-anchor="middle">unmapped user gap</text>
+            <text class="seg-text" x="530" y="699" text-anchor="middle">
+              <tspan x="530">user stack</tspan>
+              <tspan class="seg-small" x="530" dy="16">user mode에서 접근 가능</tspan>
+            </text>
+            <text class="seg-text" x="530" y="827" text-anchor="middle">
+              <tspan x="530">heap-like gap</tspan>
+              <tspan class="seg-small" x="530" dy="16">Project 2에서는 일반 heap 미구현</tspan>
+            </text>
+            <text class="seg-text" x="530" y="918" text-anchor="middle">user BSS</text>
+            <text class="seg-text" x="530" y="964" text-anchor="middle">user initialized data</text>
+            <text class="seg-text" x="530" y="1015" text-anchor="middle">
+              <tspan x="530">user code segment</tspan>
+              <tspan class="seg-small" x="530" dy="16">process별 page table mapping</tspan>
+            </text>
+            <text class="seg-text" x="530" y="1058" text-anchor="middle">low unmapped area</text>
+
+            <text class="seg-text" x="995" y="174" text-anchor="middle">
+              <tspan x="995">user pool</tspan>
+              <tspan class="seg-small" x="995" dy="16">user page용 frame 출처</tspan>
+            </text>
+            <text class="seg-text" x="995" y="304" text-anchor="middle">
+              <tspan x="995">kernel pool</tspan>
+              <tspan class="seg-small" x="995" dy="16">metadata 포함</tspan>
+            </text>
+            <text class="seg-text" x="995" y="407" text-anchor="middle">kernel BSS</text>
+            <text class="seg-text" x="995" y="454" text-anchor="middle">kernel initialized data</text>
+            <text class="seg-text" x="995" y="506" text-anchor="middle">kernel code segment</text>
+            <text class="seg-text" x="995" y="550" text-anchor="middle">bootstrap / low 1 MB</text>
+
+            <text class="seg-text" x="122" y="384" text-anchor="middle">...</text>
+            <text class="seg-text" x="122" y="436" text-anchor="middle">interrupt frame</text>
+            <text class="seg-text" x="122" y="509" text-anchor="middle">
+              <tspan x="122">kernel stack</tspan>
+              <tspan class="seg-small" x="122" dy="16">kernel mode 실행용</tspan>
+            </text>
+            <text class="seg-text" x="122" y="594" text-anchor="middle">
+              <tspan x="122">struct thread</tspan>
+              <tspan class="seg-small" x="122" dy="16">pml4, spt 등</tspan>
+            </text>
+
+            <text class="addr-text" x="306" y="108" text-anchor="end">KERN_BASE + RAM</text>
+            <text class="addr-subtext" x="306" y="122" text-anchor="end">direct map upper</text>
+            <text class="addr-text" x="306" y="172" text-anchor="end">KERN_BASE + paddr</text>
+            <text class="addr-subtext" x="306" y="186" text-anchor="end">ptov(paddr)</text>
+            <text class="addr-text" x="306" y="556" text-anchor="end">KERN_BASE + 0</text>
+            <text class="addr-subtext" x="306" y="570" text-anchor="end">= 0x8004000000</text>
+            <text class="addr-text" x="306" y="632" text-anchor="end">0x47480000</text>
+            <text class="addr-subtext" x="306" y="646" text-anchor="end">USER_STACK</text>
+            <text class="addr-text" x="306" y="909" text-anchor="end">upage</text>
+            <text class="addr-subtext" x="306" y="923" text-anchor="end">page-aligned VA</text>
+            <text class="addr-text" x="306" y="1036" text-anchor="end">0x400000</text>
+            <text class="addr-subtext" x="306" y="1050" text-anchor="end">user code start</text>
+            <text class="addr-text" x="306" y="1066" text-anchor="end">0x0</text>
+            <text class="addr-subtext" x="306" y="1080" text-anchor="end">null / low area</text>
+
+            <text class="svg-label" x="338" y="330" text-anchor="end">
+              <tspan x="338">kernel direct</tspan>
+              <tspan x="338" dy="14">map 범위</tspan>
+            </text>
+            <text class="svg-label" x="338" y="808" text-anchor="end">
+              <tspan x="338">user virtual</tspan>
+              <tspan x="338" dy="14">address 범위</tspan>
+            </text>
+
+            <rect class="route-badge" x="714" y="146" width="150" height="28" rx="14"></rect>
+            <text class="route-text" x="789" y="164" text-anchor="middle">kernel direct mapping</text>
+            <rect class="route-badge" x="714" y="742" width="150" height="28" rx="14"></rect>
+            <text class="route-text" x="789" y="760" text-anchor="middle">PML4 page mapping</text>
           </svg>
-
-          <div class="route-label route-direct">kernel direct mapping</div>
-          <div class="route-label route-user">PML4 page mapping</div>
-          <div class="route-label route-block">blocked in user mode</div>
-          <div class="mode-label mode-kernel">kernel mode view</div>
-          <div class="mode-label mode-user">user mode view</div>
-          <div class="axis-note">위쪽은 높은 virtual address, 아래쪽은 낮은 virtual address로 읽습니다.</div>
-
-          <div class="map-box thread-box">
-            <div class="box-label">per-thread kernel page</div>
-            <div class="thread-column">
-              <div class="thread-seg thread short">...</div>
-              <div class="thread-seg thread short">interrupt frame</div>
-              <div class="thread-seg hatch mid">kernel stack<small>kernel mode 실행용</small></div>
-              <div class="thread-seg thread short">struct thread<small>pml4, spt 등</small></div>
-            </div>
-          </div>
-
-          <div class="map-box virtual-box">
-            <div class="box-label">current process virtual address space</div>
-            <div class="mem-column">
-              <div class="seg hatch short">unused high kernel virtual area</div>
-              <div class="seg kernel tall">
-                <span class="marker">1</span>
-                user pool을 보는 kernel virtual mapping
-                <small>KERN_BASE + physical address</small>
-              </div>
-              <div class="seg kernel thin">allocator / page metadata</div>
-              <div class="seg kernel mid">
-                <span class="marker">2</span>
-                kernel pool mapping
-                <small>kernel 전용 frame 접근</small>
-              </div>
-              <div class="seg kernel short">kernel BSS</div>
-              <div class="seg kernel short">kernel initialized data</div>
-              <div class="seg kernel mid">kernel code segment</div>
-              <div class="seg kernel short">bootstrap mapping</div>
-              <div class="seg wall">
-                <span class="marker warn">3</span>
-                KERN_BASE permission wall
-              </div>
-              <div class="seg hatch mid">unmapped user gap</div>
-              <div class="seg user tall">
-                <span class="marker">4</span>
-                user stack
-                <small>user mode에서 접근 가능</small>
-              </div>
-              <div class="seg hatch mid">heap-like gap<small>Project 2에서는 일반 heap 미구현</small></div>
-              <div class="seg user short">user BSS</div>
-              <div class="seg user short">user initialized data</div>
-              <div class="seg user mid">
-                <span class="marker">5</span>
-                user code segment
-                <small>process별 page table mapping</small>
-              </div>
-              <div class="seg hatch short">low unmapped area</div>
-            </div>
-          </div>
-
-          <div class="map-box physical-box">
-            <div class="box-label">physical memory</div>
-            <div class="mem-column">
-              <div class="seg physical tall">
-                <span class="marker">6</span>
-                user pool
-                <small>user page용 frame 출처</small>
-              </div>
-              <div class="seg physical mid">kernel pool</div>
-              <div class="seg physical short">kernel BSS</div>
-              <div class="seg physical short">kernel initialized data</div>
-              <div class="seg physical mid">kernel code segment</div>
-              <div class="seg physical mid">bootstrap<small>low 1 MB area</small></div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -705,6 +749,10 @@
         <span class="legend-item"><span class="swatch" style="background:#d8e8ff"></span>user virtual memory</span>
         <span class="legend-item"><span class="swatch" style="background:#e7d8ef"></span>physical memory</span>
         <span class="legend-item"><span class="swatch" style="background:repeating-linear-gradient(-45deg,#fff,#fff 8px,#e4e4e8 8px,#e4e4e8 10px)"></span>unmapped / reserved virtual area</span>
+        <span class="legend-item"><span class="arrow-sample"></span>실선 화살표 = kernel direct mapping</span>
+        <span class="legend-item"><span class="arrow-sample dashed"></span>점선 화살표 = user page table mapping</span>
+        <span class="legend-item"><span class="line-sample"></span>짧은 선 = 특정 주소 지점</span>
+        <span class="legend-item"><span class="brace-sample">{</span>brace = 주소 범위</span>
       </div>
     </section>
 
@@ -721,6 +769,10 @@
         <h3>3. user page는 dashed path로 frame에 연결된다</h3>
         <p>user BSS, code, stack은 user pool을 직접 보는 것이 아니라 PML4 mapping을 통해 frame에 도달합니다.</p>
       </article>
+      <article class="read-card">
+        <h3>4. 왼쪽 주소는 representative value다</h3>
+        <p>`KERN_BASE`, `USER_STACK`, `0x400000`은 Pintos 기준값이고, `paddr`, `upage`는 실행 중 선택되는 주소 변수입니다.</p>
+      </article>
     </section>
 
     <section class="explain" id="explain" aria-label="map explanation">
@@ -732,6 +784,20 @@
           <code class="block">kernel virtual address = KERN_BASE + physical address
 physical address = kernel virtual address - KERN_BASE</code>
           <p>map의 실선은 이 관계를 나타냅니다. physical user pool도 kernel이 볼 때는 kernel virtual mapping을 통해 접근됩니다.</p>
+        </div>
+      </article>
+
+      <article class="explain-card">
+        <div class="num">1a</div>
+        <div>
+          <h3>`KERN_BASE + physical address`는 매핑 정보를 저장한다는 뜻이 아니다</h3>
+          <p>`KERN_BASE + paddr`는 kernel이 사용할 virtual address를 계산하는 식입니다. 매핑 정보 자체는 page table entry에 저장되고, MMU가 그 page table을 보고 virtual address를 physical address로 변환합니다.</p>
+          <code class="block">paddr = 0x1234
+kaddr = KERN_BASE + paddr
+
+kernel이 *(uint8_t *) kaddr 를 읽으면
+MMU가 kaddr -> physical 0x1234 로 변환한다</code>
+          <p>따라서 “VM 위에 뭔가를 띄운다”기보다는, kernel virtual address라는 창을 통해 실제 physical frame을 읽고 쓰는 것입니다.</p>
         </div>
       </article>
 
@@ -773,6 +839,18 @@ Process B: user virtual 0x500000 -> physical frame B</code>
 2. kernel virtual address로 frame 초기화
 3. PML4에 upage -> frame mapping 설치
 4. user program은 upage로 접근</code>
+        </div>
+      </article>
+
+      <article class="explain-card">
+        <div class="num">5a</div>
+        <div>
+          <h3>direct mapping은 virtual address range를 더 쓰지만 physical memory를 두 배로 쓰지는 않는다</h3>
+          <p>같은 physical frame이 user virtual address와 kernel virtual address 양쪽에 보일 수 있습니다. 이것은 virtual mapping이 두 개라는 뜻이지, RAM frame이 두 개 복사된다는 뜻은 아닙니다.</p>
+          <code class="block">user virtual upage ───────┐
+                           ├─ same physical frame
+kernel virtual KERN_BASE+p ┘</code>
+          <p>대신 OS는 virtual address space 일부를 kernel용으로 예약합니다. 그래서 user에게 제공되는 virtual address 범위는 하드웨어가 이론적으로 표현할 수 있는 전체 범위보다 작게 정해질 수 있습니다. Pintos는 `KERN_BASE = 0x8004000000`을 경계로 그런 선택을 합니다.</p>
         </div>
       </article>
 
