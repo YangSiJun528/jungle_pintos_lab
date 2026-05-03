@@ -340,44 +340,18 @@
       stroke-width: 2.7;
     }
 
-    .range-brace {
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-width: 3.2;
-      pointer-events: none;
-    }
-
-    .range-brace.user {
-      stroke: rgba(37, 99, 235, 0.9);
-    }
-
-    .range-brace.physical {
+    .highlight-ring.backing {
       stroke: rgba(22, 128, 58, 0.82);
+      stroke-dasharray: 12 5;
+      stroke-width: 3.1;
     }
 
-    .range-brace.direct {
-      stroke: rgba(8, 145, 178, 0.9);
-    }
-
-    .range-brace.kernel {
-      stroke: rgba(8, 145, 178, 0.76);
-    }
-
-    .range-brace.meta {
-      stroke: rgba(180, 83, 9, 0.86);
-    }
-
-    .range-brace.fault {
-      stroke: rgba(225, 29, 72, 0.9);
-    }
-
-    .range-brace.evict {
-      stroke: rgba(124, 58, 237, 0.9);
-    }
-
-    .range-brace.backing {
-      stroke: rgba(22, 128, 58, 0.86);
+    .highlight-ring.scope {
+      stroke-width: 2.1;
+      stroke-dasharray: 15 7;
+      opacity: 0.86;
+      rx: 11;
+      ry: 11;
     }
 
     .boundary {
@@ -933,6 +907,24 @@
       border-color: var(--blue);
     }
 
+    .arrow-sample.fault {
+      border-color: var(--rose);
+    }
+
+    .arrow-sample.meta {
+      border-color: var(--amber);
+      border-top-style: dotted;
+    }
+
+    .arrow-sample.backing {
+      border-color: var(--green);
+    }
+
+    .arrow-sample.evict {
+      border-color: var(--violet);
+      border-top-style: dashed;
+    }
+
     .takeaway {
       min-width: 0;
       color: #1c2734;
@@ -1106,11 +1098,11 @@
             </g>
 
             <g class="map-item" data-show="overview" data-focus="overview">
-              <path class="range-brace user" d="M 724 422 C 742 422 742 450 732 458 L 732 554 C 732 562 746 562 746 565 C 746 568 732 568 732 576 L 732 672 C 742 680 742 708 724 708"></path>
-              <path class="range-brace physical" d="M 1076 86 C 1058 86 1058 116 1068 126 L 1068 225 C 1068 233 1054 233 1054 237 C 1054 241 1068 241 1068 249 L 1068 348 C 1058 358 1058 388 1076 388"></path>
+              <rect class="highlight-ring user scope" x="420" y="416" width="300" height="298"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="318"></rect>
               <rect class="highlight-ring user" x="1106" y="154" width="244" height="52"></rect>
-              <path class="range-brace direct" d="M 724 116 C 742 116 742 136 732 144 L 732 171 C 732 178 746 178 746 181 C 746 184 732 184 732 191 L 732 210 C 742 218 742 238 724 238"></path>
-              <path class="range-brace meta" d="M 1598 154 C 1614 154 1614 182 1604 190 L 1604 253 C 1604 260 1616 260 1616 264 C 1616 268 1604 268 1604 275 L 1604 338 C 1614 346 1614 374 1598 374"></path>
+              <rect class="highlight-ring direct scope" x="420" y="110" width="300" height="134"></rect>
+              <rect class="highlight-ring meta scope" x="1448" y="148" width="150" height="232"></rect>
               <path class="route user" d="M 710 472 L 768 472 L 768 272 L 800 272"></path>
               <path class="route user" d="M 950 350 L 1026 350 L 1026 184 L 1110 184"></path>
               <path class="route direct" d="M 710 150 L 1072 150 L 1072 168 L 1110 168"></path>
@@ -1124,17 +1116,17 @@
             </g>
 
             <g class="map-item" data-show="user" data-focus="user">
-              <rect class="highlight-ring user" x="60" y="150" width="258" height="206"></rect>
-              <rect class="highlight-ring user" x="426" y="422" width="288" height="286"></rect>
-              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="302"></rect>
+              <rect class="highlight-ring user scope" x="56" y="146" width="266" height="214"></rect>
+              <rect class="highlight-ring user scope" x="420" y="416" width="300" height="298"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="318"></rect>
               <rect class="highlight-ring user" x="1106" y="154" width="244" height="52"></rect>
               <rect class="highlight-ring user" x="1106" y="208" width="244" height="52"></rect>
               <rect class="highlight-ring fault" x="426" y="522" width="288" height="92"></rect>
-              <rect class="highlight-ring meta" x="796" y="242" width="158" height="138"></rect>
+              <rect class="highlight-ring meta scope" x="794" y="240" width="166" height="146"></rect>
               <path class="route fault" d="M 314 323 L 392 323 L 392 568 L 432 568"></path>
-              <path class="route user" d="M 710 472 L 766 472 L 766 272 L 800 272"></path>
-              <path class="route user" d="M 950 350 L 1064 350 L 1064 180 L 1110 180"></path>
-              <path class="route user" d="M 950 350 L 1046 350 L 1046 234 L 1110 234"></path>
+              <path class="route user" d="M 710 472 L 770 472 L 770 272 L 800 272"></path>
+              <path class="route user" d="M 950 338 L 1034 338 L 1034 180 L 1110 180"></path>
+              <path class="route user" d="M 950 362 L 1058 362 L 1058 234 L 1110 234"></path>
               <text class="minor-label" x="189" y="144" text-anchor="middle">process-specific page tables</text>
               <text class="minor-label" x="570" y="416" text-anchor="middle">all user VA segments</text>
               <text class="minor-label" x="1236" y="80" text-anchor="middle">shared physical user pool</text>
@@ -1143,12 +1135,12 @@
               <g class="badge" transform="translate(326 253)"><circle r="13"></circle><text>2</text></g>
               <g class="badge" transform="translate(392 568)"><circle r="13"></circle><text>3</text></g>
               <g class="badge" transform="translate(766 272)"><circle r="13"></circle><text>4</text></g>
-              <g class="badge" transform="translate(1064 210)"><circle r="13"></circle><text>5</text></g>
+              <g class="badge" transform="translate(1058 234)"><circle r="13"></circle><text>5</text></g>
             </g>
 
             <g class="map-item" data-show="direct" data-focus="direct">
-              <rect class="highlight-ring direct" x="426" y="116" width="288" height="122"></rect>
-              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="590"></rect>
+              <rect class="highlight-ring direct scope" x="420" y="110" width="300" height="134"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="606"></rect>
               <rect class="highlight-ring direct" x="1106" y="154" width="244" height="52"></rect>
               <rect class="highlight-ring direct" x="1106" y="262" width="244" height="52"></rect>
               <rect class="highlight-ring direct" x="1088" y="388" width="296" height="110"></rect>
@@ -1164,12 +1156,12 @@
             </g>
 
             <g class="map-item" data-show="kernel" data-focus="kernel">
-              <rect class="highlight-ring kernel" x="426" y="70" width="288" height="328"></rect>
+              <rect class="highlight-ring kernel scope" x="420" y="64" width="300" height="340"></rect>
               <rect class="highlight-ring direct" x="426" y="116" width="288" height="122"></rect>
               <rect class="highlight-ring meta" x="426" y="238" width="288" height="82"></rect>
               <rect class="highlight-ring kernel" x="1088" y="388" width="296" height="202"></rect>
-              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="590"></rect>
-              <path class="route direct" d="M 710 178 L 1040 178 L 1040 443 L 1092 443"></path>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="606"></rect>
+              <path class="route direct" d="M 710 178 L 1042 178 L 1042 443 L 1092 443"></path>
               <text class="minor-label" x="890" y="166">direct-map window keeps a kernel-side name for RAM</text>
               <text class="minor-label" x="896" y="410">kernel half above KERN_BASE stays mapped</text>
               <text class="minor-label" x="570" y="64" text-anchor="middle">kernel-side virtual range</text>
@@ -1181,41 +1173,41 @@
 
             <g class="map-item" data-show="fault" data-focus="fault">
               <rect class="highlight-ring fault" x="426" y="522" width="288" height="92"></rect>
-              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="302"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="318"></rect>
               <rect class="highlight-ring user" x="1106" y="316" width="244" height="52"></rect>
-              <rect class="highlight-ring meta" x="1454" y="154" width="138" height="220"></rect>
-              <rect class="highlight-ring direct" x="1456" y="502" width="134" height="68"></rect>
+              <rect class="highlight-ring meta scope" x="1448" y="148" width="150" height="232"></rect>
+              <rect class="highlight-ring backing" x="1456" y="502" width="134" height="68"></rect>
               <path class="route fault" d="M 314 323 L 392 323 L 392 568 L 432 568"></path>
-              <path class="route fault" d="M 710 568 L 760 568 L 760 194 L 800 194"></path>
-              <path class="route fault" d="M 950 194 L 980 194 L 980 66 L 1440 66 L 1440 188 L 1460 188"></path>
-              <path class="route direct" d="M 1460 536 L 1408 536 L 1408 342 L 1346 342"></path>
-              <path class="route user" d="M 1110 342 L 970 342 L 970 350 L 950 350"></path>
+              <path class="route fault" d="M 710 568 L 756 568 L 756 194 L 800 194"></path>
+              <path class="route meta" d="M 950 194 L 1002 194 L 1002 60 L 1438 60 L 1438 188 L 1460 188"></path>
+              <path class="route backing" d="M 1460 536 L 1424 536 L 1424 380 L 1362 380 L 1362 356 L 1346 356"></path>
+              <path class="route user" d="M 950 350 L 1030 350 L 1030 334 L 1110 334"></path>
               <text class="minor-label" x="570" y="516" text-anchor="middle">faultable user VA gap</text>
               <text class="minor-label" x="1236" y="80" text-anchor="middle">user pool frame allocation target</text>
               <text class="minor-label" x="1523" y="146" text-anchor="middle">fault metadata</text>
               <g class="badge" transform="translate(392 568)"><circle r="13"></circle><text>1</text></g>
               <g class="badge" transform="translate(760 194)"><circle r="13"></circle><text>2</text></g>
-              <g class="badge" transform="translate(1440 188)"><circle r="13"></circle><text>3</text></g>
-              <g class="badge" transform="translate(1408 342)"><circle r="13"></circle><text>4</text></g>
-              <g class="badge" transform="translate(970 350)"><circle r="13"></circle><text>5</text></g>
+              <g class="badge" transform="translate(1438 188)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(1424 380)"><circle r="13"></circle><text>4</text></g>
+              <g class="badge" transform="translate(1030 334)"><circle r="13"></circle><text>5</text></g>
             </g>
 
             <g class="map-item" data-show="evict" data-focus="evict">
-              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="302"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="318"></rect>
               <rect class="highlight-ring evict" x="1106" y="262" width="244" height="52"></rect>
               <rect class="highlight-ring evict" x="1106" y="316" width="244" height="52"></rect>
-              <rect class="highlight-ring meta" x="1454" y="154" width="138" height="220"></rect>
-              <rect class="highlight-ring evict" x="1456" y="502" width="134" height="68"></rect>
+              <rect class="highlight-ring meta scope" x="1448" y="148" width="150" height="232"></rect>
+              <rect class="highlight-ring backing" x="1456" y="502" width="134" height="68"></rect>
               <path class="route evict" d="M 1346 288 L 1416 288 L 1416 264 L 1460 264"></path>
               <path class="route meta" d="M 1460 264 L 1434 264 L 1434 188 L 1460 188"></path>
-              <path class="route evict" d="M 1460 340 L 1428 340 L 1428 536 L 1460 536"></path>
-              <path class="route evict" d="M 1346 288 L 1404 288 L 1404 342 L 1346 342"></path>
+              <path class="route backing" d="M 1586 340 L 1622 340 L 1622 536 L 1586 536"></path>
+              <path class="route evict" d="M 1346 288 L 1372 288 L 1372 342 L 1346 342"></path>
               <text class="minor-label" x="1236" y="80" text-anchor="middle">resident frames inside user pool</text>
               <text class="minor-label" x="1523" y="146" text-anchor="middle">page identity metadata</text>
               <g class="badge" transform="translate(1362 288)"><circle r="13"></circle><text>1</text></g>
               <g class="badge" transform="translate(1434 188)"><circle r="13"></circle><text>2</text></g>
-              <g class="badge" transform="translate(1428 536)"><circle r="13"></circle><text>3</text></g>
-              <g class="badge" transform="translate(1404 342)"><circle r="13"></circle><text>4</text></g>
+              <g class="badge" transform="translate(1622 536)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(1372 342)"><circle r="13"></circle><text>4</text></g>
             </g>
           </svg>
 
@@ -1315,6 +1307,10 @@
         <span class="legend-item"><span class="swatch metadata"></span>VM metadata</span>
         <span class="legend-item"><span class="arrow-sample"></span>direct map</span>
         <span class="legend-item"><span class="arrow-sample dashed"></span>user page mapping</span>
+        <span class="legend-item"><span class="arrow-sample fault"></span>fault path</span>
+        <span class="legend-item"><span class="arrow-sample meta"></span>metadata lookup</span>
+        <span class="legend-item"><span class="arrow-sample backing"></span>backing bytes</span>
+        <span class="legend-item"><span class="arrow-sample evict"></span>eviction</span>
       </div>
       <div class="takeaway" id="takeaway"></div>
     </footer>
