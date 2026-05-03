@@ -1004,6 +1004,27 @@
       background: #fbf8ff;
     }
 
+    .pt-slot.is-arrow {
+      border-color: rgba(22, 128, 58, 0.52);
+      background:
+        linear-gradient(90deg, rgba(22, 128, 58, 0.08), rgba(37, 99, 235, 0.08)),
+        #fff;
+    }
+
+    .pt-slot.is-arrow .slot-index {
+      color: #16803a;
+    }
+
+    .pt-slot.is-arrow .slot-pte {
+      color: #135b2d;
+    }
+
+    .pt-slot.is-arrow .slot-frame {
+      border-color: rgba(22, 128, 58, 0.44);
+      background: #e8f6ed;
+      color: #135b2d;
+    }
+
     .slot-index {
       color: #667487;
       font-size: 10px;
@@ -1081,6 +1102,11 @@
     .frame-slot.is-evict {
       border-color: rgba(124, 58, 237, 0.45);
       background: #fbf8ff;
+    }
+
+    .frame-slot.is-source {
+      border-color: rgba(180, 83, 9, 0.42);
+      background: #fff8e7;
     }
 
     .frame-slot strong,
@@ -1776,12 +1802,12 @@
         takeaway: "Fault path: user VA miss -> SPT -> user pool frame -> direct-map load -> PTE update",
         detail: {
           eyebrow: "Fault Transition",
-          title: "fault PTE transition",
-          summary: "not-present -> present",
+          title: "page fault updates one slot",
+          summary: "faulting thread",
           upage: "0x500000",
           upageSub: "fault VA",
           pml4: "Process C page table",
-          pml4Sub: "fault-time root",
+          pml4Sub: "before -> after PTE update",
           walk: "PTE lookup fails",
           walkSub: "not-present",
           pte: "not-present -> present",
@@ -1791,20 +1817,20 @@
           kpageSub: "direct-map alias",
           frameTitle: "Frame G",
           frameLabel: "resident page bytes",
-          frameNote: "page-in bytes",
+          frameNote: "C page_table[1]",
           frameClass: "",
           slots: [
             { index: "[0]", va: "user code", pte: "present", frame: "Frame F" },
-            { index: "[1]", va: "0x500000", pte: "0 -> 1", frame: "Frame G", className: "is-active" },
-            { index: "[2]", va: "user stack", pte: "present", frame: "Frame B" },
-            { index: "[3]", va: "lazy gap", pte: "SPT only", frame: "no frame", className: "is-missing" },
-            { index: "[4]", va: "swap/file", pte: "backing", frame: "page bytes" }
+            { index: "[1] before", va: "0x500000", pte: "not-present", frame: "no frame", className: "is-missing" },
+            { index: "fault", va: "SPT lookup", pte: "backing -> load", frame: "-> Frame G", className: "is-arrow" },
+            { index: "[1] after", va: "0x500000", pte: "present | rw", frame: "Frame G", className: "is-active" },
+            { index: "[2]", va: "user stack", pte: "present", frame: "Frame B" }
           ],
           frames: [
-            { title: "Frame G", note: "new page-in frame", className: "is-active" },
+            { title: "backing", note: "file/swap page bytes", className: "is-source" },
+            { title: "Frame G", note: "page-in target", className: "is-active" },
             { title: "Frame F", note: "resident page" },
-            { title: "Frame B", note: "stack page" },
-            { title: "backing", note: "file/swap source" }
+            { title: "Frame B", note: "stack page" }
           ]
         }
       },
