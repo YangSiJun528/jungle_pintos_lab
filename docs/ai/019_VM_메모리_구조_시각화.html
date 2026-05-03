@@ -299,7 +299,7 @@
 
     .highlight-ring {
       fill: none;
-      stroke-width: 3;
+      stroke-width: 3.4;
       rx: 8;
       ry: 8;
       pointer-events: none;
@@ -312,6 +312,7 @@
     .highlight-ring.physical {
       stroke: rgba(22, 128, 58, 0.72);
       stroke-dasharray: 10 6;
+      stroke-width: 2.4;
     }
 
     .highlight-ring.direct {
@@ -326,6 +327,7 @@
     .highlight-ring.fault {
       stroke: rgba(225, 29, 72, 0.82);
       stroke-dasharray: 8 5;
+      stroke-width: 3.1;
     }
 
     .highlight-ring.evict {
@@ -335,6 +337,47 @@
     .highlight-ring.meta {
       stroke: rgba(180, 83, 9, 0.78);
       stroke-dasharray: 4 5;
+      stroke-width: 2.7;
+    }
+
+    .range-brace {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 3.2;
+      pointer-events: none;
+    }
+
+    .range-brace.user {
+      stroke: rgba(37, 99, 235, 0.9);
+    }
+
+    .range-brace.physical {
+      stroke: rgba(22, 128, 58, 0.82);
+    }
+
+    .range-brace.direct {
+      stroke: rgba(8, 145, 178, 0.9);
+    }
+
+    .range-brace.kernel {
+      stroke: rgba(8, 145, 178, 0.76);
+    }
+
+    .range-brace.meta {
+      stroke: rgba(180, 83, 9, 0.86);
+    }
+
+    .range-brace.fault {
+      stroke: rgba(225, 29, 72, 0.9);
+    }
+
+    .range-brace.evict {
+      stroke: rgba(124, 58, 237, 0.9);
+    }
+
+    .range-brace.backing {
+      stroke: rgba(22, 128, 58, 0.86);
     }
 
     .boundary {
@@ -347,7 +390,7 @@
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
-      stroke-width: 1.35;
+      stroke-width: 1.6;
     }
 
     .route.user {
@@ -358,25 +401,34 @@
 
     .route.direct {
       stroke: var(--cyan);
-      stroke-width: 1.55;
+      stroke-width: 1.8;
       marker-end: url(#arrowDirect);
     }
 
     .route.meta {
       stroke: var(--amber);
-      stroke-dasharray: 3 6;
+      stroke-dasharray: 2 6;
+      stroke-width: 1.75;
       marker-end: url(#arrowMeta);
     }
 
     .route.fault {
       stroke: var(--rose);
-      stroke-dasharray: 8 6;
+      stroke-width: 1.85;
       marker-end: url(#arrowFault);
     }
 
     .route.evict {
       stroke: var(--violet);
+      stroke-dasharray: 10 5;
+      stroke-width: 1.85;
       marker-end: url(#arrowEvict);
+    }
+
+    .route.backing {
+      stroke: var(--green);
+      stroke-width: 1.85;
+      marker-end: url(#arrowBacking);
     }
 
     .badge circle {
@@ -931,6 +983,9 @@
               <marker id="arrowEvict" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
                 <path d="M 0 0 L 8 4 L 0 8 z" fill="#7c3aed"></path>
               </marker>
+              <marker id="arrowBacking" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#16803a"></path>
+              </marker>
             </defs>
 
             <text class="svg-title" x="570" y="38" text-anchor="middle">current process virtual address space</text>
@@ -1051,14 +1106,14 @@
             </g>
 
             <g class="map-item" data-show="overview" data-focus="overview">
-              <rect class="highlight-ring user" x="426" y="422" width="288" height="286"></rect>
-              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="302"></rect>
+              <path class="range-brace user" d="M 724 422 C 742 422 742 450 732 458 L 732 554 C 732 562 746 562 746 565 C 746 568 732 568 732 576 L 732 672 C 742 680 742 708 724 708"></path>
+              <path class="range-brace physical" d="M 1076 86 C 1058 86 1058 116 1068 126 L 1068 225 C 1068 233 1054 233 1054 237 C 1054 241 1068 241 1068 249 L 1068 348 C 1058 358 1058 388 1076 388"></path>
               <rect class="highlight-ring user" x="1106" y="154" width="244" height="52"></rect>
-              <rect class="highlight-ring direct" x="426" y="116" width="288" height="122"></rect>
-              <rect class="highlight-ring meta" x="1454" y="154" width="138" height="220"></rect>
-              <path class="route user" d="M 710 472 L 766 472 L 766 272 L 800 272"></path>
-              <path class="route user" d="M 950 350 L 1064 350 L 1064 180 L 1110 180"></path>
-              <path class="route direct" d="M 710 150 L 1070 150 L 1070 170 L 1110 170"></path>
+              <path class="range-brace direct" d="M 724 116 C 742 116 742 136 732 144 L 732 171 C 732 178 746 178 746 181 C 746 184 732 184 732 191 L 732 210 C 742 218 742 238 724 238"></path>
+              <path class="range-brace meta" d="M 1598 154 C 1614 154 1614 182 1604 190 L 1604 253 C 1604 260 1616 260 1616 264 C 1616 268 1604 268 1604 275 L 1604 338 C 1614 346 1614 374 1598 374"></path>
+              <path class="route user" d="M 710 472 L 768 472 L 768 272 L 800 272"></path>
+              <path class="route user" d="M 950 350 L 1026 350 L 1026 184 L 1110 184"></path>
+              <path class="route direct" d="M 710 150 L 1072 150 L 1072 168 L 1110 168"></path>
               <text class="minor-label" x="570" y="416" text-anchor="middle">entire user VA range</text>
               <text class="minor-label" x="1236" y="80" text-anchor="middle">user pool frames</text>
               <text class="minor-label" x="1523" y="146" text-anchor="middle">VM metadata</text>
