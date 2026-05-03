@@ -294,6 +294,46 @@
       ry: 4;
     }
 
+    .highlight-ring {
+      fill: none;
+      stroke-width: 3;
+      rx: 8;
+      ry: 8;
+      pointer-events: none;
+    }
+
+    .highlight-ring.user {
+      stroke: rgba(37, 99, 235, 0.78);
+    }
+
+    .highlight-ring.physical {
+      stroke: rgba(22, 128, 58, 0.72);
+      stroke-dasharray: 10 6;
+    }
+
+    .highlight-ring.direct {
+      stroke: rgba(8, 145, 178, 0.82);
+    }
+
+    .highlight-ring.kernel {
+      stroke: rgba(8, 145, 178, 0.7);
+      stroke-dasharray: 9 6;
+    }
+
+    .highlight-ring.fault {
+      stroke: rgba(225, 29, 72, 0.82);
+      stroke-dasharray: 8 5;
+    }
+
+    .highlight-ring.evict {
+      stroke: rgba(124, 58, 237, 0.82);
+    }
+
+    .highlight-ring.meta {
+      stroke: rgba(180, 83, 9, 0.78);
+      stroke-dasharray: 4 5;
+    }
+
     .boundary {
       stroke: #e11d48;
       stroke-width: 1.8;
@@ -462,6 +502,10 @@
       line-height: 1;
     }
 
+    .flow-list[hidden] {
+      display: none;
+    }
+
     .panel-note {
       margin: 16px 0 0;
       padding: 12px 14px;
@@ -568,9 +612,9 @@
           <span>inline SVG: long vertical bars, segmented memory regions, minimal arrows</span>
         </div>
         <div class="map-frame">
-          <svg id="vm-map" viewBox="0 0 1260 724" role="img" aria-labelledby="map-title map-desc">
+          <svg id="vm-map" viewBox="0 0 1640 774" role="img" aria-labelledby="map-title map-desc">
             <title id="map-title">Pintos VM memory bar map</title>
-            <desc id="map-desc">세로 virtual memory bar와 physical memory bar를 나란히 두고 user mapping, kernel direct map, page fault, eviction 관계를 보여 준다.</desc>
+            <desc id="map-desc">세로 virtual memory bar와 physical memory bar를 나란히 두고 user mapping, kernel direct map, page fault, eviction 관계를 번호가 붙은 lane으로 보여 준다.</desc>
             <defs>
               <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
                 <rect width="10" height="10" fill="#fff"></rect>
@@ -593,175 +637,234 @@
               </marker>
             </defs>
 
-            <text class="svg-title" x="460" y="36" text-anchor="middle">current process virtual address space</text>
-            <text class="svg-title" x="930" y="36" text-anchor="middle">physical memory (actual RAM)</text>
-            <text class="svg-note" x="460" y="704" text-anchor="middle">위쪽이 높은 virtual address, 아래쪽이 낮은 virtual address다.</text>
+            <text class="svg-title" x="570" y="38" text-anchor="middle">current process virtual address space</text>
+            <text class="svg-title" x="1235" y="38" text-anchor="middle">physical memory (actual RAM)</text>
+            <text class="svg-note" x="570" y="744" text-anchor="middle">bar 안쪽은 memory region이고, bar 바깥 lane은 주소 해석 흐름이다.</text>
 
             <g class="map-item" data-focus="overview kernel direct user fault evict">
-              <rect class="bar-outline" x="332" y="64" width="256" height="616"></rect>
-              <rect class="seg seg-muted" x="334" y="66" width="252" height="42"></rect>
-              <rect class="seg seg-kernel" x="334" y="108" width="252" height="118"></rect>
-              <rect class="seg seg-meta" x="334" y="226" width="252" height="78"></rect>
-              <rect class="seg seg-kernel" x="334" y="304" width="252" height="76"></rect>
-              <line class="boundary" x1="320" y1="380" x2="600" y2="380"></line>
-              <rect class="seg seg-user" x="334" y="400" width="252" height="96"></rect>
-              <rect class="seg seg-hatch" x="334" y="496" width="252" height="90"></rect>
-              <rect class="seg seg-user" x="334" y="586" width="252" height="50"></rect>
-              <rect class="seg seg-user" x="334" y="636" width="252" height="42"></rect>
+              <rect class="bar-outline" x="430" y="70" width="280" height="640"></rect>
+              <rect class="seg seg-muted" x="432" y="72" width="276" height="44"></rect>
+              <rect class="seg seg-kernel" x="432" y="116" width="276" height="122"></rect>
+              <rect class="seg seg-meta" x="432" y="238" width="276" height="82"></rect>
+              <rect class="seg seg-kernel" x="432" y="320" width="276" height="78"></rect>
+              <line class="boundary" x1="414" y1="398" x2="724" y2="398"></line>
+              <rect class="seg seg-user" x="432" y="422" width="276" height="100"></rect>
+              <rect class="seg seg-hatch" x="432" y="522" width="276" height="92"></rect>
+              <rect class="seg seg-user" x="432" y="614" width="276" height="52"></rect>
+              <rect class="seg seg-user" x="432" y="666" width="276" height="42"></rect>
 
-              <text class="seg-label" x="460" y="93">high kernel gap</text>
-              <text class="seg-label" x="460" y="151">kernel direct-map window</text>
-              <text class="seg-sub" x="460" y="169">KERN_BASE + paddr</text>
-              <text class="seg-sub" x="460" y="187">same RAM, kernel-side name</text>
-              <text class="seg-label" x="460" y="258">page tables / VM metadata</text>
-              <text class="seg-sub" x="460" y="276">kernel memory bookkeeping</text>
-              <text class="seg-label" x="460" y="337">kernel code / data / BSS</text>
-              <text class="seg-sub" x="460" y="355">shared kernel mappings</text>
-              <text class="axis-label" x="610" y="385">KERN_BASE boundary</text>
-              <text class="seg-label" x="460" y="438">user stack</text>
-              <text class="seg-sub" x="460" y="456">process-specific user VA</text>
-              <text class="seg-label" x="460" y="538">lazy / unmapped gap</text>
-              <text class="seg-sub" x="460" y="556">address exists, frame may not</text>
-              <text class="seg-label" x="460" y="616">user data / BSS</text>
-              <text class="seg-label" x="460" y="662">user code</text>
+              <text class="seg-label" x="570" y="99">high kernel gap</text>
+              <text class="seg-label" x="570" y="159">kernel direct-map window</text>
+              <text class="seg-sub" x="570" y="178">KERN_BASE + paddr</text>
+              <text class="seg-sub" x="570" y="197">same RAM, kernel-side name</text>
+              <text class="seg-label" x="570" y="274">page tables / VM metadata</text>
+              <text class="seg-sub" x="570" y="293">kernel memory bookkeeping</text>
+              <text class="seg-label" x="570" y="354">kernel code / data / BSS</text>
+              <text class="seg-sub" x="570" y="373">shared kernel mappings</text>
+              <text class="axis-label" x="738" y="403">KERN_BASE boundary</text>
+              <text class="seg-label" x="570" y="463">user stack</text>
+              <text class="seg-sub" x="570" y="482">process-specific user VA</text>
+              <text class="seg-label" x="570" y="560">lazy / unmapped gap</text>
+              <text class="seg-sub" x="570" y="579">address exists, frame may not</text>
+              <text class="seg-label" x="570" y="646">user data / BSS</text>
+              <text class="seg-label" x="570" y="693">user code</text>
             </g>
 
             <g class="map-item" data-focus="overview kernel direct user fault evict">
-              <rect class="bar-outline" x="814" y="74" width="252" height="560"></rect>
-              <rect class="seg seg-physical" x="816" y="76" width="248" height="286"></rect>
-              <rect class="seg seg-meta" x="816" y="362" width="248" height="108"></rect>
-              <rect class="seg seg-kernel" x="816" y="470" width="248" height="88"></rect>
-              <rect class="seg seg-muted" x="816" y="558" width="248" height="74"></rect>
-              <text class="seg-label" x="940" y="104">user pool</text>
-              <text class="seg-sub" x="940" y="122">global physical frame resource</text>
-              <text class="seg-label" x="940" y="394">kernel pool</text>
-              <text class="seg-sub" x="940" y="412">metadata / kernel objects</text>
-              <text class="seg-label" x="940" y="505">kernel image / low RAM</text>
-              <text class="seg-label" x="940" y="594">free / other frames</text>
+              <rect class="bar-outline" x="1090" y="86" width="292" height="590"></rect>
+              <rect class="seg seg-physical" x="1092" y="88" width="288" height="300"></rect>
+              <rect class="seg seg-meta" x="1092" y="388" width="288" height="110"></rect>
+              <rect class="seg seg-kernel" x="1092" y="498" width="288" height="92"></rect>
+              <rect class="seg seg-muted" x="1092" y="590" width="288" height="84"></rect>
+              <text class="seg-label" x="1236" y="116">user pool</text>
+              <text class="seg-sub" x="1236" y="135">global physical frame resource</text>
+              <text class="seg-label" x="1236" y="427">kernel pool</text>
+              <text class="seg-sub" x="1236" y="446">metadata / kernel objects</text>
+              <text class="seg-label" x="1236" y="535">kernel image / low RAM</text>
+              <text class="seg-label" x="1236" y="628">free / other frames</text>
             </g>
 
             <g class="map-item" data-show="overview direct user fault evict" data-focus="overview direct user fault evict">
-              <rect class="frame-slice" x="826" y="146" width="228" height="42"></rect>
-              <text class="card-title" x="935" y="165">Frame A</text>
-              <text class="card-sub" x="935" y="180">Process A page bytes</text>
-              <rect class="frame-slice" x="826" y="196" width="228" height="42"></rect>
-              <text class="card-title" x="935" y="215">Frame B</text>
-              <text class="card-sub" x="935" y="230">Process B page bytes</text>
-              <rect class="frame-slice" x="826" y="246" width="228" height="42"></rect>
-              <text class="card-title" x="935" y="265">Frame F</text>
-              <text class="card-sub" x="935" y="280">resident page bytes</text>
-              <rect class="frame-slice" x="826" y="296" width="228" height="42"></rect>
-              <text class="card-title" x="935" y="315">Frame G</text>
-              <text class="card-sub" x="935" y="330">new / page-in frame</text>
+              <rect class="frame-slice" x="1110" y="158" width="236" height="44"></rect>
+              <text class="card-title" x="1228" y="178">Frame A</text>
+              <text class="card-sub" x="1228" y="193">Process A page bytes</text>
+              <rect class="frame-slice" x="1110" y="212" width="236" height="44"></rect>
+              <text class="card-title" x="1228" y="232">Frame B</text>
+              <text class="card-sub" x="1228" y="247">Process B page bytes</text>
+              <rect class="frame-slice" x="1110" y="266" width="236" height="44"></rect>
+              <text class="card-title" x="1228" y="286">Frame F</text>
+              <text class="card-sub" x="1228" y="301">resident page bytes</text>
+              <rect class="frame-slice" x="1110" y="320" width="236" height="44"></rect>
+              <text class="card-title" x="1228" y="340">Frame G</text>
+              <text class="card-sub" x="1228" y="355">new / page-in frame</text>
             </g>
 
             <g class="map-item" data-focus="overview kernel direct user fault evict">
-              <text class="addr-label" x="302" y="72" text-anchor="end">KERN_BASE + RAM</text>
-              <text class="addr-label" x="302" y="230" text-anchor="end">KERN_BASE + paddr</text>
-              <text class="addr-label" x="302" y="384" text-anchor="end">KERN_BASE</text>
-              <text class="addr-label" x="302" y="496" text-anchor="end">USER_STACK</text>
-              <text class="addr-label" x="302" y="661" text-anchor="end">0x400000 / low user</text>
-              <text class="addr-label" x="1092" y="80">high paddr</text>
-              <text class="addr-label" x="1092" y="634">low paddr</text>
+              <text class="addr-label" x="402" y="78" text-anchor="end">KERN_BASE + RAM</text>
+              <text class="addr-label" x="402" y="242" text-anchor="end">KERN_BASE + paddr</text>
+              <text class="addr-label" x="402" y="402" text-anchor="end">KERN_BASE</text>
+              <text class="addr-label" x="402" y="522" text-anchor="end">USER_STACK</text>
+              <text class="addr-label" x="402" y="694" text-anchor="end">0x400000 / low user</text>
+              <text class="addr-label" x="1406" y="94">high paddr</text>
+              <text class="addr-label" x="1406" y="676">low paddr</text>
             </g>
 
             <g class="map-item" data-show="overview user" data-focus="overview user">
-              <rect class="card" x="48" y="142" width="218" height="54"></rect>
-              <text class="card-title" x="157" y="164">Process A active PML4</text>
-              <text class="card-sub" x="157" y="181">0x500000 -> Frame A</text>
+              <rect class="card" x="64" y="154" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="178">Process A active PML4</text>
+              <text class="card-sub" x="189" y="196">0x500000 -> Frame A</text>
             </g>
 
             <g class="map-item" data-show="user" data-focus="user">
-              <rect class="card" x="48" y="212" width="218" height="54"></rect>
-              <text class="card-title" x="157" y="234">Process B active PML4</text>
-              <text class="card-sub" x="157" y="251">0x500000 -> Frame B</text>
+              <rect class="card" x="64" y="224" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="248">Process B active PML4</text>
+              <text class="card-sub" x="189" y="266">0x500000 -> Frame B</text>
             </g>
 
             <g class="map-item" data-show="user fault" data-focus="user fault">
-              <rect class="card" x="48" y="282" width="218" height="54"></rect>
-              <text class="card-title" x="157" y="304">Process C active PML4</text>
-              <text class="card-sub" x="157" y="321">0x500000 -> not-present</text>
+              <rect class="card" x="64" y="294" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="318">Process C active PML4</text>
+              <text class="card-sub" x="189" y="336">0x500000 -> not-present</text>
             </g>
 
             <g class="map-item" data-show="overview user fault" data-focus="overview user fault">
-              <rect class="card" x="640" y="152" width="130" height="50"></rect>
-              <text class="card-title" x="705" y="174">MMU / TLB</text>
-              <text class="card-sub" x="705" y="190">translate or fault</text>
-              <rect class="card" x="640" y="222" width="130" height="50"></rect>
-              <text class="card-title" x="705" y="244">Active PML4</text>
-              <text class="card-sub" x="705" y="260">selected process</text>
-              <rect class="card" x="640" y="292" width="130" height="50"></rect>
-              <text class="card-title" x="705" y="314">PTE</text>
-              <text class="card-sub" x="705" y="330">upage -> frame</text>
+              <rect class="card" x="800" y="168" width="150" height="52"></rect>
+              <text class="card-title" x="875" y="191">MMU / TLB</text>
+              <text class="card-sub" x="875" y="207">translate or fault</text>
+              <rect class="card" x="800" y="246" width="150" height="52"></rect>
+              <text class="card-title" x="875" y="269">Active PML4</text>
+              <text class="card-sub" x="875" y="285">selected process</text>
+              <rect class="card" x="800" y="324" width="150" height="52"></rect>
+              <text class="card-title" x="875" y="347">PTE</text>
+              <text class="card-sub" x="875" y="363">upage -> frame</text>
             </g>
 
             <g class="map-item" data-show="overview fault evict" data-focus="overview fault evict">
-              <rect class="card" x="1110" y="158" width="110" height="52"></rect>
-              <text class="card-title" x="1165" y="180">SPT</text>
-              <text class="card-sub" x="1165" y="196">page identity</text>
-              <rect class="card" x="1110" y="228" width="110" height="52"></rect>
-              <text class="card-title" x="1165" y="250">Frame table</text>
-              <text class="card-sub" x="1165" y="266">frame -> page</text>
-              <rect class="card" x="1110" y="298" width="110" height="52"></rect>
-              <text class="card-title" x="1165" y="320">Swap table</text>
-              <text class="card-sub" x="1165" y="336">slot state</text>
-              <rect class="card" x="1110" y="430" width="110" height="58"></rect>
-              <text class="card-title" x="1165" y="452">swap / file</text>
-              <text class="card-sub" x="1165" y="468">backing bytes</text>
+              <rect class="card" x="1460" y="160" width="126" height="56"></rect>
+              <text class="card-title" x="1523" y="183">SPT</text>
+              <text class="card-sub" x="1523" y="199">page identity</text>
+              <rect class="card" x="1460" y="236" width="126" height="56"></rect>
+              <text class="card-title" x="1523" y="259">Frame table</text>
+              <text class="card-sub" x="1523" y="275">frame -> page</text>
+              <rect class="card" x="1460" y="312" width="126" height="56"></rect>
+              <text class="card-title" x="1523" y="335">Swap table</text>
+              <text class="card-sub" x="1523" y="351">slot state</text>
+              <rect class="card" x="1460" y="506" width="126" height="60"></rect>
+              <text class="card-title" x="1523" y="530">swap / file</text>
+              <text class="card-sub" x="1523" y="547">backing bytes</text>
             </g>
 
             <g class="map-item" data-show="overview" data-focus="overview">
-              <path class="route user" d="M 266 169 L 616 169 L 616 247 L 640 247"></path>
-              <path class="route user" d="M 705 272 L 705 292"></path>
-              <path class="route user" d="M 770 317 L 802 317 L 802 167 L 826 167"></path>
-              <path class="route direct" d="M 586 151 L 806 151 L 826 151"></path>
+              <rect class="highlight-ring user" x="426" y="422" width="288" height="286"></rect>
+              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="302"></rect>
+              <rect class="highlight-ring user" x="1106" y="154" width="244" height="52"></rect>
+              <rect class="highlight-ring direct" x="426" y="116" width="288" height="122"></rect>
+              <rect class="highlight-ring meta" x="1454" y="154" width="138" height="220"></rect>
+              <path class="route user" d="M 710 472 L 766 472 L 766 272 L 800 272"></path>
+              <path class="route user" d="M 950 350 L 1064 350 L 1064 180 L 1110 180"></path>
+              <path class="route direct" d="M 710 150 L 1070 150 L 1070 170 L 1110 170"></path>
+              <text class="minor-label" x="570" y="416" text-anchor="middle">entire user VA range</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">user pool frames</text>
+              <text class="minor-label" x="1523" y="146" text-anchor="middle">VM metadata</text>
+              <g class="badge" transform="translate(724 472)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(786 272)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1072 180)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(1040 150)"><circle r="13"></circle><text>4</text></g>
             </g>
 
             <g class="map-item" data-show="user" data-focus="user">
-              <path class="route user" d="M 266 169 L 608 169 L 608 247 L 640 247"></path>
-              <path class="route user" d="M 266 239 L 620 239 L 620 317 L 640 317"></path>
-              <path class="route fault" d="M 266 309 L 608 309 L 608 540 L 334 540"></path>
-              <path class="route user" d="M 705 272 L 705 292"></path>
-              <path class="route user" d="M 770 317 L 792 317 L 792 167 L 826 167"></path>
-              <path class="route user" d="M 770 317 L 810 317 L 810 217 L 826 217"></path>
-              <text class="minor-label" x="608" y="140">same user VA, different active PML4</text>
+              <rect class="highlight-ring user" x="60" y="150" width="258" height="206"></rect>
+              <rect class="highlight-ring user" x="426" y="422" width="288" height="286"></rect>
+              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="302"></rect>
+              <rect class="highlight-ring user" x="1106" y="154" width="244" height="52"></rect>
+              <rect class="highlight-ring user" x="1106" y="208" width="244" height="52"></rect>
+              <rect class="highlight-ring fault" x="426" y="522" width="288" height="92"></rect>
+              <rect class="highlight-ring meta" x="796" y="242" width="158" height="138"></rect>
+              <path class="route fault" d="M 314 323 L 392 323 L 392 568 L 432 568"></path>
+              <path class="route user" d="M 710 472 L 766 472 L 766 272 L 800 272"></path>
+              <path class="route user" d="M 950 350 L 1064 350 L 1064 180 L 1110 180"></path>
+              <path class="route user" d="M 950 350 L 1046 350 L 1046 234 L 1110 234"></path>
+              <text class="minor-label" x="189" y="144" text-anchor="middle">process-specific PML4 choices</text>
+              <text class="minor-label" x="570" y="416" text-anchor="middle">all user VA segments</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">shared physical user pool</text>
+              <text class="minor-label" x="840" y="424">same user VA, different active PML4</text>
+              <g class="badge" transform="translate(326 183)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(326 253)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(392 568)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(766 272)"><circle r="13"></circle><text>4</text></g>
+              <g class="badge" transform="translate(1064 210)"><circle r="13"></circle><text>5</text></g>
             </g>
 
             <g class="map-item" data-show="direct" data-focus="direct">
-              <path class="route direct" d="M 586 151 L 806 151 L 826 151"></path>
-              <path class="route direct" d="M 586 188 L 794 188 L 794 267 L 826 267"></path>
-              <path class="route direct" d="M 586 208 L 782 208 L 782 394 L 816 394"></path>
-              <text class="minor-label" x="705" y="148" text-anchor="middle">kernel direct-map alias</text>
+              <rect class="highlight-ring direct" x="426" y="116" width="288" height="122"></rect>
+              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="590"></rect>
+              <rect class="highlight-ring direct" x="1106" y="154" width="244" height="52"></rect>
+              <rect class="highlight-ring direct" x="1106" y="262" width="244" height="52"></rect>
+              <rect class="highlight-ring direct" x="1088" y="388" width="296" height="110"></rect>
+              <rect class="highlight-ring direct" x="1088" y="498" width="296" height="92"></rect>
+              <path class="route direct" d="M 710 150 L 1070 150 L 1070 180 L 1110 180"></path>
+              <path class="route direct" d="M 710 178 L 1040 178 L 1040 288 L 1110 288"></path>
+              <path class="route direct" d="M 710 206 L 1020 206 L 1020 443 L 1092 443"></path>
+              <text class="minor-label" x="888" y="139" text-anchor="middle">kernel direct-map alias lane</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">direct map can name RAM frames</text>
+              <g class="badge" transform="translate(724 150)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(1040 288)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1020 443)"><circle r="13"></circle><text>3</text></g>
             </g>
 
             <g class="map-item" data-show="kernel" data-focus="kernel">
-              <path class="route meta" d="M 586 342 L 640 342 L 640 247"></path>
-              <path class="route direct" d="M 586 265 L 816 265 L 816 394"></path>
-              <text class="minor-label" x="704" y="374">shared kernel part stays mapped</text>
+              <rect class="highlight-ring kernel" x="426" y="70" width="288" height="328"></rect>
+              <rect class="highlight-ring direct" x="426" y="116" width="288" height="122"></rect>
+              <rect class="highlight-ring meta" x="426" y="238" width="288" height="82"></rect>
+              <rect class="highlight-ring kernel" x="1088" y="388" width="296" height="202"></rect>
+              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="590"></rect>
+              <path class="route direct" d="M 710 178 L 1040 178 L 1040 443 L 1092 443"></path>
+              <text class="minor-label" x="890" y="166">direct-map window keeps a kernel-side name for RAM</text>
+              <text class="minor-label" x="896" y="410">kernel half above KERN_BASE stays mapped</text>
+              <text class="minor-label" x="570" y="64" text-anchor="middle">kernel-side virtual range</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">physical RAM visible through kernel aliases</text>
+              <g class="badge" transform="translate(724 354)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(1040 178)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1040 443)"><circle r="13"></circle><text>3</text></g>
             </g>
 
             <g class="map-item" data-show="fault" data-focus="fault">
-              <path class="route fault" d="M 266 309 L 620 309 L 620 177 L 640 177"></path>
-              <path class="route fault" d="M 770 177 L 790 177 L 790 126 L 1092 126 L 1092 184 L 1110 184"></path>
-              <path class="route meta" d="M 1110 184 L 1082 184 L 1082 317 L 1054 317"></path>
-              <path class="route direct" d="M 1110 459 L 1088 459 L 1088 330 L 1054 330"></path>
-              <path class="route user" d="M 826 317 L 770 317"></path>
-              <g class="badge" transform="translate(292 300)"><circle r="13"></circle><text>1</text></g>
-              <g class="badge" transform="translate(1092 126)"><circle r="13"></circle><text>2</text></g>
-              <g class="badge" transform="translate(1082 316)"><circle r="13"></circle><text>3</text></g>
-              <g class="badge" transform="translate(1088 452)"><circle r="13"></circle><text>4</text></g>
-              <g class="badge" transform="translate(802 318)"><circle r="13"></circle><text>5</text></g>
+              <rect class="highlight-ring fault" x="426" y="522" width="288" height="92"></rect>
+              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="302"></rect>
+              <rect class="highlight-ring user" x="1106" y="316" width="244" height="52"></rect>
+              <rect class="highlight-ring meta" x="1454" y="154" width="138" height="220"></rect>
+              <rect class="highlight-ring direct" x="1456" y="502" width="134" height="68"></rect>
+              <path class="route fault" d="M 314 323 L 392 323 L 392 568 L 432 568"></path>
+              <path class="route fault" d="M 710 568 L 760 568 L 760 194 L 800 194"></path>
+              <path class="route fault" d="M 950 194 L 980 194 L 980 66 L 1440 66 L 1440 188 L 1460 188"></path>
+              <path class="route direct" d="M 1460 536 L 1408 536 L 1408 342 L 1346 342"></path>
+              <path class="route user" d="M 1110 342 L 970 342 L 970 350 L 950 350"></path>
+              <text class="minor-label" x="570" y="516" text-anchor="middle">faultable user VA gap</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">user pool frame allocation target</text>
+              <text class="minor-label" x="1523" y="146" text-anchor="middle">fault metadata</text>
+              <g class="badge" transform="translate(392 568)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(760 194)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1440 188)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(1408 342)"><circle r="13"></circle><text>4</text></g>
+              <g class="badge" transform="translate(970 350)"><circle r="13"></circle><text>5</text></g>
             </g>
 
             <g class="map-item" data-show="evict" data-focus="evict">
-              <path class="route evict" d="M 1054 267 L 1084 267 L 1084 459 L 1110 459"></path>
-              <path class="route meta" d="M 1110 184 L 1080 184 L 1080 526 L 600 526 L 600 540 L 334 540"></path>
-              <path class="route evict" d="M 935 288 L 935 296"></path>
-              <path class="route evict" d="M 1110 459 L 1088 459 L 1088 317 L 1054 317"></path>
-              <g class="badge" transform="translate(1084 267)"><circle r="13"></circle><text>1</text></g>
-              <g class="badge" transform="translate(1080 184)"><circle r="13"></circle><text>2</text></g>
-              <g class="badge" transform="translate(600 540)"><circle r="13"></circle><text>3</text></g>
-              <g class="badge" transform="translate(1088 316)"><circle r="13"></circle><text>4</text></g>
+              <rect class="highlight-ring physical" x="1088" y="86" width="296" height="302"></rect>
+              <rect class="highlight-ring evict" x="1106" y="262" width="244" height="52"></rect>
+              <rect class="highlight-ring evict" x="1106" y="316" width="244" height="52"></rect>
+              <rect class="highlight-ring meta" x="1454" y="154" width="138" height="220"></rect>
+              <rect class="highlight-ring evict" x="1456" y="502" width="134" height="68"></rect>
+              <path class="route evict" d="M 1346 288 L 1416 288 L 1416 264 L 1460 264"></path>
+              <path class="route meta" d="M 1460 264 L 1434 264 L 1434 188 L 1460 188"></path>
+              <path class="route evict" d="M 1460 340 L 1428 340 L 1428 536 L 1460 536"></path>
+              <path class="route evict" d="M 1346 288 L 1404 288 L 1404 342 L 1346 342"></path>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">resident frames inside user pool</text>
+              <text class="minor-label" x="1523" y="146" text-anchor="middle">page identity metadata</text>
+              <g class="badge" transform="translate(1362 288)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(1434 188)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1428 536)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(1404 342)"><circle r="13"></circle><text>4</text></g>
             </g>
           </svg>
         </div>
@@ -808,6 +911,12 @@
           "Kernel direct-map VA는 같은 frame을 kernel-side alias로 본다.",
           "SPT와 frame table은 page identity와 frame 소유 관계를 기억한다."
         ],
+        flow: [
+          "전체 user VA range에서 process가 쓰는 주소 이름이 나온다.",
+          "Active PML4/PTE가 그 user VA를 frame 번호로 해석한다.",
+          "해석 결과는 user pool 안의 Frame A를 가리킨다.",
+          "Kernel direct-map VA도 같은 Frame A를 kernel-side alias로 볼 수 있다."
+        ],
         note: "두 주소 이름이 같은 RAM frame을 가리킬 수 있지만, byte 저장소가 두 벌이라는 뜻은 아니다.",
         takeaway: "핵심 연결: user VA -> active PML4/PTE -> physical frame <- kernel direct-map VA"
       },
@@ -820,6 +929,11 @@
           "Kernel code, allocator, page table memory, frame table 같은 kernel object는 같은 VA로 접근된다.",
           "User mode에서 kernel VA를 읽을 수 있다는 뜻은 아니다. supervisor permission이 접근을 막는다.",
           "Process A/B/C가 바뀌어도 kernel direct-map 창은 physical memory를 같은 방식으로 본다."
+        ],
+        flow: [
+          "KERN_BASE 위쪽 kernel half는 process PML4마다 공통으로 들어간다.",
+          "Direct-map window는 paddr에 KERN_BASE를 더한 kernel VA 이름을 만든다.",
+          "그 이름은 physical RAM의 kernel pool/object 구간을 같은 방식으로 가리킨다."
         ],
         note: "전역 view란 kernel이 같은 주소 이름으로 자기 자료구조와 RAM alias에 접근한다는 뜻이다.",
         takeaway: "Context switch는 user view를 바꾸지만, kernel-side mapping은 같은 기준점으로 유지된다."
@@ -834,6 +948,11 @@
           "User pool frame도 RAM에 올라와 있으면 direct-map 대상이다.",
           "pml4_set_page의 kpage는 frame을 식별하는 kernel virtual address로 이해하면 된다."
         ],
+        flow: [
+          "Direct-map window에서 만든 kernel VA가 Frame A를 가리킨다.",
+          "같은 방식으로 user pool의 Frame F도 kernel VA 이름을 얻는다.",
+          "Kernel pool frame도 RAM frame이므로 direct-map window로 접근된다."
+        ],
         note: "Direct map은 page의 영구 신분증이 아니라 현재 physical frame을 보는 kernel-side 이름이다.",
         takeaway: "Direct map은 복사본이 아니라 같은 frame의 kernel-side name이다."
       },
@@ -846,6 +965,13 @@
           "바뀌는 것은 user pool이 아니라 CPU가 현재 사용하는 PML4다.",
           "User pool은 모든 process가 경쟁하는 하나의 전역 physical frame 자원이다.",
           "같은 process의 thread는 user address space를 공유하지만, 다른 process는 다른 user mapping을 쓴다."
+        ],
+        flow: [
+          "Process A의 PML4는 같은 user VA를 Frame A로 해석한다.",
+          "Process B의 PML4는 같은 user VA를 Frame B로 해석한다.",
+          "Process C에서는 그 user VA가 not-present라서 resident frame이 없다.",
+          "Active PML4/PTE가 현재 해석 규칙이며, context switch 때 이 규칙이 바뀐다.",
+          "전체 user VA range와 Frame A/B 묶음은 user 영역이 실제 byte 저장소가 아니라 frame을 바라본다는 점을 보여 준다."
         ],
         note: "Process별 view는 주소 이름의 해석 규칙이 달라진다는 뜻이지 RAM pool이 복제된다는 뜻이 아니다.",
         takeaway: "User view 전환의 중심은 active PML4이고, physical user pool은 전역 자원으로 남는다."
@@ -860,6 +986,13 @@
           "Frame은 user pool에서 확보되고, kernel은 direct-map VA로 그 frame의 byte를 채운다.",
           "PTE가 갱신되면 fault가 났던 instruction을 다시 실행할 수 있다."
         ],
+        flow: [
+          "Not-present user VA가 lazy/unmapped gap에서 접근된다.",
+          "MMU/TLB가 translation 실패를 page fault로 올린다.",
+          "Kernel은 SPT에서 page identity와 backing 정보를 찾는다.",
+          "Backing bytes를 새 user-pool frame에 direct-map VA로 채운다.",
+          "PTE가 Frame G를 가리키도록 갱신되어 user VA가 다시 유효해진다."
+        ],
         note: "MMU가 disk에서 page를 읽어 오는 것이 아니다. 실패 감지와 복구 책임은 분리된다.",
         takeaway: "Fault path: user VA miss -> SPT -> user pool frame -> direct-map load -> PTE update"
       },
@@ -873,6 +1006,12 @@
           "Process의 PTE는 not-present가 되고, frame F는 다른 page에 재사용될 수 있다.",
           "나중에 같은 user VA가 fault를 내면 새 frame G에 page-in될 수 있다."
         ],
+        flow: [
+          "Frame F가 victim frame으로 선택된다.",
+          "SPT/frame table은 어떤 page가 밀려나는지 metadata로 기록한다.",
+          "Page bytes는 swap/file backing store로 나간다.",
+          "Frame은 재사용되고, 이후 같은 page는 다른 frame으로 page-in될 수 있다."
+        ],
         note: "Direct map은 특정 user page가 아니라 physical frame의 현재 내용을 본다.",
         takeaway: "Eviction은 page identity와 resident frame을 분리해서 생각해야 한다."
       }
@@ -884,6 +1023,7 @@
     const panelTitle = document.getElementById("panel-title");
     const panelSummary = document.getElementById("panel-summary");
     const panelList = document.getElementById("panel-list");
+    const flowList = document.getElementById("flow-list");
     const panelNote = document.getElementById("panel-note");
     const takeaway = document.getElementById("takeaway");
     const mapItems = Array.from(document.querySelectorAll(".map-item"));
@@ -911,6 +1051,15 @@
         const li = document.createElement("li");
         li.textContent = point;
         panelList.appendChild(li);
+      }
+
+      flowList.innerHTML = "";
+      const flow = view.flow || [];
+      flowList.hidden = flow.length === 0;
+      for (const step of flow) {
+        const li = document.createElement("li");
+        li.textContent = step;
+        flowList.appendChild(li);
       }
 
       for (const item of mapItems) {

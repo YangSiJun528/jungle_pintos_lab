@@ -7,7 +7,6 @@
 #include "userprog/gdt.h"
 #include "threads/flags.h"
 #include "intrinsic.h"
-#include "tests/filesys/create.inc"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/mmu.h"
@@ -274,10 +273,10 @@ is_valid_user_buffer (void *buf, size_t size) {
 		return get_next_page_if_valid (p) != NULL;
 	}
 
-	// 산술 연산 시에는 uintptr_t 변환이 안전해보임
+	/* 산술 연산 시에는 uintptr_t 변환이 안전해보임. */
 	void *buf_end = (void *) ((uintptr_t) p + size);
 	while (p < buf_end) {
-		// 유효하면 다음 페이지, 아니면 NULL 반환
+		/* 유효하면 다음 페이지, 아니면 NULL 반환. */
 		p = get_next_page_if_valid (p);
 		if (p == NULL) {
 			return false;
@@ -291,14 +290,15 @@ is_valid_user_string (char *str) {
 	char *p = str;
 
 	while (true) {
-		// 유효하면 다음 페이지, 아니면 NULL 반환
-		char *next_p = get_next_page_if_valid(p);
+		/* 유효하면 다음 페이지, 아니면 NULL 반환. */
+		char *next_p = get_next_page_if_valid (p);
 		char *page_end = pg_round_up (p);
 		if (next_p == NULL) {
 			return false;
 		}
 
-		// 현재 페이지 내부를 순회하며 문자열의 끝이 있는지 검사
+		/* 현재 페이지 내부를 순회하며 문자열의 끝이 있는지
+		   검사. */
 		while (p < page_end) {
 			if (*p == '\0') {
 				return true;
@@ -306,29 +306,30 @@ is_valid_user_string (char *str) {
 			p++;
 		}
 
-		// 다음 page 검사 진행
+		/* 다음 page 검사 진행. */
 		p = next_p;
 	}
 }
 
-// 해당 ptr의 page가 유효한지 확인하고, 다음 페이지를 반환한다.
-// 구현의 편의를 위해 분리한 함수로,
-// is_valid_user_* 외에는 사용하는 걸 추천하지 않음
-// 리턴하는 다음 페이지 주소가 유효하지 않을 수 있음
-//
-// 유효 시 다음 page를 주소를 반환 (유효하지 않을 수 있음
-// 그렇지 않으면 NULL을 반환
+/* 해당 ptr의 page가 유효한지 확인하고,
+   다음 페이지를 반환한다.
+   구현의 편의를 위해 분리한 함수다.
+   is_valid_user_* 외에는 사용하는 걸 추천하지 않음.
+   리턴하는 다음 페이지 주소가 유효하지 않을 수 있음.
+   유효 시 다음 page 주소를 반환한다.
+   그렇지 않으면 NULL을 반환한다. */
 static void *
 get_next_page_if_valid (void *ptr) {
 	if (ptr == NULL) {
 		return NULL;
 	}
 
-	// 커널 영역 위인가?
+	/* 커널 영역 위인가? */
 	if (!is_user_vaddr (ptr)) {
 		return NULL;
 	}
-	// thread가 가지는 유저 가상 주소(pml4 필드)가 unmapped 상태인가?
+	/* thread가 가지는 유저 가상 주소(pml4 필드)가
+	   unmapped 상태인가? */
 	if (pml4_get_page (thread_current ()->pml4, ptr) == NULL) {
 		return NULL;
 	}
