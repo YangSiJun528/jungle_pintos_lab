@@ -24,6 +24,8 @@
       --radius-sm: 8px;
       --radius-lg: 18px;
       --radius-pill: 999px;
+      --page-width: 1280px;
+      --desktop-min: 1360px;
     }
 
     * {
@@ -36,12 +38,15 @@
 
     body {
       margin: 0;
+      min-width: var(--desktop-min);
       background: var(--parchment);
       color: var(--ink);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
       font-size: 17px;
       line-height: 1.47;
       letter-spacing: -0.01em;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
 
     a {
@@ -62,7 +67,7 @@
     }
 
     .topbar-inner {
-      width: min(1180px, calc(100% - 32px));
+      width: var(--page-width);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -78,7 +83,6 @@
     .topbar nav {
       display: flex;
       gap: 16px;
-      overflow-x: auto;
       white-space: nowrap;
       font-size: 14px;
     }
@@ -90,24 +94,26 @@
     }
 
     .hero h1 {
-      max-width: 920px;
+      width: 920px;
       margin: 0 auto 14px;
-      font-size: clamp(34px, 5vw, 56px);
+      font-size: 56px;
       line-height: 1.08;
       font-weight: 600;
       letter-spacing: -0.02em;
+      text-wrap: balance;
     }
 
     .hero p {
-      max-width: 800px;
+      width: 800px;
       margin: 0 auto;
       color: var(--muted);
-      font-size: clamp(18px, 2vw, 22px);
+      font-size: 22px;
       line-height: 1.42;
+      text-wrap: pretty;
     }
 
     main {
-      width: min(1180px, calc(100% - 32px));
+      width: var(--page-width);
       margin: 0 auto;
       padding: 28px 0 72px;
     }
@@ -121,26 +127,27 @@
 
     .map-header {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: 1fr 460px;
       gap: 18px;
       align-items: end;
-      padding: 24px clamp(20px, 4vw, 40px);
+      padding: 24px 40px;
       background: #fafafc;
       border-bottom: 1px solid var(--hairline);
     }
 
     .map-header h2 {
       margin: 0 0 8px;
-      font-size: clamp(26px, 4vw, 40px);
+      font-size: 40px;
       line-height: 1.1;
       font-weight: 600;
       letter-spacing: -0.018em;
     }
 
     .map-header p {
-      max-width: 780px;
+      width: 720px;
       margin: 0;
       color: var(--muted);
+      text-wrap: pretty;
     }
 
     .pill {
@@ -152,16 +159,104 @@
       background: var(--primary-soft);
       color: var(--primary);
       font-size: 14px;
-      white-space: nowrap;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+
+    .map-tabs {
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--canvas);
+    }
+
+    .tab-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .tab-button {
+      min-height: 88px;
+      padding: 13px 14px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition:
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .tab-button[aria-selected="true"] {
+      border-color: rgba(0, 102, 204, 0.58);
+      background: var(--primary-soft);
+      box-shadow: inset 0 0 0 1px rgba(0, 102, 204, 0.2);
+    }
+
+    .tab-button:focus-visible {
+      outline: 3px solid rgba(0, 102, 204, 0.24);
+      outline-offset: 2px;
+    }
+
+    .tab-kicker,
+    .tab-title {
+      display: block;
+      letter-spacing: 0;
+    }
+
+    .tab-kicker {
+      margin-bottom: 6px;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tab-title {
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.25;
+      text-wrap: pretty;
+    }
+
+    .tab-panel {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-left: 3px solid var(--primary);
+      border-radius: var(--radius-sm);
+      background: #fafafc;
+      color: var(--muted);
+      line-height: 1.45;
+      text-wrap: pretty;
+    }
+
+    .tab-panel[hidden] {
+      display: none;
+    }
+
+    .tab-panel strong {
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .tab-panel p {
+      margin: 0;
+    }
+
+    .tab-panel p + p {
+      margin-top: 6px;
     }
 
     .map-scroll {
-      overflow-x: auto;
-      padding: clamp(18px, 4vw, 36px);
+      overflow: hidden;
+      padding: 36px 0;
     }
 
     .map-canvas {
-      min-width: 1140px;
+      width: 1140px;
       height: 1180px;
       margin: 0 auto;
       background:
@@ -327,11 +422,89 @@
       stroke-width: 1.5;
     }
 
+    .dim-target {
+      transition:
+        opacity 220ms ease,
+        filter 220ms ease,
+        stroke-width 220ms ease;
+    }
+
+    .map-section[data-view] .memory-svg .dim-target {
+      opacity: 0.22;
+    }
+
+    .map-section[data-view="direct"] .memory-svg .focus-direct,
+    .map-section[data-view="page"] .memory-svg .focus-page,
+    .map-section[data-view="alias"] .memory-svg .focus-alias {
+      opacity: 1;
+      filter: drop-shadow(0 0 5px rgba(0, 102, 204, 0.24));
+    }
+
+    .map-section[data-view="direct"] .memory-svg .mapping-direct.focus-direct,
+    .map-section[data-view="page"] .memory-svg .mapping-user.focus-page,
+    .map-section[data-view="alias"] .memory-svg .mapping-direct.focus-alias,
+    .map-section[data-view="alias"] .memory-svg .mapping-user.focus-alias {
+      stroke-width: 3.2;
+    }
+
+    .demo-layer {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+    }
+
+    .map-section[data-view="direct"] .demo-direct,
+    .map-section[data-view="page"] .demo-page,
+    .map-section[data-view="alias"] .demo-alias {
+      opacity: 1;
+    }
+
+    .focus-box {
+      fill: rgba(0, 102, 204, 0.08);
+      stroke: var(--primary);
+      stroke-width: 2;
+    }
+
+    .focus-box.alt {
+      fill: rgba(117, 74, 150, 0.12);
+      stroke: #7e5aa3;
+    }
+
+    .flow-dot {
+      fill: var(--primary);
+      filter: drop-shadow(0 0 5px rgba(0, 102, 204, 0.4));
+    }
+
+    .flow-dot.alt {
+      fill: #7e5aa3;
+      filter: drop-shadow(0 0 5px rgba(126, 90, 163, 0.38));
+    }
+
+    .demo-callout {
+      fill: #fff;
+      stroke: rgba(0, 0, 0, 0.14);
+      stroke-width: 1;
+    }
+
+    .demo-callout-text {
+      fill: var(--ink);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .demo-callout-small {
+      fill: var(--muted);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
     .legend {
       display: flex;
       flex-wrap: wrap;
       gap: 12px 18px;
-      padding: 18px clamp(20px, 4vw, 40px) 24px;
+      padding: 18px 40px 24px;
       border-top: 1px solid var(--hairline);
       background: #fafafc;
     }
@@ -477,6 +650,8 @@
       line-height: 1.55;
       letter-spacing: 0;
       white-space: pre-wrap;
+      word-break: normal;
+      overflow-wrap: anywhere;
     }
 
     .summary {
@@ -489,7 +664,7 @@
 
     .summary h2 {
       margin: 0 0 14px;
-      font-size: clamp(24px, 3vw, 34px);
+      font-size: 34px;
       line-height: 1.15;
     }
 
@@ -511,32 +686,6 @@
       line-height: 1.55;
     }
 
-    @media (max-width: 900px) {
-      .map-header,
-      .reading {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .topbar-inner {
-        padding: 10px 0;
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .hero {
-        padding: 56px 18px 34px;
-      }
-
-      main {
-        width: min(100% - 20px, 1180px);
-      }
-
-      .explain-card {
-        grid-template-columns: 1fr;
-      }
-    }
   </style>
 </head>
 <body>
@@ -558,13 +707,42 @@
   </section>
 
   <main>
-    <section class="map-section" id="map" aria-label="Pintos memory map">
+    <section class="map-section" id="map" aria-label="Pintos memory map" data-view="direct">
       <div class="map-header">
         <div>
           <h2>Memory map</h2>
           <p>가운데는 현재 process의 virtual address space입니다. 위쪽 kernel 영역은 모든 process에서 공통이고, 아래쪽 user 영역은 process마다 다릅니다. 오른쪽은 실제 RAM입니다.</p>
         </div>
         <span class="pill">solid arrow = kernel direct map, dashed arrow = user page table map</span>
+      </div>
+
+      <div class="map-tabs">
+        <div class="tab-list" role="tablist" aria-label="memory map focus">
+          <button class="tab-button" id="tab-direct" type="button" role="tab" aria-selected="true" aria-controls="panel-direct" data-view-button="direct">
+            <span class="tab-kicker">1</span>
+            <span class="tab-title">kernel direct mapping은 kernel이 physical memory를 다루는 창이다</span>
+          </button>
+          <button class="tab-button" id="tab-page" type="button" role="tab" aria-selected="false" aria-controls="panel-page" data-view-button="page">
+            <span class="tab-kicker">2</span>
+            <span class="tab-title">process별 virtual memory와 page table</span>
+          </button>
+          <button class="tab-button" id="tab-alias" type="button" role="tab" aria-selected="false" aria-controls="panel-alias" data-view-button="alias">
+            <span class="tab-kicker">3</span>
+            <span class="tab-title">같은 physical frame을 두 virtual mapping으로 볼 수 있다</span>
+          </button>
+        </div>
+
+        <div class="tab-panel" id="panel-direct" role="tabpanel" aria-labelledby="tab-direct">
+          <p><strong>kernel은 physical address를 직접 포인터처럼 쓰지 않고</strong>, `KERN_BASE + physical address`라는 kernel virtual address로 RAM을 봅니다.</p>
+          <p>user pool은 physical memory의 일부이며, 그 frame들도 같은 kernel direct map으로 접근됩니다.</p>
+        </div>
+        <div class="tab-panel" id="panel-page" role="tabpanel" aria-labelledby="tab-page" hidden>
+          <p><strong>user virtual address는 process마다 독립적입니다.</strong> user page는 PML4 page table entry를 거쳐 user pool의 physical frame에 연결됩니다.</p>
+          <p>같은 `upage`라도 process마다 다른 frame을 가리킬 수 있습니다.</p>
+        </div>
+        <div class="tab-panel" id="panel-alias" role="tabpanel" aria-labelledby="tab-alias" hidden>
+          <p><strong>RAM frame이 복사되는 것이 아닙니다.</strong> 하나의 physical frame이 user virtual address와 `KERN_BASE + paddr` 양쪽 virtual address에 매핑될 수 있다는 뜻입니다.</p>
+        </div>
       </div>
 
       <div class="map-scroll">
@@ -594,52 +772,52 @@
             <text class="svg-note" x="530" y="1112" text-anchor="middle">위쪽은 높은 virtual address, 아래쪽은 낮은 virtual address로 읽습니다.</text>
 
             <rect class="mem-rect hatch-fill" x="380" y="76" width="300" height="36"></rect>
-            <rect class="mem-rect kernel-fill" x="380" y="112" width="300" height="126"></rect>
-            <rect class="mem-rect kernel-fill" x="380" y="238" width="300" height="50"></rect>
-            <rect class="mem-rect kernel-fill" x="380" y="288" width="300" height="90"></rect>
-            <rect class="mem-rect kernel-fill" x="380" y="378" width="300" height="47"></rect>
-            <rect class="mem-rect kernel-fill" x="380" y="425" width="300" height="47"></rect>
-            <rect class="mem-rect kernel-fill" x="380" y="472" width="300" height="58"></rect>
-            <rect class="mem-rect kernel-fill" x="380" y="530" width="300" height="30"></rect>
-            <rect class="mem-rect hatch-fill" x="380" y="560" width="300" height="76"></rect>
-            <rect class="mem-rect user-fill" x="380" y="636" width="300" height="132"></rect>
-            <rect class="mem-rect hatch-fill" x="380" y="768" width="300" height="122"></rect>
-            <rect class="mem-rect user-fill" x="380" y="890" width="300" height="46"></rect>
-            <rect class="mem-rect user-fill" x="380" y="936" width="300" height="46"></rect>
-            <rect class="mem-rect user-fill" x="380" y="982" width="300" height="58"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct focus-alias" x="380" y="112" width="300" height="126"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="238" width="300" height="50"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="288" width="300" height="90"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="378" width="300" height="47"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="425" width="300" height="47"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="472" width="300" height="58"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="530" width="300" height="30"></rect>
+            <rect class="mem-rect hatch-fill dim-target focus-page" x="380" y="560" width="300" height="76"></rect>
+            <rect class="mem-rect user-fill dim-target focus-page" x="380" y="636" width="300" height="132"></rect>
+            <rect class="mem-rect hatch-fill dim-target focus-page" x="380" y="768" width="300" height="122"></rect>
+            <rect class="mem-rect user-fill dim-target focus-page focus-alias" x="380" y="890" width="300" height="46"></rect>
+            <rect class="mem-rect user-fill dim-target focus-page" x="380" y="936" width="300" height="46"></rect>
+            <rect class="mem-rect user-fill dim-target focus-page" x="380" y="982" width="300" height="58"></rect>
             <rect class="mem-rect hatch-fill" x="380" y="1040" width="300" height="28"></rect>
 
-            <rect class="mem-rect physical-fill" x="880" y="112" width="230" height="126"></rect>
-            <rect class="mem-rect physical-fill" x="880" y="238" width="230" height="140"></rect>
-            <rect class="mem-rect physical-fill" x="880" y="378" width="230" height="47"></rect>
-            <rect class="mem-rect physical-fill" x="880" y="425" width="230" height="47"></rect>
-            <rect class="mem-rect physical-fill" x="880" y="472" width="230" height="58"></rect>
-            <rect class="mem-rect physical-fill" x="880" y="530" width="230" height="30"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct focus-page focus-alias" x="880" y="112" width="230" height="126"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="238" width="230" height="140"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="378" width="230" height="47"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="425" width="230" height="47"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="472" width="230" height="58"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="530" width="230" height="30"></rect>
 
             <rect class="mem-rect thread-fill" x="35" y="354" width="174" height="48"></rect>
             <rect class="mem-rect thread-fill" x="35" y="402" width="174" height="56"></rect>
             <rect class="mem-rect stack-fill" x="35" y="458" width="174" height="110"></rect>
             <rect class="mem-rect thread-fill" x="35" y="568" width="174" height="60"></rect>
 
-            <path class="mapping-direct" d="M 680 175 C 750 175, 810 175, 880 175"></path>
-            <path class="mapping-direct" d="M 680 333 C 750 333, 810 333, 880 333"></path>
-            <path class="mapping-direct" d="M 680 501 C 750 501, 810 501, 880 501"></path>
-            <path class="mapping-user" d="M 680 913 C 790 913, 770 206, 880 206"></path>
+            <path class="mapping-direct dim-target focus-direct focus-alias" d="M 680 175 C 750 175, 810 175, 880 175"></path>
+            <path class="mapping-direct dim-target focus-direct" d="M 680 333 C 750 333, 810 333, 880 333"></path>
+            <path class="mapping-direct dim-target focus-direct" d="M 680 501 C 750 501, 810 501, 880 501"></path>
+            <path class="mapping-user dim-target focus-page focus-alias" d="M 680 913 C 790 913, 770 206, 880 206"></path>
 
-            <path class="range-brace" d="M 380 112 C 360 112, 356 132, 356 152 L 356 304 C 356 326, 344 326, 344 336 C 344 346, 356 346, 356 368 L 356 520 C 356 540, 360 560, 380 560"></path>
-            <path class="range-brace" d="M 380 560 C 360 560, 356 586, 356 616 L 356 782 C 356 804, 344 804, 344 814 C 344 824, 356 824, 356 846 L 356 1018 C 356 1044, 360 1068, 380 1068"></path>
+            <path class="range-brace dim-target focus-direct focus-alias" d="M 380 112 C 360 112, 356 132, 356 152 L 356 304 C 356 326, 344 326, 344 336 C 344 346, 356 346, 356 368 L 356 520 C 356 540, 360 560, 380 560"></path>
+            <path class="range-brace dim-target focus-page focus-alias" d="M 380 560 C 360 560, 356 586, 356 616 L 356 782 C 356 804, 344 804, 344 814 C 344 824, 356 824, 356 846 L 356 1018 C 356 1044, 360 1068, 380 1068"></path>
 
             <line class="leader" x1="316" y1="112" x2="380" y2="112"></line>
-            <line class="leader" x1="316" y1="176" x2="380" y2="176"></line>
-            <line class="leader" x1="316" y1="560" x2="380" y2="560"></line>
-            <line class="leader" x1="316" y1="636" x2="380" y2="636"></line>
-            <line class="leader" x1="316" y1="913" x2="380" y2="913"></line>
+            <line class="leader dim-target focus-direct focus-alias" x1="316" y1="176" x2="380" y2="176"></line>
+            <line class="leader dim-target focus-direct focus-page" x1="316" y1="560" x2="380" y2="560"></line>
+            <line class="leader dim-target focus-page" x1="316" y1="636" x2="380" y2="636"></line>
+            <line class="leader dim-target focus-page focus-alias" x1="316" y1="913" x2="380" y2="913"></line>
             <line class="leader" x1="316" y1="1040" x2="380" y2="1040"></line>
             <line class="leader" x1="316" y1="1068" x2="380" y2="1068"></line>
 
-            <line class="kern-boundary" x1="380" y1="560" x2="680" y2="560"></line>
-            <rect class="permission-badge" x="696" y="546" width="128" height="28" rx="14"></rect>
-            <text class="permission-text" x="760" y="564" text-anchor="middle">KERN_BASE boundary</text>
+            <line class="kern-boundary dim-target focus-direct focus-page" x1="380" y1="560" x2="680" y2="560"></line>
+            <rect class="permission-badge dim-target focus-direct focus-page" x="696" y="546" width="128" height="28" rx="14"></rect>
+            <text class="permission-text dim-target focus-direct focus-page" x="760" y="564" text-anchor="middle">KERN_BASE boundary</text>
 
             <g>
               <circle class="num-dot" cx="400" cy="132" r="12"></circle>
@@ -658,8 +836,8 @@
 
             <text class="seg-text" x="530" y="99" text-anchor="middle">unused high kernel virtual area</text>
             <text class="seg-text" x="530" y="164" text-anchor="middle">
-              <tspan x="530">user pool을 보는</tspan>
-              <tspan x="530" dy="16">kernel virtual mapping</tspan>
+              <tspan x="530">user-pool frames도</tspan>
+              <tspan x="530" dy="16">kernel direct map으로 접근</tspan>
               <tspan class="seg-small" x="530" dy="16">KERN_BASE + physical address</tspan>
             </text>
             <text class="seg-text" x="530" y="268" text-anchor="middle">allocator / page metadata</text>
@@ -740,6 +918,49 @@
             <text class="route-text" x="789" y="164" text-anchor="middle">kernel direct mapping</text>
             <rect class="route-badge" x="714" y="742" width="150" height="28" rx="14"></rect>
             <text class="route-text" x="789" y="760" text-anchor="middle">PML4 page mapping</text>
+
+            <g class="demo-layer demo-direct">
+              <rect class="focus-box" x="374" y="106" width="312" height="460" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="460" rx="8"></rect>
+              <rect class="demo-callout" x="708" y="82" width="160" height="48" rx="8"></rect>
+              <text class="demo-callout-text" x="788" y="102" text-anchor="middle">KERN_BASE + paddr</text>
+              <text class="demo-callout-small" x="788" y="118" text-anchor="middle">same RAM offset</text>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="2.2s" repeatCount="indefinite" path="M 680 175 C 750 175, 810 175, 880 175"></animateMotion>
+              </circle>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="2.7s" repeatCount="indefinite" path="M 680 333 C 750 333, 810 333, 880 333"></animateMotion>
+              </circle>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="3.1s" repeatCount="indefinite" path="M 680 501 C 750 501, 810 501, 880 501"></animateMotion>
+              </circle>
+            </g>
+
+            <g class="demo-layer demo-page">
+              <rect class="focus-box" x="374" y="554" width="312" height="492" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="138" rx="8"></rect>
+              <rect class="demo-callout" x="710" y="844" width="132" height="54" rx="8"></rect>
+              <text class="demo-callout-text" x="776" y="866" text-anchor="middle">PML4 entry</text>
+              <text class="demo-callout-small" x="776" y="882" text-anchor="middle">upage -> frame</text>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="3.2s" repeatCount="indefinite" path="M 680 913 C 790 913, 770 206, 880 206"></animateMotion>
+              </circle>
+            </g>
+
+            <g class="demo-layer demo-alias">
+              <rect class="focus-box" x="374" y="106" width="312" height="138" rx="8"></rect>
+              <rect class="focus-box" x="374" y="884" width="312" height="58" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="138" rx="8"></rect>
+              <rect class="demo-callout" x="720" y="236" width="148" height="58" rx="8"></rect>
+              <text class="demo-callout-text" x="794" y="258" text-anchor="middle">one physical frame</text>
+              <text class="demo-callout-small" x="794" y="274" text-anchor="middle">two virtual views</text>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="2.4s" repeatCount="indefinite" path="M 680 175 C 750 175, 810 175, 880 175"></animateMotion>
+              </circle>
+              <circle class="flow-dot alt" r="5">
+                <animateMotion dur="3.2s" repeatCount="indefinite" path="M 680 913 C 790 913, 770 206, 880 206"></animateMotion>
+              </circle>
+            </g>
           </svg>
         </div>
       </div>
@@ -783,7 +1004,7 @@
           <p>Pintos는 physical memory를 `KERN_BASE` 위 kernel virtual address에 일대일로 매핑합니다. 그래서 kernel은 physical address를 포인터처럼 직접 쓰지 않고, kernel virtual address로 같은 frame을 접근합니다.</p>
           <code class="block">kernel virtual address = KERN_BASE + physical address
 physical address = kernel virtual address - KERN_BASE</code>
-          <p>map의 실선은 이 관계를 나타냅니다. physical user pool도 kernel이 볼 때는 kernel virtual mapping을 통해 접근됩니다.</p>
+          <p>map의 실선은 이 관계를 나타냅니다. user pool에 속한 physical frame도 kernel이 볼 때는 kernel direct map을 통해 접근됩니다.</p>
         </div>
       </article>
 
@@ -882,5 +1103,56 @@ kernel virtual KERN_BASE+p ┘</code>
       이 HTML은 Pintos 메모리 구조 이해를 위한 시각 자료이며 과제 구현 코드를 포함하지 않습니다.
     </p>
   </main>
+  <script>
+    (() => {
+      const map = document.querySelector(".map-section[data-view]");
+      if (!map) {
+        return;
+      }
+
+      const buttons = Array.from(map.querySelectorAll("[data-view-button]"));
+      const panels = Array.from(map.querySelectorAll("[role='tabpanel']"));
+      const views = new Set(buttons.map((button) => button.dataset.viewButton));
+
+      const setView = (view, updateHash = true) => {
+        map.dataset.view = view;
+
+        buttons.forEach((button) => {
+          const active = button.dataset.viewButton === view;
+          button.setAttribute("aria-selected", String(active));
+          button.tabIndex = active ? 0 : -1;
+        });
+
+        panels.forEach((panel) => {
+          panel.hidden = panel.id !== `panel-${view}`;
+        });
+
+        if (updateHash) {
+          history.replaceState(null, "", `#${view}`);
+        }
+      };
+
+      buttons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+          setView(button.dataset.viewButton);
+        });
+
+        button.addEventListener("keydown", (event) => {
+          const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+          if (direction === 0) {
+            return;
+          }
+
+          event.preventDefault();
+          const nextIndex = (index + direction + buttons.length) % buttons.length;
+          buttons[nextIndex].focus();
+          setView(buttons[nextIndex].dataset.viewButton);
+        });
+      });
+
+      const hashView = location.hash.slice(1);
+      setView(views.has(hashView) ? hashView : map.dataset.view || "direct", false);
+    })();
+  </script>
 </body>
 </html>
