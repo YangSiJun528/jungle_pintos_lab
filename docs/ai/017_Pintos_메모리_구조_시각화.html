@@ -294,6 +294,110 @@
       overflow-wrap: anywhere;
     }
 
+    .context-board {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) 48px minmax(210px, 0.75fr);
+      gap: 12px;
+      align-items: stretch;
+      margin-top: 14px;
+    }
+
+    .context-processes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .context-process-card,
+    .context-frame-card {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    .context-process-card.active {
+      border-color: var(--primary);
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+
+    .context-process-card h4,
+    .context-frame-card h4 {
+      margin: 0 0 6px;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .context-process-card p,
+    .context-frame-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .context-pages {
+      display: grid;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .context-page-row {
+      padding: 6px 8px;
+      border: 1px solid rgba(0, 102, 204, 0.18);
+      border-radius: 6px;
+      background: rgba(0, 102, 204, 0.06);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .context-page-row.mapped {
+      border-color: rgba(24, 128, 56, 0.34);
+      background: rgba(24, 128, 56, 0.08);
+    }
+
+    .context-page-row.lazy {
+      border-color: rgba(176, 106, 0, 0.34);
+      background: rgba(245, 166, 35, 0.1);
+    }
+
+    .context-link-column {
+      display: grid;
+      place-items: center;
+      color: var(--primary);
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .context-frames {
+      display: grid;
+      gap: 8px;
+    }
+
+    .context-frame-card {
+      border-color: rgba(24, 128, 56, 0.34);
+      background: rgba(24, 128, 56, 0.07);
+    }
+
+    .context-frame-card.alt {
+      border-color: rgba(126, 90, 163, 0.34);
+      background: rgba(126, 90, 163, 0.08);
+    }
+
+    .context-frame-card.lazy {
+      border-color: rgba(176, 106, 0, 0.34);
+      border-style: dashed;
+      background: rgba(245, 166, 35, 0.08);
+    }
+
     .bitmap-panel {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -564,21 +668,21 @@
       opacity: 0.36;
     }
 
+    .map-section[data-view="threading"] .memory-svg .dim-target,
     .map-section[data-view="storage"] .memory-svg .dim-target {
       opacity: 0.3;
     }
 
     .map-section[data-view="direct"] .memory-svg .focus-direct,
-    .map-section[data-view="page"] .memory-svg .focus-page,
-    .map-section[data-view="alias"] .memory-svg .focus-alias {
+    .map-section[data-view="direct"] .memory-svg .focus-alias,
+    .map-section[data-view="page"] .memory-svg .focus-page {
       opacity: 1;
       filter: drop-shadow(0 0 5px rgba(0, 102, 204, 0.24));
     }
 
     .map-section[data-view="direct"] .memory-svg .mapping-direct.focus-direct,
-    .map-section[data-view="page"] .memory-svg .mapping-user.focus-page,
-    .map-section[data-view="alias"] .memory-svg .mapping-direct.focus-alias,
-    .map-section[data-view="alias"] .memory-svg .mapping-user.focus-alias {
+    .map-section[data-view="direct"] .memory-svg .mapping-user.focus-alias,
+    .map-section[data-view="page"] .memory-svg .mapping-user.focus-page {
       stroke-width: 3.2;
     }
 
@@ -589,8 +693,9 @@
     }
 
     .map-section[data-view="direct"] .demo-direct,
+    .map-section[data-view="direct"] .demo-alias,
     .map-section[data-view="page"] .demo-page,
-    .map-section[data-view="alias"] .demo-alias,
+    .map-section[data-view="threading"] .demo-threading,
     .map-section[data-view="contents"] .demo-contents,
     .map-section[data-view="bitmap"] .demo-bitmap,
     .map-section[data-view="storage"] .demo-storage {
@@ -699,6 +804,68 @@
       letter-spacing: 0;
     }
 
+    .context-card {
+      fill: #fff;
+      stroke: rgba(0, 102, 204, 0.36);
+      stroke-width: 1.2;
+      filter: drop-shadow(0 8px 14px rgba(35, 45, 65, 0.08));
+    }
+
+    .context-card.active {
+      fill: rgba(0, 102, 204, 0.08);
+      stroke: var(--primary);
+      stroke-width: 2;
+    }
+
+    .context-card.idle {
+      fill: rgba(0, 0, 0, 0.025);
+      stroke-dasharray: 6 5;
+    }
+
+    .context-mini-page {
+      fill: rgba(0, 102, 204, 0.1);
+      stroke: rgba(0, 102, 204, 0.42);
+      stroke-width: 1;
+    }
+
+    .context-frame {
+      fill: rgba(24, 128, 56, 0.14);
+      stroke: #188038;
+      stroke-width: 1.4;
+    }
+
+    .context-frame.alt {
+      fill: rgba(126, 90, 163, 0.14);
+      stroke: #7e5aa3;
+    }
+
+    .context-route {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 2.1;
+      stroke-linecap: round;
+      stroke-dasharray: 6 5;
+      marker-end: url(#arrowPrimary);
+    }
+
+    .context-route.alt {
+      stroke: #7e5aa3;
+    }
+
+    .context-label {
+      fill: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .context-small {
+      fill: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
     .vm-real-box {
       fill: rgba(24, 128, 56, 0.12);
       stroke: #188038;
@@ -780,13 +947,6 @@
       flex: 0 0 auto;
     }
 
-    .line-sample {
-      width: 28px;
-      height: 0;
-      border-top: 1px solid var(--hairline);
-      flex: 0 0 auto;
-    }
-
     .arrow-sample {
       position: relative;
       width: 34px;
@@ -809,44 +969,6 @@
       border-left: 8px solid var(--primary);
       border-top: 4px solid transparent;
       border-bottom: 4px solid transparent;
-    }
-
-    .brace-sample {
-      width: 18px;
-      height: 22px;
-      display: inline-grid;
-      place-items: center;
-      color: var(--muted);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 22px;
-      line-height: 1;
-      flex: 0 0 auto;
-    }
-
-    .reading {
-      margin-top: 28px;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .read-card {
-      background: var(--canvas);
-      border: 1px solid var(--hairline);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-    }
-
-    .read-card h3 {
-      margin: 0 0 10px;
-      font-size: 19px;
-      line-height: 1.2;
-      font-weight: 600;
-    }
-
-    .read-card p {
-      margin: 0;
-      color: var(--muted);
     }
 
     .explain {
@@ -967,93 +1089,6 @@
       text-wrap: pretty;
     }
 
-    .operation-steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin: 14px 0 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .operation-step {
-      min-height: 150px;
-      padding: 14px;
-      border: 1px solid var(--hairline);
-      border-radius: var(--radius-sm);
-      background: #fafafc;
-    }
-
-    .step-number {
-      display: grid;
-      width: 28px;
-      height: 28px;
-      margin-bottom: 10px;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--primary);
-      color: #fff;
-      font-size: 14px;
-      line-height: 1;
-      font-weight: 800;
-    }
-
-    .operation-step h4 {
-      margin: 0 0 7px;
-      color: var(--ink);
-      font-size: 15px;
-      line-height: 1.25;
-      font-weight: 700;
-      letter-spacing: 0;
-    }
-
-    .operation-step p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.42;
-      text-wrap: pretty;
-    }
-
-    .vm-split-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .vm-split-card {
-      padding: 15px 16px;
-      border: 1px solid var(--hairline);
-      border-radius: var(--radius-sm);
-      background: #fff;
-    }
-
-    .vm-split-card.real {
-      border-color: rgba(24, 128, 56, 0.45);
-      background: rgba(24, 128, 56, 0.04);
-    }
-
-    .vm-split-card.meta {
-      border-color: rgba(176, 106, 0, 0.4);
-      background: rgba(245, 166, 35, 0.05);
-    }
-
-    .vm-split-card h4 {
-      margin: 0 0 8px;
-      color: var(--ink);
-      font-size: 16px;
-      line-height: 1.25;
-      font-weight: 700;
-      letter-spacing: 0;
-    }
-
-    .vm-split-card p {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
     .summary {
       margin-top: 28px;
       padding: 26px;
@@ -1105,16 +1140,19 @@
       }
 
       .tab-list,
-      .reading,
-      .term-grid,
-      .operation-steps {
+      .term-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .code-tour,
-      .bitmap-panel,
-      .vm-split-grid {
+      .context-board,
+      .context-processes,
+      .bitmap-panel {
         grid-template-columns: 1fr;
+      }
+
+      .context-link-column {
+        min-height: 30px;
       }
     }
 
@@ -1157,9 +1195,7 @@
       }
 
       .tab-list,
-      .reading,
-      .term-grid,
-      .operation-steps {
+      .term-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1180,7 +1216,6 @@
       <div class="brand">Pintos Memory Map</div>
       <nav aria-label="문서 이동">
         <a href="#map">map</a>
-        <a href="#reading">읽는 법</a>
         <a href="#explain">설명</a>
         <a href="#summary">요약</a>
       </nav>
@@ -1206,15 +1241,15 @@
         <div class="tab-list" role="tablist" aria-label="memory map focus">
           <button class="tab-button" id="tab-direct" type="button" role="tab" aria-selected="true" aria-controls="panel-direct" data-view-button="direct">
             <span class="tab-kicker">1</span>
-            <span class="tab-title">kernel direct mapping은 kernel이 physical memory를 다루는 창이다</span>
+            <span class="tab-title">kernel direct map과 alias를 함께 본다</span>
           </button>
           <button class="tab-button" id="tab-page" type="button" role="tab" aria-selected="false" aria-controls="panel-page" data-view-button="page">
             <span class="tab-kicker">2</span>
             <span class="tab-title">process별 virtual memory와 page table</span>
           </button>
-          <button class="tab-button" id="tab-alias" type="button" role="tab" aria-selected="false" aria-controls="panel-alias" data-view-button="alias">
+          <button class="tab-button" id="tab-threading" type="button" role="tab" aria-selected="false" aria-controls="panel-threading" data-view-button="threading">
             <span class="tab-kicker">3</span>
-            <span class="tab-title">같은 physical frame을 두 virtual mapping으로 볼 수 있다</span>
+            <span class="tab-title">여러 user 공간과 page-table 묶음 비교</span>
           </button>
           <button class="tab-button" id="tab-contents" type="button" role="tab" aria-selected="false" aria-controls="panel-contents" data-view-button="contents">
             <span class="tab-kicker">4</span>
@@ -1222,25 +1257,71 @@
           </button>
           <button class="tab-button" id="tab-bitmap" type="button" role="tab" aria-selected="false" aria-controls="panel-bitmap" data-view-button="bitmap">
             <span class="tab-kicker">5</span>
-            <span class="tab-title">user pool bitmap과 physical frame의 차이</span>
+            <span class="tab-title">bitmap, metadata, 실제 byte 구분</span>
           </button>
           <button class="tab-button" id="tab-storage" type="button" role="tab" aria-selected="false" aria-controls="panel-storage" data-view-button="storage">
             <span class="tab-kicker">6</span>
-            <span class="tab-title">VM에서 실제 byte와 metadata/예약 상태 구분</span>
+            <span class="tab-title">역할별 데이터가 실제 byte인지 metadata인지 시각화</span>
           </button>
         </div>
 
         <div class="tab-panel" id="panel-direct" role="tabpanel" aria-labelledby="tab-direct">
           <p><strong>kernel은 physical address를 직접 포인터처럼 쓰지 않고</strong>, `KERN_BASE + physical address`라는 kernel virtual address로 RAM을 봅니다.</p>
-          <p>user pool은 physical memory의 일부이며, 그 frame들도 같은 kernel direct map으로 접근됩니다.</p>
+          <p>physical frame이 user page에 붙어 있으면, 같은 frame을 user virtual address와 kernel direct-map address 양쪽 virtual mapping으로 볼 수 있습니다.</p>
         </div>
         <div class="tab-panel" id="panel-page" role="tabpanel" aria-labelledby="tab-page" hidden>
           <p><strong>user pool은 오른쪽 physical memory 안의 frame 출처입니다.</strong> 왼쪽 user virtual range 안에서는 page table에 매핑된 page만 그 frame에 연결됩니다.</p>
           <p>stack, BSS, data, code 같은 mapped page는 user-pool frame을 붙일 수 있지만, gap이나 unmapped area는 아직 frame을 갖지 않습니다.</p>
         </div>
-        <div class="tab-panel" id="panel-alias" role="tabpanel" aria-labelledby="tab-alias" hidden>
-          <p><strong>BSS만 가능한 것이 아닙니다.</strong> stack, BSS, data, code처럼 physical frame이 붙은 user page는 모두 kernel direct map 주소와 alias될 수 있습니다.</p>
-          <p>RAM frame이 복사되는 것이 아니라, 하나의 frame을 user virtual address와 `KERN_BASE + paddr` 양쪽에서 보는 것입니다.</p>
+        <div class="tab-panel" id="panel-threading" role="tabpanel" aria-labelledby="tab-threading" hidden>
+          <p><strong>process마다 user virtual address space와 page table 묶음이 따로 있습니다.</strong> 가운데 user 공간은 현재 선택된 process의 관점이고, 같은 upage라도 다른 process에서는 다른 physical frame 또는 아직 frame이 없는 상태를 가리킬 수 있습니다.</p>
+          <p>멀티스레드로 확장해 생각하면 같은 process 안의 thread들은 같은 user address space를 공유하고, 다른 process의 thread는 다른 page-table 묶음을 봅니다. kernel direct map은 이런 process 묶음들과 별개로 전역 mapping입니다.</p>
+          <div class="context-board" aria-label="multiple process address spaces">
+            <div class="context-processes">
+              <article class="context-process-card active">
+                <h4>Process A: 현재 view</h4>
+                <p>thread(s) -> PML4 A</p>
+                <div class="context-pages">
+                  <span class="context-page-row mapped">upage 0x500000 -> frame A</span>
+                  <span class="context-page-row">stack -> frame stack</span>
+                  <span class="context-page-row">code/data -> user pool</span>
+                </div>
+              </article>
+              <article class="context-process-card">
+                <h4>Process B</h4>
+                <p>thread(s) -> PML4 B</p>
+                <div class="context-pages">
+                  <span class="context-page-row mapped">same 0x500000 -> frame B</span>
+                  <span class="context-page-row">stack -> 다른 frame</span>
+                  <span class="context-page-row">code/data -> 다른 mapping</span>
+                </div>
+              </article>
+              <article class="context-process-card">
+                <h4>Process C</h4>
+                <p>thread(s) -> PML4 C</p>
+                <div class="context-pages">
+                  <span class="context-page-row lazy">same 0x500000 -> frame 없음</span>
+                  <span class="context-page-row">lazy page / unmapped</span>
+                  <span class="context-page-row">상태는 metadata에만 있음</span>
+                </div>
+              </article>
+            </div>
+            <div class="context-link-column">page<br>table<br>maps</div>
+            <div class="context-frames">
+              <article class="context-frame-card">
+                <h4>user pool frame A</h4>
+                <p>Process A의 0x500000 page byte</p>
+              </article>
+              <article class="context-frame-card alt">
+                <h4>user pool frame B</h4>
+                <p>Process B의 같은 VA가 보는 다른 byte</p>
+              </article>
+              <article class="context-frame-card lazy">
+                <h4>no frame yet</h4>
+                <p>Process C는 아직 physical frame이 붙지 않음</p>
+              </article>
+            </div>
+          </div>
         </div>
         <div class="tab-panel" id="panel-contents" role="tabpanel" aria-labelledby="tab-contents" hidden>
           <p><strong>이 탭은 주소 영역을 실제 데이터 종류와 연결합니다.</strong> 아래 예시는 각 영역에 어떤 byte나 metadata가 들어가는지 설명하기 위한 축약 예시입니다.</p>
@@ -1287,8 +1368,8 @@ thread page upper area
           </div>
         </div>
         <div class="tab-panel" id="panel-bitmap" role="tabpanel" aria-labelledby="tab-bitmap" hidden>
-          <p><strong>bitmap은 page 내용을 저장하지 않습니다.</strong> user pool의 각 physical page frame이 free인지 used인지 page당 1 bit로 표시합니다.</p>
-          <p>실제 user code/data/stack byte는 오른쪽 user pool frame 안에 있고, bitmap은 kernel allocator가 보는 작은 관리 정보입니다.</p>
+          <p><strong>bitmap과 page table은 page 내용을 저장하지 않습니다.</strong> bitmap은 frame의 free/used 상태를, page table은 VA -> frame 연결을 기록합니다.</p>
+          <p>실제 user code/data/stack byte는 오른쪽 user pool frame 안에 있고, gap이나 lazy page처럼 frame이 없는 상태는 metadata로만 남습니다.</p>
           <div class="term-grid" aria-label="memory storage terminology">
             <article class="term-card">
               <span class="term-label">용어 1</span>
@@ -1301,7 +1382,7 @@ thread page upper area
                 <dt>내용</dt>
                 <dd>user pool bitmap, page table, frame table 같은 관리 정보</dd>
                 <dt>역할</dt>
-                <dd>frame 할당 상태와 VA -> frame 연결을 기록하는 곳</dd>
+                <dd>frame 할당 상태, VA -> frame 연결, lazy/예약 상태를 기록</dd>
               </dl>
             </article>
             <article class="term-card">
@@ -1315,7 +1396,7 @@ thread page upper area
                 <dt>내용</dt>
                 <dd>실제 byte를 담는 공간이 아님</dd>
                 <dt>역할</dt>
-                <dd>현재 process의 page table에서 physical frame을 찾기 위한 이름</dd>
+                <dd>현재 process의 page table에서 frame을 찾기 위한 이름</dd>
               </dl>
             </article>
             <article class="term-card">
@@ -1333,28 +1414,6 @@ thread page upper area
               </dl>
             </article>
           </div>
-          <ol class="operation-steps" aria-label="memory access steps">
-            <li class="operation-step">
-              <span class="step-number">1</span>
-              <h4>주소 사용</h4>
-              <p>process가 user virtual address(upage)로 load/store를 요청합니다.</p>
-            </li>
-            <li class="operation-step">
-              <span class="step-number">2</span>
-              <h4>page table 조회</h4>
-              <p>현재 process의 page table이 VA에 연결된 physical frame을 찾습니다.</p>
-            </li>
-            <li class="operation-step">
-              <span class="step-number">3</span>
-              <h4>frame 접근</h4>
-              <p>읽고 쓰는 실제 byte는 user pool의 physical frame에 있습니다.</p>
-            </li>
-            <li class="operation-step">
-              <span class="step-number">4</span>
-              <h4>bitmap 관리</h4>
-              <p>kernel allocator는 bitmap bit로 frame의 free/used 상태만 관리합니다.</p>
-            </li>
-          </ol>
           <div class="bitmap-panel">
             <article class="bitmap-card">
               <h4>frame index와 bit의 관계</h4>
@@ -1371,8 +1430,8 @@ thread page upper area
               </div>
             </article>
             <article class="bitmap-card">
-              <h4>메모리 사용량 감각</h4>
-              <p>10000개 page frame을 추적해도 bitmap 자체는 10000 bit입니다. 큰 것은 bitmap이 아니라 실제 frame data입니다.</p>
+              <h4>metadata와 data의 크기 감각</h4>
+              <p>bitmap은 page당 1 bit라서 작습니다. 큰 메모리는 bitmap이 아니라 실제 frame byte에서 발생합니다.</p>
               <code class="formula">10000 frames * 1 bit = 10000 bits
 10000 bits / 8 = 1250 bytes ~= 1.22 KiB
 
@@ -1382,17 +1441,7 @@ thread page upper area
         </div>
         <div class="tab-panel" id="panel-storage" role="tabpanel" aria-labelledby="tab-storage" hidden>
           <p><strong>VM에 주소 범위가 보인다는 말과 실제 RAM byte가 있다는 말은 다릅니다.</strong> 실제 접근 가능한 page는 page table mapping을 통해 physical frame에 닿습니다.</p>
-          <p>반대로 gap, low unmapped area, lazy page처럼 아직 frame이 없는 상태는 page table, supplemental page table, bitmap 같은 metadata로만 상태를 관리합니다. metadata 자체는 kernel memory에 저장되는 실제 byte지만, 그것은 user page 내용이 아닙니다.</p>
-          <div class="vm-split-grid" aria-label="actual bytes versus metadata state">
-            <article class="vm-split-card real">
-              <h4>실제 byte-backed mapping</h4>
-              <p>user stack, user code/data/BSS처럼 mapping이 설치된 page는 user virtual address가 physical frame의 실제 byte로 이어집니다.</p>
-            </article>
-            <article class="vm-split-card meta">
-              <h4>metadata 또는 예약 상태</h4>
-              <p>unmapped gap, lazy-load 후보, free frame 상태는 주소 범위나 관리 정보로만 존재합니다. frame이 붙기 전에는 읽고 쓸 user page byte가 없습니다.</p>
-            </article>
-          </div>
+          <p>초록은 실제 byte-backed mapping, 주황은 metadata 또는 예약 상태입니다. metadata 자체도 kernel memory에 저장되는 byte지만 user page 내용은 아닙니다.</p>
         </div>
       </div>
 
@@ -1663,6 +1712,57 @@ thread page upper area
               </circle>
             </g>
 
+            <g class="demo-layer demo-threading">
+              <rect class="focus-box" x="374" y="630" width="312" height="416" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="138" rx="8"></rect>
+
+              <text class="context-label" x="158" y="630" text-anchor="middle">여러 user address space 묶음</text>
+              <rect class="context-card active" x="32" y="650" width="252" height="104" rx="8"></rect>
+              <text class="context-label" x="52" y="676">Process A 선택됨</text>
+              <text class="context-small" x="52" y="694">thread(s) -> PML4 A</text>
+              <text class="context-small" x="52" y="710">upage 0x500000 -> frame A</text>
+              <rect class="context-mini-page" x="202" y="668" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="690" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="712" width="56" height="16" rx="3"></rect>
+              <text class="context-small" x="230" y="742" text-anchor="middle">code/data/stack</text>
+
+              <rect class="context-card" x="32" y="770" width="252" height="104" rx="8"></rect>
+              <text class="context-label" x="52" y="796">Process B</text>
+              <text class="context-small" x="52" y="814">thread(s) -> PML4 B</text>
+              <text class="context-small" x="52" y="830">same upage -> frame B</text>
+              <rect class="context-mini-page" x="202" y="788" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="810" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="832" width="56" height="16" rx="3"></rect>
+              <text class="context-small" x="230" y="862" text-anchor="middle">다른 user VA 묶음</text>
+
+              <rect class="context-card idle" x="32" y="890" width="252" height="104" rx="8"></rect>
+              <text class="context-label" x="52" y="916">Process C</text>
+              <text class="context-small" x="52" y="934">thread(s) -> PML4 C</text>
+              <text class="context-small" x="52" y="950">same upage -> frame 없음</text>
+              <rect class="context-mini-page" x="202" y="908" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="930" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="952" width="56" height="16" rx="3"></rect>
+              <text class="context-small" x="230" y="982" text-anchor="middle">lazy / unmapped</text>
+
+              <rect class="context-frame" x="890" y="130" width="82" height="34" rx="5"></rect>
+              <text class="context-small" x="931" y="151" text-anchor="middle">frame A</text>
+              <rect class="context-frame alt" x="994" y="130" width="82" height="34" rx="5"></rect>
+              <text class="context-small" x="1035" y="151" text-anchor="middle">frame B</text>
+              <rect class="context-frame" x="890" y="184" width="82" height="34" rx="5"></rect>
+              <text class="context-small" x="931" y="205" text-anchor="middle">frame stack</text>
+
+              <path class="context-route" d="M 680 913 C 765 913, 760 147, 890 147"></path>
+              <path class="context-route alt" d="M 284 822 C 600 822, 680 147, 994 147"></path>
+
+              <rect class="demo-callout" x="704" y="746" width="176" height="124" rx="8"></rect>
+              <text class="demo-callout-text" x="792" y="770" text-anchor="middle">현재 view = Process A</text>
+              <text class="demo-callout-small" x="792" y="790" text-anchor="middle">가운데 user range는</text>
+              <text class="demo-callout-small" x="792" y="808" text-anchor="middle">PML4 A로 해석</text>
+              <text class="demo-callout-small" x="792" y="826" text-anchor="middle">B를 선택하면 같은 VA도</text>
+              <text class="demo-callout-small" x="792" y="844" text-anchor="middle">frame B나 미매핑으로 바뀜</text>
+              <text class="demo-callout-small" x="792" y="862" text-anchor="middle">kernel direct map은 전역</text>
+            </g>
+
             <g class="demo-layer demo-contents">
               <rect class="contents-highlight" x="374" y="106" width="312" height="460" rx="8"></rect>
               <rect class="contents-highlight user" x="374" y="630" width="312" height="416" rx="8"></rect>
@@ -1726,7 +1826,7 @@ thread page upper area
               <text class="storage-label" x="803" y="630" text-anchor="middle">초록: 실제 byte 연결</text>
               <text class="storage-label-small" x="803" y="648" text-anchor="middle">VA -> page table -> frame</text>
               <text class="storage-label-small" x="803" y="664" text-anchor="middle">읽기/쓰기는 frame byte 변경</text>
-              <text class="storage-label-small" x="803" y="680" text-anchor="middle">예: code, data, BSS, stack</text>
+              <text class="storage-label-small" x="803" y="680" text-anchor="middle">예: user pool frame, code, data, stack</text>
 
               <rect class="demo-callout" x="704" y="778" width="208" height="94" rx="8"></rect>
               <text class="storage-label" x="808" y="800" text-anchor="middle">주황: metadata/예약</text>
@@ -1750,121 +1850,58 @@ thread page upper area
         <span class="legend-item"><span class="swatch" style="background:repeating-linear-gradient(-45deg,#fff,#fff 8px,#e4e4e8 8px,#e4e4e8 10px)"></span>unmapped / reserved virtual area</span>
         <span class="legend-item"><span class="arrow-sample"></span>실선 화살표 = kernel direct mapping</span>
         <span class="legend-item"><span class="arrow-sample dashed"></span>점선 화살표 = user page table mapping</span>
-        <span class="legend-item"><span class="line-sample"></span>짧은 선 = 특정 주소 지점</span>
-        <span class="legend-item"><span class="brace-sample">{</span>brace = 주소 범위</span>
         <span class="legend-item"><span class="swatch" style="background:rgba(0,102,204,0.13);border-color:#0066cc"></span>page 탭 파란 강조 = user-pool frame이 붙은 mapped page</span>
         <span class="legend-item"><span class="swatch" style="background:#fff;border-style:dashed"></span>page 탭 점선 강조 = 아직 physical frame이 없는 user virtual gap</span>
-        <span class="legend-item"><span class="swatch" style="background:rgba(24,128,56,0.12);border-color:#188038"></span>6번 탭 초록 = 실제 frame byte로 이어지는 mapping</span>
+        <span class="legend-item"><span class="swatch" style="background:rgba(24,128,56,0.12);border-color:#188038"></span>6번 탭 초록 = user pool frame 같은 실제 byte 저장 영역</span>
         <span class="legend-item"><span class="swatch" style="background:rgba(245,166,35,0.12);border-color:#b06a00;border-style:dashed"></span>6번 탭 주황 = metadata 또는 예약 상태</span>
       </div>
-    </section>
-
-    <section class="reading" id="reading" aria-label="map reading guide">
-      <article class="read-card">
-        <h3>kernel은 오른쪽 RAM을 위쪽 kernel 주소로 본다</h3>
-        <p>실선은 physical memory가 kernel virtual memory에 고정 offset으로 비친다는 뜻입니다.</p>
-      </article>
-      <article class="read-card">
-        <h3>user는 아래쪽 user 주소만 본다</h3>
-        <p>`KERN_BASE` 위쪽은 같은 process page table 안에 있어도 user mode에서 접근할 수 없습니다.</p>
-      </article>
-      <article class="read-card">
-        <h3>user page는 dashed path로 frame에 연결된다</h3>
-        <p>user BSS, code, stack은 user pool을 직접 보는 것이 아니라 PML4 mapping을 통해 frame에 도달합니다.</p>
-      </article>
-      <article class="read-card">
-        <h3>왼쪽 주소는 representative value다</h3>
-        <p>`KERN_BASE`, `USER_STACK`, `0x400000`은 Pintos 기준값이고, `paddr`, `upage`는 실행 중 선택되는 주소 변수입니다.</p>
-      </article>
     </section>
 
     <section class="explain" id="explain" aria-label="map explanation">
       <article class="explain-card">
         <div class="num">1</div>
         <div>
-          <h3>kernel direct mapping은 kernel이 physical memory를 다루는 창이다</h3>
-          <p>Pintos는 physical memory를 `KERN_BASE` 위 kernel virtual address에 일대일로 매핑합니다. 그래서 kernel은 physical address를 포인터처럼 직접 쓰지 않고, kernel virtual address로 같은 frame을 접근합니다.</p>
+          <h3>kernel direct map과 KERN_BASE</h3>
+          <p>Pintos는 physical memory를 `KERN_BASE` 위 kernel virtual address에 일대일로 매핑합니다. 그래서 kernel은 physical address를 포인터처럼 직접 쓰지 않고, `KERN_BASE + physical address` 형태의 kernel virtual address로 frame을 접근합니다.</p>
           <code class="block">kernel virtual address = KERN_BASE + physical address
 physical address = kernel virtual address - KERN_BASE</code>
-          <p>map의 실선은 이 관계를 나타냅니다. user pool에 속한 physical frame도 kernel이 볼 때는 kernel direct map을 통해 접근됩니다.</p>
-        </div>
-      </article>
-
-      <article class="explain-card">
-        <div class="num">1a</div>
-        <div>
-          <h3>`KERN_BASE + physical address`는 매핑 정보를 저장한다는 뜻이 아니다</h3>
-          <p>`KERN_BASE + paddr`는 kernel이 사용할 virtual address를 계산하는 식입니다. 매핑 정보 자체는 page table entry에 저장되고, MMU가 그 page table을 보고 virtual address를 physical address로 변환합니다.</p>
-          <code class="block">paddr = 0x1234
-kaddr = KERN_BASE + paddr
-
-kernel이 *(uint8_t *) kaddr 를 읽으면
-MMU가 kaddr -> physical 0x1234 로 변환한다</code>
-          <p>따라서 “VM 위에 뭔가를 띄운다”기보다는, kernel virtual address라는 창을 통해 실제 physical frame을 읽고 쓰는 것입니다.</p>
-        </div>
-      </article>
-
-      <article class="explain-card">
-        <div class="num">1b</div>
-        <div>
-          <h3>KERN_BASE는 단순한 선이 아니라 permission wall이다</h3>
-          <p>user virtual memory는 `KERN_BASE` 아래입니다. user program이 `KERN_BASE` 위 kernel virtual address를 접근하려고 하면 page fault가 발생합니다.</p>
-          <p>반대로 kernel mode는 kernel virtual memory에 접근할 수 있고, 현재 실행 중인 process의 user virtual memory도 필요하면 접근할 수 있습니다.</p>
+          <p>`KERN_BASE`는 동시에 user/kernel 경계입니다. physical frame이 user page에 붙어 있으면, 같은 frame을 user VA와 kernel direct-map VA 양쪽에서 볼 수 있습니다.</p>
         </div>
       </article>
 
       <article class="explain-card">
         <div class="num">2</div>
         <div>
-          <h3>process별 virtual memory와 page table</h3>
-          <p>가운데 아래의 user BSS, initialized data, code, stack은 user program이 보는 영역입니다. 같은 virtual address라도 process A와 process B가 서로 다른 physical frame에 매핑될 수 있습니다.</p>
+          <h3>user virtual page와 user pool frame</h3>
+          <p>가운데 아래의 user BSS, data, code, stack은 process별 user virtual memory입니다. 같은 virtual address라도 process마다 다른 frame에 매핑될 수 있습니다.</p>
           <code class="block">Process A: user virtual 0x500000 -> physical frame A
 Process B: user virtual 0x500000 -> physical frame B</code>
-          <p>이 독립성이 process isolation의 핵심입니다.</p>
-        </div>
-      </article>
-
-      <article class="explain-card">
-        <div class="num">2a</div>
-        <div>
-          <h3>kernel pool과 user pool은 physical frame의 출처를 나누는 말이다</h3>
-          <p>`kernel pool`은 kernel 내부 자료구조, buffer, page table 같은 kernel 용도 frame을 얻는 곳입니다. `user pool`은 user page에 붙일 frame을 얻는 곳입니다.</p>
-          <p>둘 다 physical memory 안의 pool입니다. user pool이라는 이름 때문에 user program이 그 주소를 직접 본다고 이해하면 안 됩니다.</p>
-          <p>사용 중인 user-pool frame에는 resident user page의 실제 byte가 들어갈 수 있지만, user pool 전체가 “활성화된 모든 메모리 데이터”를 뜻하지는 않습니다. free frame도 user pool 안에 있고, kernel 데이터는 kernel pool 쪽 frame을 씁니다.</p>
-        </div>
-      </article>
-
-      <article class="explain-card">
-        <div class="num">2b</div>
-        <div>
-          <h3>mapped user page만 user-pool frame에 연결된다</h3>
-          <p>점선은 user virtual page가 PML4 page table entry를 통해 user pool의 physical frame에 연결되는 경로입니다. stack, BSS, data, code처럼 실제 mapping이 설치된 page만 frame을 가집니다.</p>
+          <p>`user pool`은 user가 직접 보는 주소 공간이 아니라 user page에 붙일 physical frame의 출처입니다. gap이나 unmapped area는 주소 범위로는 보이지만 아직 frame byte가 없습니다.</p>
           <code class="block">1. user page가 실제 frame을 필요로 함
 2. allocator가 user pool에서 빈 frame을 선택함
 3. page table이 virtual page -> frame 관계를 기록함
 4. CPU/MMU가 접근 시 그 관계로 frame을 찾음</code>
-          <p>반대로 user virtual range 안의 gap이나 unmapped area는 주소 범위로는 보이지만, 아직 연결된 physical frame이 없습니다.</p>
         </div>
       </article>
 
       <article class="explain-card">
         <div class="num">3</div>
         <div>
-          <h3>같은 physical frame을 두 virtual mapping으로 볼 수 있다</h3>
-          <p>같은 physical frame이 user virtual address와 kernel virtual address 양쪽에 보일 수 있습니다. BSS만의 성질이 아니라 physical frame이 붙은 mapped user page 전반에 해당합니다.</p>
+          <h3>alias, bitmap, metadata</h3>
+          <p>physical frame이 붙은 user page는 user virtual address와 kernel direct-map address 양쪽에서 보일 수 있습니다. 이것은 복사가 아니라 같은 frame을 가리키는 virtual mapping이 둘이라는 뜻입니다.</p>
           <code class="block">user virtual upage ───────┐
                            ├─ same physical frame
 kernel virtual KERN_BASE+p ┘</code>
-          <p>그래서 alias 탭의 3번은 “복사”가 아니라 “같은 frame을 가리키는 virtual address가 둘”이라는 점을 보여 줍니다.</p>
+          <p>bitmap과 page table은 이 frame의 사용 상태와 연결 관계를 기록하는 metadata입니다. 실제 code/data/stack byte는 metadata가 아니라 frame 안에 있습니다.</p>
         </div>
       </article>
 
       <article class="explain-card">
         <div class="num">4</div>
         <div>
-          <h3>왼쪽 thread page는 user stack과 다른 kernel 구조다</h3>
-          <p>왼쪽의 `struct thread`, kernel stack, interrupt frame은 thread를 실행하고 관리하기 위한 kernel 쪽 memory입니다. user stack은 가운데 아래 user virtual memory 안에 있는 별도 영역입니다.</p>
-          <p>즉 “stack”이라는 이름이 같아도 user stack과 kernel stack은 접근 권한, 용도, 위치가 다릅니다.</p>
+          <h3>여러 user 공간과 mapping context</h3>
+          <p>각 process는 자기 user virtual address space와 page table을 하나의 묶음으로 갖습니다. 그래서 같은 `0x500000` 같은 upage라도 Process A에서는 frame A, Process B에서는 frame B, Process C에서는 아직 frame 없음으로 해석될 수 있습니다.</p>
+          <p>멀티스레드 관점에서는 같은 process 안의 thread들이 같은 user mapping 묶음을 공유하고, 다른 process의 thread는 다른 묶음을 봅니다. 왼쪽의 thread page/kernel stack은 thread별 kernel memory이고, 가운데 user 공간은 process별 mapping context입니다.</p>
         </div>
       </article>
     </section>
@@ -1872,11 +1909,12 @@ kernel virtual KERN_BASE+p ┘</code>
     <section class="summary" id="summary">
       <h2>이 map의 핵심 결론</h2>
       <ul>
-        <li>physical memory는 오른쪽에 있고, virtual address space는 가운데에 있습니다.</li>
-        <li>kernel virtual memory는 physical memory를 고정 offset으로 볼 수 있습니다.</li>
-        <li>user virtual memory는 process마다 다르고, PML4 mapping을 통해 physical frame에 연결됩니다.</li>
-        <li>user pool은 user가 직접 접근하는 주소 공간이 아니라 user page용 frame의 출처입니다.</li>
-        <li>user BSS는 user가 접근 가능하지만, kernel BSS는 user가 접근할 수 없습니다.</li>
+        <li>가운데는 virtual address space, 오른쪽은 실제 physical memory입니다.</li>
+        <li>kernel은 `KERN_BASE + physical address`로 RAM frame을 봅니다.</li>
+        <li>user page는 process별 page table을 거쳐 user-pool frame에 연결됩니다.</li>
+        <li>process마다 user address space/page table 묶음이 다르며, 같은 user VA도 다른 frame을 가리킬 수 있습니다.</li>
+        <li>thread page/kernel stack은 thread별이고, 같은 process의 thread들은 같은 user mapping 묶음을 공유합니다.</li>
+        <li>bitmap/page table은 metadata이고, 실제 byte는 physical frame 안에 있습니다.</li>
       </ul>
     </section>
 
