@@ -1270,12 +1270,13 @@
           <p>physical frame이 user page에 붙어 있으면, 같은 frame을 user virtual address와 kernel direct-map address 양쪽 virtual mapping으로 볼 수 있습니다.</p>
         </div>
         <div class="tab-panel" id="panel-page" role="tabpanel" aria-labelledby="tab-page" hidden>
-          <p><strong>user pool은 오른쪽 physical memory 안의 frame 출처입니다.</strong> 왼쪽 user virtual range 안에서는 page table에 매핑된 page만 그 frame에 연결됩니다.</p>
+          <p><strong>user pool은 오른쪽 physical memory 안의 전역 frame 출처입니다.</strong> kernel direct map으로 접근할 수 있지만, process마다 따로 생기는 kernel 영역이 아니라 allocator가 나눈 물리 frame 집합입니다.</p>
           <p>stack, BSS, data, code 같은 mapped page는 user-pool frame을 붙일 수 있지만, gap이나 unmapped area는 아직 frame을 갖지 않습니다.</p>
         </div>
         <div class="tab-panel" id="panel-threading" role="tabpanel" aria-labelledby="tab-threading" hidden>
           <p><strong>process마다 user virtual address space와 page table 묶음이 따로 있습니다.</strong> 가운데 user 공간은 현재 선택된 process의 관점이고, 같은 upage라도 다른 process에서는 다른 physical frame 또는 아직 frame이 없는 상태를 가리킬 수 있습니다.</p>
-          <p>멀티스레드로 확장해 생각하면 같은 process 안의 thread들은 같은 user address space를 공유하고, 다른 process의 thread는 다른 page-table 묶음을 봅니다. kernel direct map은 이런 process 묶음들과 별개로 전역 mapping입니다.</p>
+          <p>user pool 자체는 switch되지 않습니다. 바뀌는 것은 CPU가 사용하는 active PML4이고, 그 결과 같은 user VA가 전역 user pool 안의 어느 frame을 보느냐가 달라집니다. 같은 process 안의 thread들은 같은 user address space를 공유하고, 다른 process의 thread는 다른 page-table 묶음을 봅니다.</p>
+          <p>CPU의 virtual address 표현 범위는 가능한 주소 이름의 최대치이고, Pintos가 실제로 resident page를 담는 한계는 physical RAM, user/kernel pool 분할, 현재 만든 page-table mapping에 의해 더 작게 정해집니다.</p>
           <div class="context-board" aria-label="multiple process address spaces">
             <div class="context-processes">
               <article class="context-process-card active">
@@ -1306,14 +1307,14 @@
                 </div>
               </article>
             </div>
-            <div class="context-link-column">page<br>table<br>maps</div>
+            <div class="context-link-column">active<br>PML4<br>maps</div>
             <div class="context-frames">
               <article class="context-frame-card">
-                <h4>user pool frame A</h4>
+                <h4>global user pool frame A</h4>
                 <p>Process A의 0x500000 page byte</p>
               </article>
               <article class="context-frame-card alt">
-                <h4>user pool frame B</h4>
+                <h4>global user pool frame B</h4>
                 <p>Process B의 같은 VA가 보는 다른 byte</p>
               </article>
               <article class="context-frame-card lazy">
@@ -1755,12 +1756,12 @@ thread page upper area
               <path class="context-route alt" d="M 284 822 C 600 822, 680 147, 994 147"></path>
 
               <rect class="demo-callout" x="704" y="746" width="176" height="124" rx="8"></rect>
-              <text class="demo-callout-text" x="792" y="770" text-anchor="middle">현재 view = Process A</text>
-              <text class="demo-callout-small" x="792" y="790" text-anchor="middle">가운데 user range는</text>
-              <text class="demo-callout-small" x="792" y="808" text-anchor="middle">PML4 A로 해석</text>
-              <text class="demo-callout-small" x="792" y="826" text-anchor="middle">B를 선택하면 같은 VA도</text>
-              <text class="demo-callout-small" x="792" y="844" text-anchor="middle">frame B나 미매핑으로 바뀜</text>
-              <text class="demo-callout-small" x="792" y="862" text-anchor="middle">kernel direct map은 전역</text>
+              <text class="demo-callout-text" x="792" y="770" text-anchor="middle">바뀌는 것 = active PML4</text>
+              <text class="demo-callout-small" x="792" y="790" text-anchor="middle">가운데 user VA 해석만</text>
+              <text class="demo-callout-small" x="792" y="808" text-anchor="middle">PML4 A/B/C로 달라짐</text>
+              <text class="demo-callout-small" x="792" y="826" text-anchor="middle">user pool frame들은</text>
+              <text class="demo-callout-small" x="792" y="844" text-anchor="middle">전역 RAM 안에 계속 있음</text>
+              <text class="demo-callout-small" x="792" y="862" text-anchor="middle">kernel direct map으로 접근</text>
             </g>
 
             <g class="demo-layer demo-contents">
@@ -1823,10 +1824,10 @@ thread page upper area
               <rect class="vm-meta-box" x="374" y="1040" width="312" height="28" rx="6"></rect>
 
               <rect class="demo-callout" x="704" y="608" width="198" height="82" rx="8"></rect>
-              <text class="storage-label" x="803" y="630" text-anchor="middle">초록: 실제 byte 연결</text>
-              <text class="storage-label-small" x="803" y="648" text-anchor="middle">VA -> page table -> frame</text>
-              <text class="storage-label-small" x="803" y="664" text-anchor="middle">읽기/쓰기는 frame byte 변경</text>
-              <text class="storage-label-small" x="803" y="680" text-anchor="middle">예: user pool frame, code, data, stack</text>
+              <text class="storage-label" x="803" y="630" text-anchor="middle">초록: 실제 byte 저장</text>
+              <text class="storage-label-small" x="803" y="648" text-anchor="middle">user pool frame은 전역 RAM</text>
+              <text class="storage-label-small" x="803" y="664" text-anchor="middle">process switch로 사라지지 않음</text>
+              <text class="storage-label-small" x="803" y="680" text-anchor="middle">VA -> frame mapping만 바뀜</text>
 
               <rect class="demo-callout" x="704" y="778" width="208" height="94" rx="8"></rect>
               <text class="storage-label" x="808" y="800" text-anchor="middle">주황: metadata/예약</text>
@@ -1866,6 +1867,7 @@ thread page upper area
           <code class="block">kernel virtual address = KERN_BASE + physical address
 physical address = kernel virtual address - KERN_BASE</code>
           <p>`KERN_BASE`는 동시에 user/kernel 경계입니다. physical frame이 user page에 붙어 있으면, 같은 frame을 user VA와 kernel direct-map VA 양쪽에서 볼 수 있습니다.</p>
+          <p>이 direct-map 범위는 CPU가 표현할 수 있는 전체 virtual address 공간과 같은 말이 아닙니다. Pintos가 실제로 매핑하는 것은 machine의 physical memory 크기까지이고, OS 정책과 allocator 상태가 실제 사용 가능한 frame 수를 제한합니다.</p>
         </div>
       </article>
 
@@ -1876,7 +1878,7 @@ physical address = kernel virtual address - KERN_BASE</code>
           <p>가운데 아래의 user BSS, data, code, stack은 process별 user virtual memory입니다. 같은 virtual address라도 process마다 다른 frame에 매핑될 수 있습니다.</p>
           <code class="block">Process A: user virtual 0x500000 -> physical frame A
 Process B: user virtual 0x500000 -> physical frame B</code>
-          <p>`user pool`은 user가 직접 보는 주소 공간이 아니라 user page에 붙일 physical frame의 출처입니다. gap이나 unmapped area는 주소 범위로는 보이지만 아직 frame byte가 없습니다.</p>
+          <p>`user pool`은 user가 직접 보는 주소 공간이 아니라 user page에 붙일 전역 physical frame의 출처입니다. kernel은 direct map으로 이 frame들을 볼 수 있고, process context가 바뀌어도 user pool 자체가 바뀌지는 않습니다.</p>
           <code class="block">1. user page가 실제 frame을 필요로 함
 2. allocator가 user pool에서 빈 frame을 선택함
 3. page table이 virtual page -> frame 관계를 기록함
@@ -1901,7 +1903,7 @@ kernel virtual KERN_BASE+p ┘</code>
         <div>
           <h3>여러 user 공간과 mapping context</h3>
           <p>각 process는 자기 user virtual address space와 page table을 하나의 묶음으로 갖습니다. 그래서 같은 `0x500000` 같은 upage라도 Process A에서는 frame A, Process B에서는 frame B, Process C에서는 아직 frame 없음으로 해석될 수 있습니다.</p>
-          <p>멀티스레드 관점에서는 같은 process 안의 thread들이 같은 user mapping 묶음을 공유하고, 다른 process의 thread는 다른 묶음을 봅니다. 왼쪽의 thread page/kernel stack은 thread별 kernel memory이고, 가운데 user 공간은 process별 mapping context입니다.</p>
+          <p>이때 frame A와 frame B는 모두 같은 전역 user pool 안에 남아 있습니다. 멀티스레드 관점에서는 같은 process 안의 thread들이 같은 user mapping 묶음을 공유하고, 다른 process의 thread는 다른 묶음을 봅니다. 왼쪽의 thread page/kernel stack은 thread별 kernel memory이고, 가운데 user 공간은 process별 mapping context입니다.</p>
         </div>
       </article>
     </section>
@@ -1912,6 +1914,8 @@ kernel virtual KERN_BASE+p ┘</code>
         <li>가운데는 virtual address space, 오른쪽은 실제 physical memory입니다.</li>
         <li>kernel은 `KERN_BASE + physical address`로 RAM frame을 봅니다.</li>
         <li>user page는 process별 page table을 거쳐 user-pool frame에 연결됩니다.</li>
+        <li>user pool physical frame은 전역 RAM 안에 남아 있고, switch되는 것은 active page table입니다.</li>
+        <li>CPU의 address 표현 범위보다 Pintos의 실제 resident memory 한계가 더 작습니다.</li>
         <li>process마다 user address space/page table 묶음이 다르며, 같은 user VA도 다른 frame을 가리킬 수 있습니다.</li>
         <li>thread page/kernel stack은 thread별이고, 같은 process의 thread들은 같은 user mapping 묶음을 공유합니다.</li>
         <li>bitmap/page table은 metadata이고, 실제 byte는 physical frame 안에 있습니다.</li>
