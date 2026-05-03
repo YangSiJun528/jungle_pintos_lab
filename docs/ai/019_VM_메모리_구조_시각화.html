@@ -530,53 +530,160 @@
     }
 
     .page-table-detail {
-      display: grid;
-      grid-template-columns: 250px 1fr 270px;
-      gap: 14px;
       min-height: 0;
-      padding: 12px 14px;
+      padding: 10px 12px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: #fff;
       overflow: hidden;
     }
 
-    .detail-copy {
+    .detail-struct {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr) 310px;
+      gap: 12px;
+      height: 100%;
       min-width: 0;
-      padding-right: 2px;
-      border-right: 1px solid #dbe3ee;
     }
 
-    .detail-copy .eyebrow {
-      margin-bottom: 10px;
+    .struct-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 8px;
+      min-width: 0;
+      min-height: 0;
+      padding: 9px;
+      border: 1px solid #cbd6e3;
+      border-radius: 7px;
+      background: #f8fbff;
     }
 
-    .detail-copy h2 {
-      margin: 0 0 12px;
+    .struct-panel.is-page-table {
+      grid-template-rows: auto 1fr;
+      background: #fffaf0;
+    }
+
+    .struct-panel.is-virtual {
+      grid-template-rows: auto 1fr;
+      background: #f7fbff;
+    }
+
+    .struct-panel.is-ram {
+      background: #f8fff9;
+    }
+
+    .struct-title {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: baseline;
+      min-width: 0;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(203, 214, 227, 0.82);
+    }
+
+    .struct-title span {
+      min-width: 0;
+      color: #667487;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .struct-title strong {
+      min-width: 0;
       color: #17202a;
-      font-size: 16px;
+      font-size: 13px;
+      font-weight: 850;
       line-height: 1.1;
       letter-spacing: 0;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .detail-map-list,
-    .detail-frame-meta {
+    .memory-block {
       display: grid;
-      gap: 6px;
+      align-content: center;
+      min-height: 52px;
+      min-width: 0;
+      padding: 7px 9px;
+      border: 1px solid rgba(37, 99, 235, 0.36);
+      border-radius: 6px;
+      background: var(--blue-soft);
+    }
+
+    .memory-stack {
+      display: grid;
+      align-content: stretch;
+      gap: 7px;
+      min-height: 0;
+    }
+
+    .memory-block.is-kernel {
+      border-color: rgba(8, 145, 178, 0.36);
+      background: var(--cyan-soft);
+    }
+
+    .memory-block .block-label {
+      min-width: 0;
+      color: #3f5f91;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .memory-block strong {
+      min-width: 0;
+      margin-top: 6px;
+      color: #17202a;
+      font-size: 14px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .memory-block small {
+      min-width: 0;
+      margin-top: 4px;
+      color: #4f5f72;
+      font-size: 10px;
+      font-weight: 720;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .struct-kv {
+      display: grid;
+      gap: 5px;
       margin: 0;
     }
 
-    .detail-map-list div,
-    .detail-frame-meta div {
+    .struct-hidden-value {
+      display: none;
+    }
+
+    .struct-kv div {
       display: grid;
-      grid-template-columns: 58px 1fr;
+      grid-template-columns: 52px 1fr;
       gap: 8px;
       align-items: baseline;
       min-width: 0;
     }
 
-    .detail-map-list dt,
-    .detail-frame-meta dt {
+    .struct-kv dt {
       color: #667487;
       font-size: 10px;
       font-weight: 850;
@@ -584,83 +691,93 @@
       text-transform: uppercase;
     }
 
-    .detail-map-list dd,
-    .detail-frame-meta dd {
+    .struct-kv dd {
       min-width: 0;
       margin: 0;
       color: #17202a;
       font-size: 12px;
       font-weight: 760;
       line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .detail-chain {
+    .page-table-block {
       display: grid;
-      grid-template-columns: 118px 20px 130px 20px 150px 20px 240px 20px 170px;
+      grid-template-rows: repeat(3, 30px) minmax(45px, 1fr);
+      gap: 5px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .table-entry {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
       align-items: center;
-      gap: 7px;
       min-width: 0;
-    }
-
-    .detail-node {
-      min-width: 0;
-      height: 128px;
-      padding: 10px 10px;
       border: 1px solid #c7d4e4;
-      border-radius: 7px;
-      background: #f8fbff;
+      border-radius: 5px;
+      background: #fff;
+      padding: 5px 8px;
     }
 
-    .detail-node.is-page {
-      border-color: rgba(37, 99, 235, 0.44);
-      background: var(--blue-soft);
-    }
-
-    .detail-node.is-pte {
-      border-color: rgba(180, 83, 9, 0.45);
+    .table-entry.is-pte {
+      grid-template-columns: 72px minmax(0, 210px) 1fr;
+      border-color: rgba(180, 83, 9, 0.48);
       background: #fff8e7;
     }
 
-    .detail-node-kicker {
-      display: block;
-      margin-bottom: 7px;
+    .table-entry.is-bits {
+      grid-template-columns: 72px 1fr;
+      align-items: start;
+      min-height: 0;
+    }
+
+    .entry-key {
       color: #5a6472;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
       line-height: 1;
       text-transform: uppercase;
     }
 
-    .detail-node strong {
-      display: block;
+    .table-entry strong {
+      min-width: 0;
       color: #17202a;
-      font-size: 14px;
-      line-height: 1.15;
+      font-size: 12px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .detail-node small {
-      display: block;
-      margin-top: 6px;
+    .table-entry small {
+      min-width: 0;
       color: #4f5f72;
       font-size: 11px;
       font-weight: 650;
-      line-height: 1.25;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .detail-bits {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 9px;
+      gap: 4px;
+      min-width: 0;
     }
 
     .bit-chip {
       display: inline-flex;
       align-items: center;
-      height: 19px;
-      padding: 0 7px;
+      height: 18px;
+      padding: 0 6px;
       border: 1px solid rgba(23, 32, 42, 0.12);
-      border-radius: 999px;
+      border-radius: 4px;
       background: #fff;
       color: #314155;
       font-size: 10px;
@@ -668,47 +785,13 @@
       white-space: nowrap;
     }
 
-    .detail-arrow {
-      color: #738196;
-      font-size: 20px;
-      font-weight: 800;
-      text-align: center;
-    }
-
-    .detail-frame-panel {
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 10px;
-      min-width: 0;
-      padding-left: 2px;
-    }
-
-    .detail-frame-title {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .detail-frame-title strong {
-      color: #17202a;
-      font-size: 18px;
-      line-height: 1.1;
-    }
-
-    .detail-frame-title span {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
     .detail-frame-block {
       display: grid;
       place-items: center;
-      min-height: 70px;
+      min-height: 72px;
+      min-width: 0;
       border: 1px solid rgba(22, 128, 58, 0.38);
-      border-radius: 7px;
+      border-radius: 6px;
       background:
         linear-gradient(90deg, rgba(22, 128, 58, 0.1), rgba(22, 128, 58, 0.18)),
         #f8fff9;
@@ -1082,77 +1165,75 @@
           </svg>
 
           <section class="page-table-detail" aria-labelledby="detail-title">
-            <div class="detail-copy">
-              <p class="eyebrow" id="detail-eyebrow"></p>
-              <h2 id="detail-title"></h2>
-              <dl class="detail-map-list">
-                <div>
-                  <dt>map</dt>
-                  <dd id="detail-summary"></dd>
+            <div class="detail-struct">
+              <section class="struct-panel is-virtual" aria-label="current process virtual address space">
+                <div class="struct-title">
+                  <span id="detail-eyebrow"></span>
+                  <strong id="detail-title"></strong>
                 </div>
-                <div>
-                  <dt>unit</dt>
-                  <dd>user page / 4 KiB</dd>
+                <div class="memory-stack">
+                  <div class="memory-block">
+                    <span class="block-label">current process virtual address space</span>
+                    <strong id="detail-upage">0x500000</strong>
+                    <small id="detail-upage-sub">current process user VA</small>
+                  </div>
+                  <div class="memory-block is-kernel">
+                    <span class="block-label">kernel direct-map VA</span>
+                    <strong id="detail-kpage">kpage alias</strong>
+                    <small id="detail-kpage-sub">KERN_BASE + paddr(frame)</small>
+                  </div>
                 </div>
-                <div>
-                  <dt>owner</dt>
-                  <dd>current process</dd>
-                </div>
-              </dl>
-            </div>
+                <span class="struct-hidden-value" id="detail-summary"></span>
+              </section>
 
-            <div class="detail-chain" aria-label="한 user page의 page table 확대 흐름">
-              <div class="detail-node is-page">
-                <span class="detail-node-kicker">User page</span>
-                <strong id="detail-upage">0x500000</strong>
-                <small id="detail-upage-sub">current process user VA</small>
-              </div>
-              <div class="detail-arrow">→</div>
-              <div class="detail-node">
-                <span class="detail-node-kicker">PML4</span>
-                <strong id="detail-pml4">active page table</strong>
-                <small id="detail-pml4-sub">selected by process context</small>
-              </div>
-              <div class="detail-arrow">→</div>
-              <div class="detail-node">
-                <span class="detail-node-kicker">PDP / PD / PT</span>
-                <strong id="detail-walk">page-table walk</strong>
-                <small id="detail-walk-sub">index levels choose one PTE</small>
-              </div>
-              <div class="detail-arrow">→</div>
-              <div class="detail-node is-pte">
-                <span class="detail-node-kicker">Selected PTE</span>
-                <strong id="detail-pte">present mapping</strong>
-                <small id="detail-pte-sub">upage -> frame</small>
-                <div class="detail-bits" id="detail-bits"></div>
-              </div>
-              <div class="detail-arrow">→</div>
-              <div class="detail-node">
-                <span class="detail-node-kicker">Kernel VA</span>
-                <strong id="detail-kpage">kpage alias</strong>
-                <small id="detail-kpage-sub">KERN_BASE + paddr(frame)</small>
-              </div>
-            </div>
+              <section class="struct-panel is-page-table" aria-label="page table structure">
+                <div class="struct-title">
+                  <span>page table</span>
+                  <strong id="detail-pml4">active page table</strong>
+                </div>
+                <div class="page-table-block">
+                  <div class="table-entry">
+                    <span class="entry-key">PML4</span>
+                    <strong id="detail-pml4-sub">active PML4 root</strong>
+                    <small>root</small>
+                  </div>
+                  <div class="table-entry">
+                    <span class="entry-key">PDP/PD/PT</span>
+                    <strong id="detail-walk">page-table walk</strong>
+                    <small id="detail-walk-sub">indices select one PTE</small>
+                  </div>
+                  <div class="table-entry is-pte">
+                    <span class="entry-key">PTE</span>
+                    <strong id="detail-pte">present mapping</strong>
+                    <small id="detail-pte-sub">upage -> frame</small>
+                  </div>
+                  <div class="table-entry is-bits">
+                    <span class="entry-key">bits</span>
+                    <div class="detail-bits" id="detail-bits"></div>
+                  </div>
+                </div>
+              </section>
 
-            <div class="detail-frame-panel">
-              <div class="detail-frame-title">
-                <strong id="detail-frame-title"></strong>
-                <span>physical memory</span>
-              </div>
-              <div class="detail-frame-block" id="detail-frame-block">
-                <span id="detail-frame-label"></span>
-              </div>
-              <dl class="detail-frame-meta">
-                <div>
-                  <dt>bytes</dt>
-                  <dd id="detail-frame-note"></dd>
+              <section class="struct-panel is-ram" aria-label="physical memory actual RAM">
+                <div class="struct-title">
+                  <span>physical memory (actual RAM)</span>
+                  <strong id="detail-frame-title"></strong>
                 </div>
-                <div>
-                  <dt>alias</dt>
-                  <dd>kernel direct map</dd>
+                <div class="detail-frame-block" id="detail-frame-block">
+                  <span id="detail-frame-label"></span>
                 </div>
-              </dl>
-            </div>
+                <dl class="struct-kv">
+                  <div>
+                    <dt>bytes</dt>
+                    <dd id="detail-frame-note"></dd>
+                  </div>
+                  <div>
+                    <dt>alias</dt>
+                    <dd>kernel direct map</dd>
+                  </div>
+                </dl>
+              </section>
+              </div>
           </section>
         </div>
       </div>
