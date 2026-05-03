@@ -56,10 +56,10 @@
 
     .stage {
       width: 2180px;
-      height: 1030px;
+      height: 1260px;
       margin: 32px auto;
       display: grid;
-      grid-template-rows: 96px 830px 48px;
+      grid-template-rows: 96px 830px 220px 48px;
       row-gap: 12px;
       padding: 14px 18px;
       border: 1px solid rgba(124, 135, 151, 0.26);
@@ -526,6 +526,195 @@
       background: #f7f9fb;
     }
 
+    .page-table-detail {
+      display: grid;
+      grid-template-columns: 330px 1fr 390px;
+      gap: 20px;
+      min-height: 0;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .detail-copy {
+      min-width: 0;
+      padding-right: 2px;
+      border-right: 1px solid #dbe3ee;
+    }
+
+    .detail-copy .eyebrow {
+      margin-bottom: 9px;
+    }
+
+    .detail-copy h2 {
+      margin: 0 0 9px;
+      color: #17202a;
+      font-size: 20px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .detail-copy p {
+      margin: 0;
+      color: #3c4858;
+      font-size: 13px;
+      line-height: 1.42;
+    }
+
+    .detail-chain {
+      display: grid;
+      grid-template-columns: 150px 26px 160px 26px 180px 26px 290px 26px 230px;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .detail-node {
+      min-width: 0;
+      height: 154px;
+      padding: 12px 12px;
+      border: 1px solid #c7d4e4;
+      border-radius: 7px;
+      background: #f8fbff;
+    }
+
+    .detail-node.is-page {
+      border-color: rgba(37, 99, 235, 0.44);
+      background: var(--blue-soft);
+    }
+
+    .detail-node.is-pte {
+      border-color: rgba(180, 83, 9, 0.45);
+      background: #fff8e7;
+    }
+
+    .detail-node-kicker {
+      display: block;
+      margin-bottom: 7px;
+      color: #5a6472;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .detail-node strong {
+      display: block;
+      color: #17202a;
+      font-size: 16px;
+      line-height: 1.15;
+    }
+
+    .detail-node small {
+      display: block;
+      margin-top: 6px;
+      color: #4f5f72;
+      font-size: 12px;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .detail-bits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 9px;
+    }
+
+    .bit-chip {
+      display: inline-flex;
+      align-items: center;
+      height: 19px;
+      padding: 0 8px;
+      border: 1px solid rgba(23, 32, 42, 0.12);
+      border-radius: 999px;
+      background: #fff;
+      color: #314155;
+      font-size: 10.5px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .detail-arrow {
+      color: #738196;
+      font-size: 22px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .detail-frame-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+      min-width: 0;
+      padding-left: 2px;
+    }
+
+    .detail-frame-title {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .detail-frame-title strong {
+      color: #17202a;
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .detail-frame-title span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .detail-frame-block {
+      display: grid;
+      place-items: center;
+      min-height: 78px;
+      border: 1px solid rgba(22, 128, 58, 0.38);
+      border-radius: 7px;
+      background:
+        linear-gradient(90deg, rgba(22, 128, 58, 0.1), rgba(22, 128, 58, 0.18)),
+        #f8fff9;
+      color: #135b2d;
+      font-size: 15px;
+      font-weight: 820;
+      text-align: center;
+    }
+
+    .detail-frame-block.is-empty {
+      border-color: rgba(225, 29, 72, 0.35);
+      background:
+        repeating-linear-gradient(
+          -45deg,
+          #fff,
+          #fff 8px,
+          #ffe6ec 8px,
+          #ffe6ec 15px
+        );
+      color: #a01536;
+    }
+
+    .detail-frame-block.is-evict {
+      border-color: rgba(124, 58, 237, 0.36);
+      background:
+        linear-gradient(90deg, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0.18)),
+        #fbf8ff;
+      color: #5b28b3;
+    }
+
+    .detail-frame-note {
+      margin: 0;
+      color: #39485a;
+      font-size: 13px;
+      line-height: 1.34;
+    }
+
     .footer {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -711,19 +900,19 @@
 
             <g class="map-item" data-show="overview user" data-focus="overview user">
               <rect class="card" x="64" y="154" width="250" height="58"></rect>
-              <text class="card-title" x="189" y="178">Process A active PML4</text>
+              <text class="card-title" x="189" y="178">Process A page table</text>
               <text class="card-sub" x="189" y="196">0x500000 -> Frame A</text>
             </g>
 
             <g class="map-item" data-show="user" data-focus="user">
               <rect class="card" x="64" y="224" width="250" height="58"></rect>
-              <text class="card-title" x="189" y="248">Process B active PML4</text>
+              <text class="card-title" x="189" y="248">Process B page table</text>
               <text class="card-sub" x="189" y="266">0x500000 -> Frame B</text>
             </g>
 
             <g class="map-item" data-show="user fault" data-focus="user fault">
               <rect class="card" x="64" y="294" width="250" height="58"></rect>
-              <text class="card-title" x="189" y="318">Process C active PML4</text>
+              <text class="card-title" x="189" y="318">Process C page table</text>
               <text class="card-sub" x="189" y="336">0x500000 -> not-present</text>
             </g>
 
@@ -732,10 +921,10 @@
               <text class="card-title" x="875" y="191">MMU / TLB</text>
               <text class="card-sub" x="875" y="207">translate or fault</text>
               <rect class="card" x="800" y="246" width="150" height="52"></rect>
-              <text class="card-title" x="875" y="269">Active PML4</text>
+              <text class="card-title" x="875" y="269">Active page table</text>
               <text class="card-sub" x="875" y="285">selected process</text>
               <rect class="card" x="800" y="324" width="150" height="52"></rect>
-              <text class="card-title" x="875" y="347">PTE</text>
+              <text class="card-title" x="875" y="347">Selected PTE</text>
               <text class="card-sub" x="875" y="363">upage -> frame</text>
             </g>
 
@@ -784,10 +973,10 @@
               <path class="route user" d="M 710 472 L 766 472 L 766 272 L 800 272"></path>
               <path class="route user" d="M 950 350 L 1064 350 L 1064 180 L 1110 180"></path>
               <path class="route user" d="M 950 350 L 1046 350 L 1046 234 L 1110 234"></path>
-              <text class="minor-label" x="189" y="144" text-anchor="middle">process-specific PML4 choices</text>
+              <text class="minor-label" x="189" y="144" text-anchor="middle">process-specific page tables</text>
               <text class="minor-label" x="570" y="416" text-anchor="middle">all user VA segments</text>
               <text class="minor-label" x="1236" y="80" text-anchor="middle">shared physical user pool</text>
-              <text class="minor-label" x="840" y="424">same user VA, different active PML4</text>
+              <text class="minor-label" x="840" y="424">same user VA, different active page table</text>
               <g class="badge" transform="translate(326 183)"><circle r="13"></circle><text>1</text></g>
               <g class="badge" transform="translate(326 253)"><circle r="13"></circle><text>2</text></g>
               <g class="badge" transform="translate(392 568)"><circle r="13"></circle><text>3</text></g>
@@ -884,6 +1073,58 @@
       </aside>
     </section>
 
+    <section class="page-table-detail" aria-labelledby="detail-title">
+      <div class="detail-copy">
+        <p class="eyebrow" id="detail-eyebrow"></p>
+        <h2 id="detail-title"></h2>
+        <p id="detail-summary"></p>
+      </div>
+
+      <div class="detail-chain" aria-label="한 user page의 page table 확대 흐름">
+        <div class="detail-node is-page">
+          <span class="detail-node-kicker">User page</span>
+          <strong id="detail-upage">0x500000</strong>
+          <small id="detail-upage-sub">current process user VA</small>
+        </div>
+        <div class="detail-arrow">→</div>
+        <div class="detail-node">
+          <span class="detail-node-kicker">PML4</span>
+          <strong id="detail-pml4">active page table</strong>
+          <small id="detail-pml4-sub">selected by process context</small>
+        </div>
+        <div class="detail-arrow">→</div>
+        <div class="detail-node">
+          <span class="detail-node-kicker">PDP / PD / PT</span>
+          <strong id="detail-walk">page-table walk</strong>
+          <small id="detail-walk-sub">index levels choose one PTE</small>
+        </div>
+        <div class="detail-arrow">→</div>
+        <div class="detail-node is-pte">
+          <span class="detail-node-kicker">Selected PTE</span>
+          <strong id="detail-pte">present mapping</strong>
+          <small id="detail-pte-sub">upage -> frame</small>
+          <div class="detail-bits" id="detail-bits"></div>
+        </div>
+        <div class="detail-arrow">→</div>
+        <div class="detail-node">
+          <span class="detail-node-kicker">Kernel VA</span>
+          <strong id="detail-kpage">kpage alias</strong>
+          <small id="detail-kpage-sub">KERN_BASE + paddr(frame)</small>
+        </div>
+      </div>
+
+      <div class="detail-frame-panel">
+        <div class="detail-frame-title">
+          <strong id="detail-frame-title"></strong>
+          <span>physical memory</span>
+        </div>
+        <div class="detail-frame-block" id="detail-frame-block">
+          <span id="detail-frame-label"></span>
+        </div>
+        <p class="detail-frame-note" id="detail-frame-note"></p>
+      </div>
+    </section>
+
     <footer class="footer">
       <div class="legend" aria-label="범례">
         <span class="legend-item"><span class="swatch user"></span>User VA region</span>
@@ -907,18 +1148,38 @@
         title: "세로 memory bar로 VA와 RAM을 분리해서 본다",
         summary: "가운데 긴 막대는 현재 process의 virtual address space이고, 오른쪽 긴 막대는 실제 physical memory다. 두 막대 사이의 얇은 선만 mapping 관계를 표시한다.",
         points: [
-          "User VA는 active PML4와 PTE를 거쳐 physical frame에 닿는다.",
+          "User VA는 active page table과 PTE를 거쳐 physical frame에 닿는다.",
           "Kernel direct-map VA는 같은 frame을 kernel-side alias로 본다.",
           "SPT와 frame table은 page identity와 frame 소유 관계를 기억한다."
         ],
         flow: [
           "전체 user VA range에서 process가 쓰는 주소 이름이 나온다.",
-          "Active PML4/PTE가 그 user VA를 frame 번호로 해석한다.",
+          "Active page table/PTE가 그 user VA를 frame 번호로 해석한다.",
           "해석 결과는 user pool 안의 Frame A를 가리킨다.",
           "Kernel direct-map VA도 같은 Frame A를 kernel-side alias로 볼 수 있다."
         ],
         note: "두 주소 이름이 같은 RAM frame을 가리킬 수 있지만, byte 저장소가 두 벌이라는 뜻은 아니다.",
-        takeaway: "핵심 연결: user VA -> active PML4/PTE -> physical frame <- kernel direct-map VA"
+        takeaway: "핵심 연결: user VA -> active page table/PTE -> physical frame <- kernel direct-map VA",
+        detail: {
+          eyebrow: "Page Table Detail",
+          title: "한 user page를 page table entry로 확대한다",
+          summary: "Page table은 byte 저장소가 아니라 user VA를 어떤 physical frame으로 보낼지 기록하는 mapping이다.",
+          upage: "0x500000",
+          upageSub: "current process user VA",
+          pml4: "Process A page table",
+          pml4Sub: "active PML4 root",
+          walk: "PML4 -> PDP -> PD -> PT",
+          walkSub: "indices select one PTE",
+          pte: "PTE present",
+          pteSub: "0x500000 -> Frame A",
+          bits: ["present=1", "rw=1", "user=1", "target=Frame A"],
+          kpage: "KERN_BASE + paddr(A)",
+          kpageSub: "kernel alias for same frame",
+          frameTitle: "Frame A",
+          frameLabel: "resident Process A page bytes",
+          frameNote: "오른쪽 physical memory 안의 실제 RAM frame이다. PTE는 이 frame을 가리키는 번역 항목이다.",
+          frameClass: ""
+        }
       },
       kernel: {
         tab: "kernel view",
@@ -936,7 +1197,27 @@
           "그 이름은 physical RAM의 kernel pool/object 구간을 같은 방식으로 가리킨다."
         ],
         note: "전역 view란 kernel이 같은 주소 이름으로 자기 자료구조와 RAM alias에 접근한다는 뜻이다.",
-        takeaway: "Context switch는 user view를 바꾸지만, kernel-side mapping은 같은 기준점으로 유지된다."
+        takeaway: "Context switch는 user view를 바꾸지만, kernel-side mapping은 같은 기준점으로 유지된다.",
+        detail: {
+          eyebrow: "Kernel Entries",
+          title: "PML4에는 user mapping과 kernel mapping이 함께 있다",
+          summary: "Process가 달라도 kernel half mapping은 같은 기준으로 남고, user bit가 꺼진 supervisor-only entry로 보호된다.",
+          upage: "KERN_BASE + paddr",
+          upageSub: "kernel virtual address",
+          pml4: "shared kernel half",
+          pml4Sub: "copied into process page tables",
+          walk: "PML4 -> lower levels",
+          walkSub: "kernel-side entries",
+          pte: "supervisor PTE",
+          pteSub: "kernel VA -> kernel frame",
+          bits: ["present=1", "user=0", "shared kernel half", "target=kernel frame"],
+          kpage: "direct-map VA",
+          kpageSub: "same name across processes",
+          frameTitle: "kernel pool frame",
+          frameLabel: "kernel metadata / page table memory",
+          frameNote: "User mode가 이 mapping을 볼 수 있다는 뜻은 아니다. Permission bit가 user 접근을 막는다.",
+          frameClass: ""
+        }
       },
       direct: {
         tab: "direct map",
@@ -954,12 +1235,32 @@
           "Kernel pool frame도 RAM frame이므로 direct-map window로 접근된다."
         ],
         note: "Direct map은 page의 영구 신분증이 아니라 현재 physical frame을 보는 kernel-side 이름이다.",
-        takeaway: "Direct map은 복사본이 아니라 같은 frame의 kernel-side name이다."
+        takeaway: "Direct map은 복사본이 아니라 같은 frame의 kernel-side name이다.",
+        detail: {
+          eyebrow: "Direct-map Alias",
+          title: "PTE target frame은 kernel VA 이름도 가진다",
+          summary: "pml4_set_page의 kpage는 user VA가 아니라, kernel이 frame byte를 만질 수 있게 하는 direct-map alias다.",
+          upage: "0x500000",
+          upageSub: "user page name",
+          pml4: "process page table",
+          pml4Sub: "stores user mapping",
+          walk: "PTE lookup",
+          walkSub: "finds target frame",
+          pte: "PTE target",
+          pteSub: "upage -> Frame F",
+          bits: ["present=1", "target=Frame F", "kpage names frame", "same bytes"],
+          kpage: "KERN_BASE + paddr(F)",
+          kpageSub: "kernel-side alias",
+          frameTitle: "Frame F",
+          frameLabel: "same physical bytes",
+          frameNote: "Direct map은 frame의 또 다른 virtual name이다. User page 내용을 복사해서 들고 있는 공간이 아니다.",
+          frameClass: ""
+        }
       },
       user: {
         tab: "user view",
         eyebrow: "Per-process User View",
-        title: "같은 0x500000도 active PML4에 따라 다르게 보인다",
+        title: "같은 0x500000도 active page table에 따라 다르게 보인다",
         summary: "왼쪽의 Process A/B/C는 같은 user VA 이름을 쓰지만, 선택된 PML4에 따라 오른쪽 user pool의 다른 frame 또는 not-present 상태로 이어진다.",
         points: [
           "바뀌는 것은 user pool이 아니라 CPU가 현재 사용하는 PML4다.",
@@ -967,20 +1268,40 @@
           "같은 process의 thread는 user address space를 공유하지만, 다른 process는 다른 user mapping을 쓴다."
         ],
         flow: [
-          "Process A의 PML4는 같은 user VA를 Frame A로 해석한다.",
-          "Process B의 PML4는 같은 user VA를 Frame B로 해석한다.",
+          "Process A의 page table은 같은 user VA를 Frame A로 해석한다.",
+          "Process B의 page table은 같은 user VA를 Frame B로 해석한다.",
           "Process C에서는 그 user VA가 not-present라서 resident frame이 없다.",
-          "Active PML4/PTE가 현재 해석 규칙이며, context switch 때 이 규칙이 바뀐다.",
+          "Active page table/PTE가 현재 해석 규칙이며, context switch 때 이 규칙이 바뀐다.",
           "전체 user VA range와 Frame A/B 묶음은 user 영역이 실제 byte 저장소가 아니라 frame을 바라본다는 점을 보여 준다."
         ],
         note: "Process별 view는 주소 이름의 해석 규칙이 달라진다는 뜻이지 RAM pool이 복제된다는 뜻이 아니다.",
-        takeaway: "User view 전환의 중심은 active PML4이고, physical user pool은 전역 자원으로 남는다."
+        takeaway: "User view 전환의 중심은 active page table이고, physical user pool은 전역 자원으로 남는다.",
+        detail: {
+          eyebrow: "Per-process Mapping",
+          title: "같은 user page도 page table마다 다른 PTE를 가진다",
+          summary: "하단 확대 UI는 frame 목록이 아니라, active page table이 어떤 PTE를 선택하는지를 보여 준다.",
+          upage: "0x500000",
+          upageSub: "same user VA text",
+          pml4: "A / B / C page table",
+          pml4Sub: "context switch chooses one",
+          walk: "same VA indices",
+          walkSub: "different table roots",
+          pte: "different PTEs",
+          pteSub: "A->Frame A, B->Frame B",
+          bits: ["A: Frame A", "B: Frame B", "C: not-present", "active table decides"],
+          kpage: "selected frame alias",
+          kpageSub: "only after mapping exists",
+          frameTitle: "Frame A / Frame B",
+          frameLabel: "chosen by active page table",
+          frameNote: "Physical user pool은 전역으로 남고, process마다 달라지는 것은 VA 해석 규칙이다.",
+          frameClass: ""
+        }
       },
       fault: {
         tab: "page fault",
         eyebrow: "Fault Recovery",
         title: "not-present fault는 OS가 metadata로 복구할 수 있다",
-        summary: "Fault 흐름은 기존 memory bar 위에 번호만 얹는다. MMU fault, SPT lookup, frame 확보, backing load, PTE update 순서다.",
+        summary: "Fault 흐름은 memory bar와 하단 page table detail을 함께 본다. MMU fault, SPT lookup, frame 확보, backing load, PTE update 순서다.",
         points: [
           "SPT는 lazy page, swap 위치, file offset 같은 page identity를 기억한다.",
           "Frame은 user pool에서 확보되고, kernel은 direct-map VA로 그 frame의 byte를 채운다.",
@@ -994,7 +1315,27 @@
           "PTE가 Frame G를 가리키도록 갱신되어 user VA가 다시 유효해진다."
         ],
         note: "MMU가 disk에서 page를 읽어 오는 것이 아니다. 실패 감지와 복구 책임은 분리된다.",
-        takeaway: "Fault path: user VA miss -> SPT -> user pool frame -> direct-map load -> PTE update"
+        takeaway: "Fault path: user VA miss -> SPT -> user pool frame -> direct-map load -> PTE update",
+        detail: {
+          eyebrow: "Fault Transition",
+          title: "PTE가 not-present에서 Frame G mapping으로 바뀐다",
+          summary: "Fault 전에는 PTE가 resident frame을 가리키지 않는다. Valid fault라면 OS가 frame을 채운 뒤 PTE를 갱신한다.",
+          upage: "0x500000",
+          upageSub: "faulting user VA",
+          pml4: "Process C page table",
+          pml4Sub: "active at fault time",
+          walk: "PTE lookup fails",
+          walkSub: "not-present entry",
+          pte: "not-present -> present",
+          pteSub: "none -> Frame G",
+          bits: ["present=0 -> 1", "target none -> Frame G", "rw/user from SPT", "retry instruction"],
+          kpage: "KERN_BASE + paddr(G)",
+          kpageSub: "handler fills frame through alias",
+          frameTitle: "Frame G",
+          frameLabel: "after handler: resident page bytes",
+          frameNote: "SPT가 page identity를 확인하면 user pool에서 frame을 얻고, direct-map VA로 backing bytes를 채운다.",
+          frameClass: ""
+        }
       },
       evict: {
         tab: "eviction/swap",
@@ -1013,7 +1354,27 @@
           "Frame은 재사용되고, 이후 같은 page는 다른 frame으로 page-in될 수 있다."
         ],
         note: "Direct map은 특정 user page가 아니라 physical frame의 현재 내용을 본다.",
-        takeaway: "Eviction은 page identity와 resident frame을 분리해서 생각해야 한다."
+        takeaway: "Eviction은 page identity와 resident frame을 분리해서 생각해야 한다.",
+        detail: {
+          eyebrow: "Eviction Transition",
+          title: "PTE는 frame 연결을 잃고 page identity는 SPT에 남는다",
+          summary: "Eviction 후 frame은 재사용될 수 있고, 같은 user VA는 나중에 fault를 통해 다른 frame으로 page-in된다.",
+          upage: "0x500000",
+          upageSub: "evicted page VA",
+          pml4: "process page table",
+          pml4Sub: "mapping is cleared",
+          walk: "PTE update",
+          walkSub: "resident bit removed",
+          pte: "present -> not-present",
+          pteSub: "Frame F released",
+          bits: ["present=1 -> 0", "dirty saved if needed", "target cleared", "future fault -> Frame G"],
+          kpage: "old alias invalid for page",
+          kpageSub: "frame can be reused",
+          frameTitle: "Frame F",
+          frameLabel: "victim frame becomes reusable",
+          frameNote: "Direct map으로 보이는 것은 page identity가 아니라 현재 physical frame의 내용이다.",
+          frameClass: "is-evict"
+        }
       }
     };
 
@@ -1027,6 +1388,52 @@
     const panelNote = document.getElementById("panel-note");
     const takeaway = document.getElementById("takeaway");
     const mapItems = Array.from(document.querySelectorAll(".map-item"));
+    const detailEyebrow = document.getElementById("detail-eyebrow");
+    const detailTitle = document.getElementById("detail-title");
+    const detailSummary = document.getElementById("detail-summary");
+    const detailUpage = document.getElementById("detail-upage");
+    const detailUpageSub = document.getElementById("detail-upage-sub");
+    const detailPml4 = document.getElementById("detail-pml4");
+    const detailPml4Sub = document.getElementById("detail-pml4-sub");
+    const detailWalk = document.getElementById("detail-walk");
+    const detailWalkSub = document.getElementById("detail-walk-sub");
+    const detailPte = document.getElementById("detail-pte");
+    const detailPteSub = document.getElementById("detail-pte-sub");
+    const detailBits = document.getElementById("detail-bits");
+    const detailKpage = document.getElementById("detail-kpage");
+    const detailKpageSub = document.getElementById("detail-kpage-sub");
+    const detailFrameTitle = document.getElementById("detail-frame-title");
+    const detailFrameBlock = document.getElementById("detail-frame-block");
+    const detailFrameLabel = document.getElementById("detail-frame-label");
+    const detailFrameNote = document.getElementById("detail-frame-note");
+
+    function renderDetail(detail) {
+      detailEyebrow.textContent = detail.eyebrow;
+      detailTitle.textContent = detail.title;
+      detailSummary.textContent = detail.summary;
+      detailUpage.textContent = detail.upage;
+      detailUpageSub.textContent = detail.upageSub;
+      detailPml4.textContent = detail.pml4;
+      detailPml4Sub.textContent = detail.pml4Sub;
+      detailWalk.textContent = detail.walk;
+      detailWalkSub.textContent = detail.walkSub;
+      detailPte.textContent = detail.pte;
+      detailPteSub.textContent = detail.pteSub;
+      detailKpage.textContent = detail.kpage;
+      detailKpageSub.textContent = detail.kpageSub;
+      detailFrameTitle.textContent = detail.frameTitle;
+      detailFrameLabel.textContent = detail.frameLabel;
+      detailFrameNote.textContent = detail.frameNote;
+      detailFrameBlock.className = `detail-frame-block ${detail.frameClass || ""}`.trim();
+
+      detailBits.innerHTML = "";
+      for (const bit of detail.bits) {
+        const chip = document.createElement("span");
+        chip.className = "bit-chip";
+        chip.textContent = bit;
+        detailBits.appendChild(chip);
+      }
+    }
 
     function setView(viewId, updateHash) {
       const id = views[viewId] ? viewId : "overview";
@@ -1061,6 +1468,8 @@
         li.textContent = step;
         flowList.appendChild(li);
       }
+
+      renderDetail(view.detail);
 
       for (const item of mapItems) {
         const focus = (item.dataset.focus || "").split(/\s+/).filter(Boolean);
