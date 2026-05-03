@@ -153,6 +153,32 @@ user process가 사용할 frame도 kernel이 먼저 확보하고 초기화한다
 
 frame은 allocator 기준으로 available한 memory에서 얻는다. kernel 자료구조용 frame, page table용 frame, user page용 frame은 kernel의 allocator와 mapping 절차를 통해 용도가 구분된다.
 
+메모리 뷰로 보면 다음과 같다.
+
+```text
+                 kernel virtual memory
+KERN_BASE + pa  +------------------------------+
+                | kpage                        |
+                |  executable bytes / zeroes   |
+                +---------------|--------------+
+                                |
+                                | translates to
+                                v
+physical memory +------------------------------+
+                | physical frame F             |
+                |  executable bytes / zeroes   |
+                +---------------^--------------+
+                                |
+                                | mapped by process pml4
+                                |
+user virtual    +---------------|--------------+
+memory          | upage                        |
+                |  same bytes as frame F       |
+                +------------------------------+
+```
+
+위 그림에서 `kpage`와 `upage`는 서로 다른 virtual address다. 두 주소는 page table translation을 거쳐 같은 physical frame `F`를 가리킨다. 데이터가 저장되는 곳은 physical frame `F`이고, kernel과 user는 각자의 virtual address를 통해 그 frame을 본다.
+
 ## 7. `upage`와 `kpage`
 
 `pml4_set_page()`의 핵심 인자는 `upage`와 `kpage`다.
