@@ -393,6 +393,13 @@
       marker-end: url(#arrowDirect);
     }
 
+    .route.kernel {
+      stroke: #0f766e;
+      stroke-dasharray: 12 6;
+      stroke-width: 1.85;
+      marker-end: url(#arrowKernel);
+    }
+
     .route.meta {
       stroke: var(--amber);
       stroke-dasharray: 2 6;
@@ -1191,6 +1198,11 @@
       border-color: var(--blue);
     }
 
+    .arrow-sample.kernel {
+      border-color: #0f766e;
+      border-top-style: dashed;
+    }
+
     .arrow-sample.fault {
       border-color: var(--rose);
     }
@@ -1249,6 +1261,9 @@
               </marker>
               <marker id="arrowDirect" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
                 <path d="M 0 0 L 8 4 L 0 8 z" fill="#0891b2"></path>
+              </marker>
+              <marker id="arrowKernel" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#0f766e"></path>
               </marker>
               <marker id="arrowMeta" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
                 <path d="M 0 0 L 8 4 L 0 8 z" fill="#b45309"></path>
@@ -1354,6 +1369,18 @@
               <text class="card-sub" x="189" y="336">0x500000 -> not-present</text>
             </g>
 
+            <g class="map-item" data-show="kernel" data-focus="kernel">
+              <rect class="card" x="64" y="154" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="178">Process A PML4</text>
+              <text class="card-sub" x="189" y="196">kernel half: shared entries</text>
+              <rect class="card" x="64" y="224" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="248">Process B PML4</text>
+              <text class="card-sub" x="189" y="266">kernel half: same entries</text>
+              <rect class="card" x="64" y="294" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="318">Process C PML4</text>
+              <text class="card-sub" x="189" y="336">kernel half: same entries</text>
+            </g>
+
             <g class="map-item" data-show="overview user fault" data-focus="overview user fault">
               <rect class="card" x="800" y="168" width="150" height="52"></rect>
               <text class="card-title" x="875" y="191">MMU / TLB</text>
@@ -1442,18 +1469,18 @@
             </g>
 
             <g class="map-item" data-show="kernel" data-focus="kernel">
+              <rect class="highlight-ring kernel scope" x="56" y="146" width="266" height="214"></rect>
               <rect class="highlight-ring kernel scope" x="420" y="64" width="300" height="340"></rect>
               <rect class="highlight-ring direct" x="426" y="116" width="288" height="282"></rect>
-              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="606"></rect>
-              <rect class="highlight-ring direct" x="1106" y="154" width="244" height="52"></rect>
-              <path class="route direct" d="M 710 178 L 1070 178 L 1070 180 L 1110 180"></path>
-              <text class="minor-label" x="890" y="166">KERN_BASE + paddr names physical RAM</text>
-              <text class="minor-label" x="896" y="410">direct-map range stays mapped</text>
-              <text class="minor-label" x="570" y="64" text-anchor="middle">kernel virtual direct-map range</text>
-              <text class="minor-label" x="1236" y="80" text-anchor="middle">physical RAM visible through kernel aliases</text>
-              <g class="badge" transform="translate(724 274)"><circle r="13"></circle><text>1</text></g>
-              <g class="badge" transform="translate(870 178)"><circle r="13"></circle><text>2</text></g>
-              <g class="badge" transform="translate(1070 180)"><circle r="13"></circle><text>3</text></g>
+              <path class="route kernel" d="M 314 183 L 374 183 L 374 150 L 432 150"></path>
+              <path class="route kernel" d="M 314 253 L 390 253 L 390 274 L 432 274"></path>
+              <path class="route kernel" d="M 314 323 L 374 323 L 374 354 L 432 354"></path>
+              <text class="minor-label" x="189" y="144" text-anchor="middle">each process has its own PML4 root</text>
+              <text class="minor-label" x="570" y="64" text-anchor="middle">same kernel-side entries above KERN_BASE</text>
+              <text class="minor-label" x="896" y="410">context switch keeps this half consistent</text>
+              <g class="badge" transform="translate(326 183)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(390 274)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(724 274)"><circle r="13"></circle><text>3</text></g>
             </g>
 
             <g class="map-item" data-show="fault" data-focus="fault">
@@ -1560,6 +1587,7 @@
         <span class="legend-item"><span class="swatch physical"></span>Physical RAM</span>
         <span class="legend-item"><span class="swatch metadata"></span>VM metadata</span>
         <span class="legend-item"><span class="arrow-sample"></span>direct map</span>
+        <span class="legend-item"><span class="arrow-sample kernel"></span>shared kernel entries</span>
         <span class="legend-item"><span class="arrow-sample dashed"></span>user page mapping</span>
         <span class="legend-item"><span class="arrow-sample fault"></span>fault path</span>
         <span class="legend-item"><span class="arrow-sample meta"></span>metadata lookup</span>
@@ -1578,17 +1606,16 @@
         tab: "전체 구조",
         eyebrow: "Overview",
         title: "세로 memory bar로 VA와 RAM을 분리해서 본다",
-        summary: "가운데 긴 막대는 현재 process의 virtual address space이고, 오른쪽 긴 막대는 실제 physical memory다. 두 막대 사이의 얇은 선만 mapping 관계를 표시한다.",
+        summary: "전체 뷰는 user VA, active page_table[], physical frame[], kernel direct-map, VM metadata의 위치만 한 번에 잡는다.",
         points: [
-          "User VA는 active page table과 PTE를 거쳐 physical frame에 닿는다.",
-          "Kernel direct-map VA는 같은 frame을 kernel-side alias로 본다.",
-          "SPT와 frame table은 page identity와 frame 소유 관계를 기억한다."
+          "User VA는 현재 thread가 선택한 page table entry를 통해 frame에 닿는다.",
+          "KERN_BASE 위 direct-map은 physical RAM의 kernel-side alias다.",
+          "SPT/frame table/backing store는 page identity와 resident frame 상태를 보조한다."
         ],
         flow: [
-          "전체 user VA range에서 process가 쓰는 주소 이름이 나온다.",
-          "Active page table/PTE가 그 user VA를 frame 번호로 해석한다.",
-          "해석 결과는 user pool 안의 Frame A를 가리킨다.",
-          "Kernel direct-map VA도 같은 Frame A를 kernel-side alias로 볼 수 있다."
+          "현재 thread의 user VA가 active page_table[] slot 하나를 선택한다.",
+          "그 PTE가 physical frame[] 안의 resident frame을 가리킨다.",
+          "Kernel direct-map VA는 같은 physical frame을 kernel-side name으로 볼 수 있다."
         ],
         note: "두 주소 이름이 같은 RAM frame을 가리킬 수 있지만, byte 저장소가 두 벌이라는 뜻은 아니다.",
         takeaway: "핵심 연결: user VA -> active page table/PTE -> physical frame <- kernel direct-map VA",
@@ -1627,30 +1654,30 @@
         }
       },
       kernel: {
-        tab: "kernel view",
-        eyebrow: "Global Kernel View",
-        title: "KERN_BASE 위 direct-map은 physical RAM을 같은 방식으로 본다",
-        summary: "Virtual memory bar의 KERN_BASE 위쪽은 kernel virtual range이고, Pintos에서는 physical RAM을 KERN_BASE + paddr 형태로 1:1 alias하는 전역 direct-map window다.",
+        tab: "kernel PML4",
+        eyebrow: "Shared Kernel Entries",
+        title: "process별 PML4는 user half가 달라도 kernel half를 공유한다",
+        summary: "Kernel view는 direct-map 주소식보다 process A/B/C의 page table 안에 같은 kernel-side entries가 들어간다는 구조를 보여 준다.",
         points: [
-          "이 direct-map window는 user pool frame, kernel pool, kernel image/low RAM 같은 실제 RAM 구간을 kernel VA로 본다.",
-          "User mode에서 kernel VA를 읽을 수 있다는 뜻은 아니다. supervisor permission이 접근을 막는다.",
-          "Process A/B/C가 바뀌어도 KERN_BASE + 같은 paddr은 같은 physical frame을 가리킨다."
+          "Context switch는 user half의 해석을 바꾸지만 kernel half는 같은 기준으로 유지된다.",
+          "각 process PML4에는 kernel code, kernel objects, direct-map window에 필요한 supervisor entries가 공통으로 존재한다.",
+          "User mode는 이 entries를 사용할 수 없다. supervisor permission이 접근을 막는다."
         ],
         flow: [
-          "Process별 PML4에는 user mapping과 별개로 공통 kernel-side mapping이 들어간다.",
-          "Direct-map window는 physical address에 KERN_BASE를 더한 kernel VA 이름을 만든다.",
-          "그 이름은 user pool frame까지 포함한 physical RAM의 같은 byte를 가리킨다."
+          "Process A/B/C는 서로 다른 PML4 root를 가진다.",
+          "각 PML4의 user half는 process마다 다른 page_table[] slot을 가진다.",
+          "각 PML4의 kernel half는 같은 kernel-side entries를 유지한다."
         ],
-        note: "여기서 kernel view는 kernel object만 따로 모아 둔 영역이 아니라 physical RAM을 보는 kernel-side alias 창이다.",
-        takeaway: "Context switch는 user view를 바꾸지만, KERN_BASE + paddr direct-map은 같은 physical RAM을 본다.",
+        note: "Direct-map의 KERN_BASE + paddr 관계는 direct map 탭에서 따로 본다. 여기서는 page table 안의 공통 kernel half가 초점이다.",
+        takeaway: "Kernel view: per-process PML4 roots, shared kernel-side entries.",
         detail: {
-          eyebrow: "Kernel Direct Map",
-          title: "physical RAM aliases",
-          summary: "KERN_BASE + paddr -> frame",
+          eyebrow: "Kernel PML4 Half",
+          title: "shared entries",
+          summary: "current kernel thread",
           upage: "KERN_BASE + paddr",
           upageSub: "kernel VA",
-          pml4: "shared direct-map entries",
-          pml4Sub: "global entries",
+          pml4: "A / B / C PML4 roots",
+          pml4Sub: "same kernel half",
           walk: "PML4 -> lower levels",
           walkSub: "kernel indices",
           pte: "supervisor PTE",
@@ -1658,22 +1685,22 @@
           bits: ["present=1", "user=0", "global mapping", "target=physical RAM"],
           kpage: "direct-map VA",
           kpageSub: "process-invariant",
-          frameTitle: "physical frame",
+          frameTitle: "kernel-side targets",
           frameLabel: "RAM bytes",
-          frameNote: "same bytes",
+          frameNote: "kernel half",
           frameClass: "",
           slots: [
-            { index: "[0]", va: "KERN_BASE+A", pte: "supervisor", frame: "Frame A", className: "is-active" },
-            { index: "[1]", va: "KERN_BASE+B", pte: "supervisor", frame: "Frame B" },
-            { index: "[2]", va: "KERN_BASE+KP", pte: "supervisor", frame: "kernel pool" },
-            { index: "[3]", va: "KERN_BASE+LOW", pte: "supervisor", frame: "low RAM" },
-            { index: "[4]", va: "KERN_BASE+FREE", pte: "supervisor", frame: "free frame" }
+            { index: "A[k]", va: "kernel half", pte: "supervisor", frame: "shared entries", className: "is-active" },
+            { index: "B[k]", va: "kernel half", pte: "supervisor", frame: "same entries", className: "is-active" },
+            { index: "C[k]", va: "kernel half", pte: "supervisor", frame: "same entries", className: "is-active" },
+            { index: "A[u]", va: "user half", pte: "Process A only", frame: "Frame A" },
+            { index: "B[u]", va: "user half", pte: "Process B only", frame: "Frame B" }
           ],
           frames: [
-            { title: "Frame A", note: "user pool bytes", className: "is-active" },
-            { title: "Frame B", note: "user pool bytes" },
-            { title: "kernel pool", note: "metadata bytes" },
-            { title: "low RAM", note: "kernel image bytes" }
+            { title: "kernel code", note: "shared supervisor mapping", className: "is-active" },
+            { title: "page tables", note: "kernel pool objects" },
+            { title: "direct map", note: "same kernel-side range" },
+            { title: "user frames", note: "selected by user half" }
           ]
         }
       },
