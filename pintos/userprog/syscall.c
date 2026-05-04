@@ -182,7 +182,7 @@ handle_halt (struct syscall_entry *entry UNUSED) {
 // 리턴값 없음
 static void
 handle_exit (struct syscall_entry *entry) {
-	int status = entry->args[0];
+	int status = (int) entry->args[0];
 	exit (status);
 }
 
@@ -242,11 +242,28 @@ handle_read (struct syscall_entry *entry UNUSED) {
 	ASSERT (false); /* 현재 처리할 수 없는 syscall */
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// int write (int fd, const void *buffer, unsigned size);
+// 인자 3개
+// 리턴값 int - 쓴 바이트 수, 쓸 수 없으면 0
 static void
-handle_write (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_write (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	int fd = (int) entry->args[0];
+	const void *buffer = (const void *) entry->args[1];
+	size_t size = entry->args[2];
+
+	if (is_valid_user_buffer ((void *) buffer, size) == false) {
+		exit (-1);
+	}
+
+	// 만약 fd가 STDOUT_FILENO(0) 이면 콘솔에 쓰기
+	if (fd == STDOUT_FILENO) {
+		putbuf (buffer, size);
+		entry->return_value = size;
+		return;
+	}
+
+	//TODO: Not Impl yet
 }
 
 /* TODO: 구현하면 UNUSED, ASSERT 빼기 */
@@ -274,6 +291,9 @@ handle_close (struct syscall_entry *entry UNUSED) {
 static void
 exit (int status) {
 	thread_current ()->exit_status = status;
+
+	// 테스트 통과를 위해서 필요한 로그, 여기가 아니라 다른 곳에서 필요할수도?
+	printf("%s: exit(%d)\n", thread_current ()->name, thread_current ()->exit_status);
 	thread_exit ();
 }
 
