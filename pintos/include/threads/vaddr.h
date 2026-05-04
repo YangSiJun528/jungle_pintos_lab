@@ -35,12 +35,15 @@
 #define pg_no(va) ((uint64_t) (va) >> PGBITS)
 
 /* Round up to nearest page boundary. */
-/* 가장 가까운 page boundary로 올림한다. */
+/* page-aligned가 아니면 다음 page boundary로 올림한다. */
 #define pg_round_up(va) ((void *) (((uint64_t) (va) + PGSIZE - 1) & ~PGMASK))
 
 /* Round down to nearest page boundary. */
-/* 가장 가까운 page boundary로 내림한다. */
+/* 이전 page boundary로 내림한다. */
 #define pg_round_down(va) (void *) ((uint64_t) (va) & ~PGMASK)
+
+/* 항상 다음 page boundary로 올림한다. */
+#define pg_next(va) ((void *) (((uint64_t) pg_round_down(va)) + PGSIZE))
 
 /* Kernel virtual address start */
 /* 커널 가상 주소 시작 지점. */
