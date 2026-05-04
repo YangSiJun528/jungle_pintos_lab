@@ -10,6 +10,8 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/mmu.h"
+#include "filesys/filesys.h"
+#include "filesys/file.h"
 
 struct syscall_entry {
 	/* system call number */
@@ -221,11 +223,29 @@ handle_remove (struct syscall_entry *entry UNUSED) {
 	ASSERT (false); /* 현재 처리할 수 없는 syscall */
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// int open (const char *file);
+// 인자 1개
+// 리턴값 int - fd 번호, 실패하면 -1
 static void
-handle_open (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_open (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	const char *filename = (const char *) entry->args[0];
+
+	if (!is_valid_user_string ((char *) filename)) {
+		exit (-1);
+	}
+
+	struct file *file = filesys_open (filename);
+	if (file == NULL) {
+		entry->return_value = -1;
+		return;
+	}
+
+	int fd = fd_alloc (file);
+	if (fd == -1) {
+		file_close (file);
+	}
+	entry->return_value = fd;
 }
 
 /* TODO: 구현하면 UNUSED, ASSERT 빼기 */
@@ -252,18 +272,26 @@ handle_write (struct syscall_entry *entry) {
 	const void *buffer = (const void *) entry->args[1];
 	size_t size = entry->args[2];
 
-	if (is_valid_user_buffer ((void *) buffer, size) == false) {
+	if (!is_valid_user_buffer ((void *) buffer, size)) {
 		exit (-1);
 	}
 
-	// 만약 fd가 STDOUT_FILENO(0) 이면 콘솔에 쓰기
 	if (fd == STDOUT_FILENO) {
 		putbuf (buffer, size);
 		entry->return_value = size;
 		return;
 	}
 
-	//TODO: Not Impl yet
+	if (fd == STDIN_FILENO) {
+		exit (-1);
+	}
+
+	struct file *file = fd_lookup (fd);
+	if (file == NULL) {
+		exit (-1);
+	}
+
+	entry->return_value = file_write (file, buffer, size);
 }
 
 /* TODO: 구현하면 UNUSED, ASSERT 빼기 */
@@ -280,20 +308,21 @@ handle_tell (struct syscall_entry *entry UNUSED) {
 	ASSERT (false); /* 현재 처리할 수 없는 syscall */
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// void close (int fd);
+// 인자 1개
+// 리턴값 없음
 static void
-handle_close (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_close (struct syscall_entry *entry) {
+	int fd = (int) entry->args[0];
+
+	if (fd == STDIN_FILENO || fd == STDOUT_FILENO || !fd_close (fd)) {
+		exit (-1);
+	}
 }
 
-//TODO: 바꿀수도 있음
 static void
 exit (int status) {
 	thread_current ()->exit_status = status;
-
-	// 테스트 통과를 위해서 필요한 로그, 여기가 아니라 다른 곳에서 필요할수도?
-	printf("%s: exit(%d)\n", thread_current ()->name, thread_current ()->exit_status);
 	thread_exit ();
 }
 
@@ -364,3 +393,4 @@ get_next_page_if_valid (void *ptr) {
 
 	return pg_next (ptr);
 }
+

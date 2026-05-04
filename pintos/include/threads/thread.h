@@ -11,6 +11,11 @@
 #include "vm/vm.h"
 #endif
 
+struct file_descriptor {
+	int fd;
+	struct list_elem elem;
+	struct file *file;
+};
 
 /* States in a thread's life cycle. */
 /* 스레드 생명 주기의 상태들. */
@@ -144,6 +149,9 @@ struct thread {
 	/* Page map level 4이다. */
 
 	int exit_status; //TODO: 나중에 이름 바꿀 수도?
+
+	struct list file_descriptors; /* fd 번호 오름차순으로 정렬 유지. 최대 128개. */
+
 #endif
 #ifdef VM
 	/* Table for whole virtual memory owned by thread. */
@@ -211,5 +219,17 @@ void thread_donors_recalc_priorities (void);
 void thread_mlfqs_recalc_priorities (void);
 void thread_mlfqs_incr_recent_cpu (void);
 void thread_mlfqs_recalc_shcd_queue (void);
+
+#ifdef USERPROG
+#define FD_MIN 2
+#define FD_MAX 128 /* open() 성공 fd 범위: [FD_MIN, FD_MAX] */
+
+int fd_alloc (struct file *);
+struct file *fd_lookup (int);
+bool fd_close (int); /* 찾아서 닫으면 true, fd 없으면 false */
+bool cmp_fd_less (const struct list_elem *a,
+		const struct list_elem *b, void *aux UNUSED);
+
+#endif // USERPROG
 
 #endif /* threads/thread.h */

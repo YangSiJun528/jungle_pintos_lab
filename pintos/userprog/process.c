@@ -18,6 +18,7 @@
 #include "threads/mmu.h"
 #include "threads/vaddr.h"
 #include "intrinsic.h"
+#include "threads/malloc.h"
 #include "threads/synch.h"
 #ifdef VM
 #include "vm/vm.h"
@@ -289,15 +290,8 @@ process_wait (tid_t child_tid UNUSED) {
 void
 process_exit (void) {
 	struct thread *curr = thread_current ();
-	/* TODO: Your code goes here.
-	 * TODO: Implement process termination message (see
-	 * TODO: project2/process_termination.html).
-	 * TODO: We recommend you to implement process resource cleanup here. */
-	/* TODO: 여기에 코드를 작성한다.
-	 * TODO: 프로세스 종료 메시지를 구현한다
-	 * TODO: (project2/process_termination.html 참고).
-	 * TODO: 프로세스 리소스 클린업을 여기서 구현하는 것을 권장한다. */
 
+	printf ("%s: exit(%d)\n", curr->name, curr->exit_status);
 	process_cleanup ();
 }
 
@@ -306,6 +300,13 @@ process_exit (void) {
 static void
 process_cleanup (void) {
 	struct thread *curr = thread_current ();
+
+	while (!list_empty (&curr->file_descriptors)) {
+		struct list_elem *e = list_pop_front (&curr->file_descriptors);
+		struct file_descriptor *fde = list_entry (e, struct file_descriptor, elem);
+		file_close (fde->file);
+		free (fde);
+	}
 
 #ifdef VM
 	supplemental_page_table_kill (&curr->spt);

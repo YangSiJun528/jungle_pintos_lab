@@ -13,6 +13,8 @@
 #include "intrinsic.h"
 #ifdef USERPROG
 #include "userprog/process.h"
+#include "filesys/file.h"
+#include "threads/malloc.h"
 #endif
 
 // mlfqs 처리를 돕는 헬퍼 매크로. 외부 공개가 필요 없어서 내부 선언
@@ -664,6 +666,9 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->magic = THREAD_MAGIC;
 	t->wait_on_lock = NULL;
 	list_init (&t->donations);
+#ifdef USERPROG
+	list_init (&t->file_descriptors);
+#endif
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
@@ -1010,3 +1015,81 @@ thread_mlfqs_recalc_shcd_queue (void) {
 		e = list_next(e);
 	}
 }
+
+#ifdef USERPROG
+bool
+cmp_fd_less (const struct list_elem *a, const struct list_elem *b,
+		void *aux UNUSED) {
+	const struct file_descriptor *fda = list_entry (a, struct file_descriptor, elem);
+	const struct file_descriptor *fdb = list_entry (b, struct file_descriptor, elem);
+	return fda->fd < fdb->fd;
+}
+
+int
+fd_alloc (struct file *file) {
+	struct thread *t = thread_current ();
+	struct list *fds = &t->file_descriptors;
+
+	int candidate = FD_MIN;
+	struct list_elem *e = list_begin (fds);
+	while (e != list_end (fds)) {
+		struct file_descriptor *fde = list_entry (e, struct file_descriptor, elem);
+		if (fde->fd > candidate)
+			break;
+		candidate = fde->fd + 1;
+		e = list_next (e);
+	}
+
+	ASSERT (candidate >= FD_MIN); /* fd 0, 1은 절대 배정되지 않음 */
+
+	if (candidate > FD_MAX)
+		return -1;
+
+	struct file_descriptor *fde = malloc (sizeof (struct file_descriptor));
+	if (fde == NULL)
+		return -1;
+
+	fde->fd = candidate;
+	fde->file = file;
+	list_insert_ordered (fds, &fde->elem, cmp_fd_less, NULL);
+	return fde->fd;
+}
+
+/* fd에 해당되는 파일 찾기, table에 없는 fd는 NULL 반환. */
+struct file *
+fd_lookup (int fd) {
+	ASSERT (fd >= FD_MIN && fd <= FD_MAX);
+	struct thread *t = thread_current ();
+	struct list_elem *e = list_begin (&t->file_descriptors);
+	while (e != list_end (&t->file_descriptors)) {
+		struct file_descriptor *fde = list_entry (e, struct file_descriptor, elem);
+		if (fde->fd == fd)
+			return fde->file;
+		if (fde->fd > fd)
+			break;
+		e = list_next (e);
+	}
+	return NULL;
+}
+
+/* fd에 해당되는 파일 닫기, 성공 여부 반환 */
+bool
+fd_close (int fd) {
+	ASSERT (fd >= FD_MIN && fd <= FD_MAX);
+	struct thread *t = thread_current ();
+	struct list_elem *e = list_begin (&t->file_descriptors);
+	while (e != list_end (&t->file_descriptors)) {
+		struct file_descriptor *fde = list_entry (e, struct file_descriptor, elem);
+		if (fde->fd == fd) {
+			list_remove (e);
+			file_close (fde->file);
+			free (fde);
+			return true;
+		}
+		if (fde->fd > fd)
+			break;
+		e = list_next (e);
+	}
+	return false;
+}
+#endif
