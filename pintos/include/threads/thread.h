@@ -142,6 +142,8 @@ struct thread {
 	/* userprog/process.c가 소유한다. */
 	uint64_t *pml4;                     /* Page map level 4 */
 	/* Page map level 4이다. */
+
+	int exit_status; //TODO: 나중에 이름 바꿀 수도?
 #endif
 #ifdef VM
 	/* Table for whole virtual memory owned by thread. */

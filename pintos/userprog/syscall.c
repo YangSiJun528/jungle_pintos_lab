@@ -48,6 +48,7 @@ static void handle_write (struct syscall_entry *);
 static void handle_seek (struct syscall_entry *);
 static void handle_tell (struct syscall_entry *);
 static void handle_close (struct syscall_entry *);
+static void exit (int status);
 static void *get_next_page_if_valid (void *);
 static bool is_valid_user_buffer (void *, size_t);
 static bool is_valid_user_string (char *);
@@ -176,10 +177,13 @@ handle_halt (struct syscall_entry *entry UNUSED) {
 	ASSERT (false); /* 현재 처리할 수 없는 syscall */
 }
 
+// void exit (int status);
+// 인자 1개
+// 리턴값 없음
 static void
-handle_exit (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_exit (struct syscall_entry *entry) {
+	int status = entry->args[0];
+	exit (status);
 }
 
 /* TODO: 구현하면 UNUSED, ASSERT 빼기 */
@@ -264,6 +268,13 @@ static void
 handle_close (struct syscall_entry *entry UNUSED) {
 	barrier ();
 	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+}
+
+//TODO: 바꿀수도 있음
+static void
+exit (int status) {
+	thread_current ()->exit_status = status;
+	thread_exit ();
 }
 
 static bool
