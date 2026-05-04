@@ -1,0 +1,1996 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pintos Memory Map</title>
+  <style>
+    :root {
+      --canvas: #ffffff;
+      --parchment: #f5f5f7;
+      --ink: #1d1d1f;
+      --muted: #6e6e73;
+      --hairline: #d2d2d7;
+      --primary: #0066cc;
+      --primary-soft: #e8f2ff;
+      --kernel: #ffffff;
+      --user: #d8e8ff;
+      --physical: #e7d8ef;
+      --thread: #fafafa;
+      --stack: #d5e4f8;
+      --warn: #ffe3df;
+      --ok: #def2e6;
+      --dark: #272729;
+      --radius-sm: 8px;
+      --radius-lg: 18px;
+      --radius-pill: 999px;
+      --page-width: 1280px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      font-size: 17px;
+      line-height: 1.47;
+      letter-spacing: -0.01em;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: center;
+      min-height: 52px;
+      background: rgba(245, 245, 247, 0.86);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      width: min(var(--page-width), calc(100vw - 32px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .topbar nav {
+      display: flex;
+      gap: 16px;
+      white-space: nowrap;
+      font-size: 14px;
+      overflow-x: auto;
+    }
+
+    .hero {
+      padding: 72px 24px 42px;
+      background: var(--canvas);
+      text-align: center;
+    }
+
+    .hero h1 {
+      max-width: 920px;
+      margin: 0 auto 14px;
+      font-size: 56px;
+      line-height: 1.08;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+    }
+
+    .hero p {
+      max-width: 800px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.42;
+      text-wrap: pretty;
+    }
+
+    main {
+      width: min(var(--page-width), calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 72px;
+    }
+
+    .map-section {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .map-header {
+      display: grid;
+      grid-template-columns: 1fr 460px;
+      gap: 18px;
+      align-items: end;
+      padding: 24px 40px;
+      background: #fafafc;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .map-header h2 {
+      margin: 0 0 8px;
+      font-size: 40px;
+      line-height: 1.1;
+      font-weight: 600;
+      letter-spacing: -0.018em;
+    }
+
+    .map-header p {
+      max-width: 720px;
+      margin: 0;
+      color: var(--muted);
+      text-wrap: pretty;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 14px;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+
+    .map-tabs {
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--canvas);
+    }
+
+    .tab-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .tab-button {
+      min-height: 88px;
+      padding: 13px 14px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition:
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .tab-button[aria-selected="true"] {
+      border-color: rgba(0, 102, 204, 0.58);
+      background: var(--primary-soft);
+      box-shadow: inset 0 0 0 1px rgba(0, 102, 204, 0.2);
+    }
+
+    .tab-button:focus-visible {
+      outline: 3px solid rgba(0, 102, 204, 0.24);
+      outline-offset: 2px;
+    }
+
+    .tab-kicker,
+    .tab-title {
+      display: block;
+      letter-spacing: 0;
+    }
+
+    .tab-kicker {
+      margin-bottom: 6px;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tab-title {
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.25;
+      text-wrap: pretty;
+    }
+
+    .tab-panel {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-left: 3px solid var(--primary);
+      border-radius: var(--radius-sm);
+      background: #fafafc;
+      color: var(--muted);
+      line-height: 1.45;
+      text-wrap: pretty;
+    }
+
+    .tab-panel[hidden] {
+      display: none;
+    }
+
+    .tab-panel strong {
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .tab-panel p {
+      margin: 0;
+    }
+
+    .tab-panel p + p {
+      margin-top: 6px;
+    }
+
+    .code-tour {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .code-slice {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    .code-slice h4 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .code-slice p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .code-slice code {
+      display: block;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      letter-spacing: 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .context-board {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) 48px minmax(210px, 0.75fr);
+      gap: 12px;
+      align-items: stretch;
+      margin-top: 14px;
+    }
+
+    .context-processes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .context-process-card,
+    .context-frame-card {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    .context-process-card.active {
+      border-color: var(--primary);
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+
+    .context-process-card h4,
+    .context-frame-card h4 {
+      margin: 0 0 6px;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .context-process-card p,
+    .context-frame-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .context-pages {
+      display: grid;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .context-page-row {
+      padding: 6px 8px;
+      border: 1px solid rgba(0, 102, 204, 0.18);
+      border-radius: 6px;
+      background: rgba(0, 102, 204, 0.06);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .context-page-row.mapped {
+      border-color: rgba(24, 128, 56, 0.34);
+      background: rgba(24, 128, 56, 0.08);
+    }
+
+    .context-page-row.lazy {
+      border-color: rgba(176, 106, 0, 0.34);
+      background: rgba(245, 166, 35, 0.1);
+    }
+
+    .context-link-column {
+      display: grid;
+      place-items: center;
+      color: var(--primary);
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .context-frames {
+      display: grid;
+      gap: 8px;
+    }
+
+    .context-frame-card {
+      border-color: rgba(24, 128, 56, 0.34);
+      background: rgba(24, 128, 56, 0.07);
+    }
+
+    .context-frame-card.alt {
+      border-color: rgba(126, 90, 163, 0.34);
+      background: rgba(126, 90, 163, 0.08);
+    }
+
+    .context-frame-card.lazy {
+      border-color: rgba(176, 106, 0, 0.34);
+      border-style: dashed;
+      background: rgba(245, 166, 35, 0.08);
+    }
+
+    .bitmap-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .bitmap-card {
+      padding: 14px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    .bitmap-card h4 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .bitmap-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .bitmap-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 10px;
+    }
+
+    .bit {
+      width: 22px;
+      height: 22px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--hairline);
+      border-radius: 5px;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .bit.used {
+      border-color: rgba(0, 102, 204, 0.62);
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .formula {
+      display: block;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      letter-spacing: 0;
+      white-space: pre-wrap;
+    }
+
+    .map-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 36px 0;
+    }
+
+    .map-canvas {
+      width: 1140px;
+      height: 1180px;
+      margin: 0 auto;
+      background:
+        linear-gradient(#ffffff, #ffffff) padding-box,
+        linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0)) border-box;
+    }
+
+    .memory-svg {
+      display: block;
+      width: 1140px;
+      height: 1180px;
+    }
+
+    .svg-title {
+      fill: var(--ink);
+      font-size: 14px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .svg-label {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .svg-note {
+      fill: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .mem-rect {
+      stroke: var(--ink);
+      stroke-width: 1;
+    }
+
+    .kernel-fill {
+      fill: var(--kernel);
+    }
+
+    .user-fill {
+      fill: var(--user);
+    }
+
+    .physical-fill {
+      fill: var(--physical);
+    }
+
+    .thread-fill {
+      fill: var(--thread);
+    }
+
+    .stack-fill {
+      fill: var(--stack);
+    }
+
+    .hatch-fill {
+      fill: url(#hatchPattern);
+    }
+
+    .seg-text {
+      fill: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .seg-small {
+      fill: var(--muted);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .seg-key {
+      fill: var(--primary);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .num-dot {
+      fill: var(--primary);
+    }
+
+    .num-dot.warn {
+      fill: #c2453d;
+    }
+
+    .num-text {
+      fill: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .mapping-direct {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 2.2;
+      marker-end: url(#arrowPrimary);
+    }
+
+    .mapping-user {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 2.2;
+      stroke-dasharray: 8 7;
+      marker-end: url(#arrowPrimary);
+    }
+
+    .route-badge {
+      fill: var(--primary-soft);
+      stroke: rgba(0, 102, 204, 0.16);
+    }
+
+    .route-text {
+      fill: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .kern-boundary {
+      fill: none;
+      stroke: var(--dark);
+      stroke-width: 3;
+      stroke-linecap: square;
+    }
+
+    .permission-badge {
+      fill: #272729;
+    }
+
+    .permission-text {
+      fill: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .leader {
+      fill: none;
+      stroke: var(--hairline);
+      stroke-width: 1;
+    }
+
+    .addr-text {
+      fill: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .addr-subtext {
+      fill: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .range-brace {
+      fill: none;
+      stroke: var(--muted);
+      stroke-width: 1.5;
+    }
+
+    .dim-target {
+      transition:
+        opacity 220ms ease,
+        filter 220ms ease,
+        stroke-width 220ms ease;
+    }
+
+    .map-section[data-view] .memory-svg .dim-target {
+      opacity: 0.22;
+    }
+
+    .map-section[data-view="contents"] .memory-svg .dim-target {
+      opacity: 0.44;
+    }
+
+    .map-section[data-view="bitmap"] .memory-svg .dim-target {
+      opacity: 0.36;
+    }
+
+    .map-section[data-view="threading"] .memory-svg .dim-target,
+    .map-section[data-view="storage"] .memory-svg .dim-target {
+      opacity: 0.3;
+    }
+
+    .map-section[data-view="direct"] .memory-svg .focus-direct,
+    .map-section[data-view="direct"] .memory-svg .focus-alias,
+    .map-section[data-view="page"] .memory-svg .focus-page {
+      opacity: 1;
+      filter: drop-shadow(0 0 5px rgba(0, 102, 204, 0.24));
+    }
+
+    .map-section[data-view="direct"] .memory-svg .mapping-direct.focus-direct,
+    .map-section[data-view="direct"] .memory-svg .mapping-user.focus-alias,
+    .map-section[data-view="page"] .memory-svg .mapping-user.focus-page {
+      stroke-width: 3.2;
+    }
+
+    .demo-layer {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+    }
+
+    .map-section[data-view="direct"] .demo-direct,
+    .map-section[data-view="direct"] .demo-alias,
+    .map-section[data-view="page"] .demo-page,
+    .map-section[data-view="threading"] .demo-threading,
+    .map-section[data-view="contents"] .demo-contents,
+    .map-section[data-view="bitmap"] .demo-bitmap,
+    .map-section[data-view="storage"] .demo-storage {
+      opacity: 1;
+    }
+
+    .focus-box {
+      fill: rgba(0, 102, 204, 0.08);
+      stroke: var(--primary);
+      stroke-width: 2;
+    }
+
+    .focus-box.alt {
+      fill: rgba(117, 74, 150, 0.12);
+      stroke: #7e5aa3;
+    }
+
+    .pool-backed {
+      fill: rgba(0, 102, 204, 0.13);
+      stroke: var(--primary);
+      stroke-width: 1.7;
+    }
+
+    .pool-unbacked {
+      fill: rgba(255, 255, 255, 0.54);
+      stroke: #9b9ba1;
+      stroke-width: 1.4;
+      stroke-dasharray: 6 5;
+    }
+
+    .flow-dot {
+      fill: var(--primary);
+      filter: drop-shadow(0 0 5px rgba(0, 102, 204, 0.4));
+    }
+
+    .flow-dot.alt {
+      fill: #7e5aa3;
+      filter: drop-shadow(0 0 5px rgba(126, 90, 163, 0.38));
+    }
+
+    .demo-callout {
+      fill: #fff;
+      stroke: rgba(0, 0, 0, 0.14);
+      stroke-width: 1;
+    }
+
+    .demo-callout-text {
+      fill: var(--ink);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .demo-callout-small {
+      fill: var(--muted);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .pool-legend-title {
+      fill: var(--ink);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .pool-frame-chip {
+      fill: rgba(117, 74, 150, 0.18);
+      stroke: #7e5aa3;
+      stroke-width: 1;
+    }
+
+    .alias-candidate {
+      fill: rgba(0, 102, 204, 0.09);
+      stroke: rgba(0, 102, 204, 0.58);
+      stroke-width: 1.4;
+    }
+
+    .contents-highlight {
+      fill: rgba(24, 128, 56, 0.08);
+      stroke: #188038;
+      stroke-width: 2;
+      stroke-dasharray: 8 5;
+    }
+
+    .contents-highlight.user {
+      fill: rgba(0, 102, 204, 0.08);
+      stroke: var(--primary);
+    }
+
+    .contents-highlight.physical {
+      fill: rgba(126, 90, 163, 0.12);
+      stroke: #7e5aa3;
+    }
+
+    .contents-highlight.thread {
+      fill: rgba(0, 0, 0, 0.04);
+      stroke: #4d4d52;
+    }
+
+    .contents-tag {
+      fill: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .context-card {
+      fill: #fff;
+      stroke: rgba(0, 102, 204, 0.36);
+      stroke-width: 1.2;
+      filter: drop-shadow(0 8px 14px rgba(35, 45, 65, 0.08));
+    }
+
+    .context-card.active {
+      fill: rgba(0, 102, 204, 0.08);
+      stroke: var(--primary);
+      stroke-width: 2;
+    }
+
+    .context-card.idle {
+      fill: rgba(0, 0, 0, 0.025);
+      stroke-dasharray: 6 5;
+    }
+
+    .context-mini-page {
+      fill: rgba(0, 102, 204, 0.1);
+      stroke: rgba(0, 102, 204, 0.42);
+      stroke-width: 1;
+    }
+
+    .context-frame {
+      fill: rgba(24, 128, 56, 0.14);
+      stroke: #188038;
+      stroke-width: 1.4;
+    }
+
+    .context-frame.alt {
+      fill: rgba(126, 90, 163, 0.14);
+      stroke: #7e5aa3;
+    }
+
+    .context-route {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 2.1;
+      stroke-linecap: round;
+      stroke-dasharray: 6 5;
+      marker-end: url(#arrowPrimary);
+    }
+
+    .context-route.alt {
+      stroke: #7e5aa3;
+    }
+
+    .context-label {
+      fill: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .context-small {
+      fill: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .vm-real-box {
+      fill: rgba(24, 128, 56, 0.12);
+      stroke: #188038;
+      stroke-width: 2;
+    }
+
+    .vm-meta-box {
+      fill: rgba(245, 166, 35, 0.12);
+      stroke: #b06a00;
+      stroke-width: 2;
+      stroke-dasharray: 7 5;
+    }
+
+    .vm-meta-box.solid {
+      stroke-dasharray: none;
+    }
+
+    .storage-label {
+      fill: var(--ink);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .storage-label-small {
+      fill: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .bitmap-bit {
+      fill: #fff;
+      stroke: var(--hairline);
+      stroke-width: 1;
+    }
+
+    .bitmap-bit.used {
+      fill: var(--primary-soft);
+      stroke: var(--primary);
+      stroke-width: 1.3;
+    }
+
+    .bitmap-bit-text {
+      fill: var(--primary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .bitmap-bit-text.free {
+      fill: var(--muted);
+      font-weight: 500;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      padding: 18px 40px 24px;
+      border-top: 1px solid var(--hairline);
+      background: #fafafc;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 4px;
+      flex: 0 0 auto;
+    }
+
+    .arrow-sample {
+      position: relative;
+      width: 34px;
+      height: 0;
+      border-top: 2px solid var(--primary);
+      flex: 0 0 auto;
+    }
+
+    .arrow-sample.dashed {
+      border-top-style: dashed;
+    }
+
+    .arrow-sample::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -5px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid var(--primary);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+    }
+
+    .explain {
+      margin-top: 28px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .explain-card {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 18px;
+      padding: 22px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+    }
+
+    .num {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .explain-card h3 {
+      margin: 0 0 8px;
+      font-size: 21px;
+      line-height: 1.2;
+      font-weight: 600;
+    }
+
+    .explain-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .explain-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    code.block {
+      display: block;
+      margin: 12px 0;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.55;
+      letter-spacing: 0;
+      white-space: pre-wrap;
+      word-break: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .term-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .term-card {
+      padding: 15px 16px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    .term-label {
+      display: inline-flex;
+      margin-bottom: 8px;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .term-card h4 {
+      margin: 0 0 10px;
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .term-card dl {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 7px 10px;
+      margin: 0;
+    }
+
+    .term-card dt {
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .term-card dd {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.42;
+      text-wrap: pretty;
+    }
+
+    .summary {
+      margin-top: 28px;
+      padding: 26px;
+      background: var(--dark);
+      color: #fff;
+      border-radius: var(--radius-lg);
+    }
+
+    .summary h2 {
+      margin: 0 0 14px;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+
+    .summary ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #f5f5f7;
+    }
+
+    .summary li {
+      margin: 8px 0;
+    }
+
+    .sources {
+      margin: 28px 0 0;
+      padding: 0 2px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1100px) {
+      .hero {
+        padding-top: 56px;
+      }
+
+      .hero h1 {
+        font-size: 44px;
+      }
+
+      .hero p {
+        font-size: 20px;
+      }
+
+      .map-header {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .tab-list,
+      .term-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .code-tour,
+      .context-board,
+      .context-processes,
+      .bitmap-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .context-link-column {
+        min-height: 30px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      body {
+        font-size: 16px;
+      }
+
+      .topbar-inner {
+        width: calc(100vw - 24px);
+        gap: 12px;
+      }
+
+      .hero {
+        padding: 44px 16px 32px;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+      }
+
+      .hero p {
+        font-size: 18px;
+      }
+
+      main {
+        width: calc(100vw - 20px);
+        padding-top: 16px;
+      }
+
+      .map-header,
+      .map-tabs,
+      .legend {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .map-header h2 {
+        font-size: 32px;
+      }
+
+      .tab-list,
+      .term-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-button {
+        min-height: 72px;
+      }
+
+      .explain-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">Pintos Memory Map</div>
+      <nav aria-label="문서 이동">
+        <a href="#map">map</a>
+        <a href="#explain">설명</a>
+        <a href="#summary">요약</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>물리 메모리, 커널 주소, 사용자 주소를 한 장에서 연결하기</h1>
+    <p>이 map은 “어디에 놓여 있는가”보다 “누가 어떤 주소로 접근하는가”를 보여 주는 자료입니다. kernel direct mapping과 user page table mapping을 분리해서 보세요.</p>
+  </section>
+
+  <main>
+    <section class="map-section" id="map" aria-label="Pintos memory map" data-view="direct">
+      <div class="map-header">
+        <div>
+          <h2>Memory map</h2>
+          <p>가운데는 현재 process의 virtual address space입니다. 위쪽 kernel 영역은 모든 process에서 공통이고, 아래쪽 user 영역은 process마다 다릅니다. 오른쪽은 실제 RAM입니다.</p>
+        </div>
+        <span class="pill">solid arrow = kernel direct map, dashed arrow = user page table map</span>
+      </div>
+
+      <div class="map-tabs">
+        <div class="tab-list" role="tablist" aria-label="memory map focus">
+          <button class="tab-button" id="tab-direct" type="button" role="tab" aria-selected="true" aria-controls="panel-direct" data-view-button="direct">
+            <span class="tab-kicker">1</span>
+            <span class="tab-title">kernel direct map과 alias를 함께 본다</span>
+          </button>
+          <button class="tab-button" id="tab-page" type="button" role="tab" aria-selected="false" aria-controls="panel-page" data-view-button="page">
+            <span class="tab-kicker">2</span>
+            <span class="tab-title">process별 virtual memory와 page table</span>
+          </button>
+          <button class="tab-button" id="tab-threading" type="button" role="tab" aria-selected="false" aria-controls="panel-threading" data-view-button="threading">
+            <span class="tab-kicker">3</span>
+            <span class="tab-title">여러 user 공간과 page-table 묶음 비교</span>
+          </button>
+          <button class="tab-button" id="tab-contents" type="button" role="tab" aria-selected="false" aria-controls="panel-contents" data-view-button="contents">
+            <span class="tab-kicker">4</span>
+            <span class="tab-title">영역별로 어떤 데이터가 들어가는지 예시로 보기</span>
+          </button>
+          <button class="tab-button" id="tab-bitmap" type="button" role="tab" aria-selected="false" aria-controls="panel-bitmap" data-view-button="bitmap">
+            <span class="tab-kicker">5</span>
+            <span class="tab-title">bitmap, metadata, 실제 byte 구분</span>
+          </button>
+          <button class="tab-button" id="tab-storage" type="button" role="tab" aria-selected="false" aria-controls="panel-storage" data-view-button="storage">
+            <span class="tab-kicker">6</span>
+            <span class="tab-title">역할별 데이터가 실제 byte인지 metadata인지 시각화</span>
+          </button>
+        </div>
+
+        <div class="tab-panel" id="panel-direct" role="tabpanel" aria-labelledby="tab-direct">
+          <p><strong>kernel은 physical address를 직접 포인터처럼 쓰지 않고</strong>, `KERN_BASE + physical address`라는 kernel virtual address로 RAM을 봅니다.</p>
+          <p>physical frame이 user page에 붙어 있으면, 같은 frame을 user virtual address와 kernel direct-map address 양쪽 virtual mapping으로 볼 수 있습니다.</p>
+        </div>
+        <div class="tab-panel" id="panel-page" role="tabpanel" aria-labelledby="tab-page" hidden>
+          <p><strong>user pool은 오른쪽 physical memory 안의 전역 frame 출처입니다.</strong> kernel direct map으로 접근할 수 있지만, process마다 따로 생기는 kernel 영역이 아니라 allocator가 나눈 물리 frame 집합입니다.</p>
+          <p>stack, BSS, data, code 같은 mapped page는 user-pool frame을 붙일 수 있지만, gap이나 unmapped area는 아직 frame을 갖지 않습니다.</p>
+        </div>
+        <div class="tab-panel" id="panel-threading" role="tabpanel" aria-labelledby="tab-threading" hidden>
+          <p><strong>process마다 user virtual address space와 page table 묶음이 따로 있습니다.</strong> 가운데 user 공간은 현재 선택된 process의 관점이고, 같은 upage라도 다른 process에서는 다른 physical frame 또는 아직 frame이 없는 상태를 가리킬 수 있습니다.</p>
+          <p>user pool 자체는 switch되지 않습니다. 바뀌는 것은 CPU가 사용하는 active PML4이고, 그 결과 같은 user VA가 전역 user pool 안의 어느 frame을 보느냐가 달라집니다. 같은 process 안의 thread들은 같은 user address space를 공유하고, 다른 process의 thread는 다른 page-table 묶음을 봅니다.</p>
+          <p>CPU의 virtual address 표현 범위는 가능한 주소 이름의 최대치이고, Pintos가 실제로 resident page를 담는 한계는 physical RAM, user/kernel pool 분할, 현재 만든 page-table mapping에 의해 더 작게 정해집니다.</p>
+          <div class="context-board" aria-label="multiple process address spaces">
+            <div class="context-processes">
+              <article class="context-process-card active">
+                <h4>Process A: 현재 view</h4>
+                <p>thread(s) -> PML4 A</p>
+                <div class="context-pages">
+                  <span class="context-page-row mapped">upage 0x500000 -> frame A</span>
+                  <span class="context-page-row">stack -> frame stack</span>
+                  <span class="context-page-row">code/data -> user pool</span>
+                </div>
+              </article>
+              <article class="context-process-card">
+                <h4>Process B</h4>
+                <p>thread(s) -> PML4 B</p>
+                <div class="context-pages">
+                  <span class="context-page-row mapped">same 0x500000 -> frame B</span>
+                  <span class="context-page-row">stack -> 다른 frame</span>
+                  <span class="context-page-row">code/data -> 다른 mapping</span>
+                </div>
+              </article>
+              <article class="context-process-card">
+                <h4>Process C</h4>
+                <p>thread(s) -> PML4 C</p>
+                <div class="context-pages">
+                  <span class="context-page-row lazy">same 0x500000 -> frame 없음</span>
+                  <span class="context-page-row">lazy page / unmapped</span>
+                  <span class="context-page-row">상태는 metadata에만 있음</span>
+                </div>
+              </article>
+            </div>
+            <div class="context-link-column">active<br>PML4<br>maps</div>
+            <div class="context-frames">
+              <article class="context-frame-card">
+                <h4>global user pool frame A</h4>
+                <p>Process A의 0x500000 page byte</p>
+              </article>
+              <article class="context-frame-card alt">
+                <h4>global user pool frame B</h4>
+                <p>Process B의 같은 VA가 보는 다른 byte</p>
+              </article>
+              <article class="context-frame-card lazy">
+                <h4>no frame yet</h4>
+                <p>Process C는 아직 physical frame이 붙지 않음</p>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="panel-contents" role="tabpanel" aria-labelledby="tab-contents" hidden>
+          <p><strong>이 탭은 주소 영역을 실제 데이터 종류와 연결합니다.</strong> 아래 예시는 각 영역에 어떤 byte나 metadata가 들어가는지 설명하기 위한 축약 예시입니다.</p>
+          <div class="code-tour">
+            <article class="code-slice">
+              <h4>user code / data / BSS / stack</h4>
+              <p>사용자 프로그램 ELF와 실행 중 stack이 가운데 아래 user virtual range에 놓입니다.</p>
+              <code>int initialized = 7;        // user initialized data
+static char zero_buf[4096]; // user BSS
+
+int main(int argc, char **argv) {
+  int local = argc;         // user stack
+  return initialized + local; // instruction bytes = user code
+}</code>
+            </article>
+            <article class="code-slice">
+              <h4>user pool frame</h4>
+              <p>mapped user page가 실제 RAM에 올라오면 오른쪽 user pool의 frame 하나가 그 page 내용을 담습니다.</p>
+              <code>mapped user virtual page
+  page table entry -> user-pool frame
+  frame bytes -> code / data / BSS / stack contents
+
+free user-pool frame
+  no current user page contents</code>
+            </article>
+            <article class="code-slice">
+              <h4>kernel code / data / BSS</h4>
+              <p>kernel 함수의 기계어와 kernel 전역 상태는 KERN_BASE 위쪽 kernel virtual range에 보입니다.</p>
+              <code>kernel text
+  scheduler / interrupt / MMU helper instructions
+
+kernel data and BSS
+  ready list, locks, allocator state, page tables</code>
+            </article>
+            <article class="code-slice">
+              <h4>thread page / page table metadata</h4>
+              <p>왼쪽 thread page는 user stack이 아니라 kernel이 thread를 관리하기 위한 page입니다.</p>
+              <code>thread page lower area
+  thread metadata: tid, status, pml4 pointer, magic
+
+thread page upper area
+  kernel stack and saved interrupt/syscall registers</code>
+            </article>
+          </div>
+        </div>
+        <div class="tab-panel" id="panel-bitmap" role="tabpanel" aria-labelledby="tab-bitmap" hidden>
+          <p><strong>bitmap과 page table은 page 내용을 저장하지 않습니다.</strong> bitmap은 frame의 free/used 상태를, page table은 VA -> frame 연결을 기록합니다.</p>
+          <p>실제 user code/data/stack byte는 오른쪽 user pool frame 안에 있고, gap이나 lazy page처럼 frame이 없는 상태는 metadata로만 남습니다.</p>
+          <div class="term-grid" aria-label="memory storage terminology">
+            <article class="term-card">
+              <span class="term-label">용어 1</span>
+              <h4>kernel metadata</h4>
+              <dl>
+                <dt>위치</dt>
+                <dd>kernel memory</dd>
+                <dt>분류</dt>
+                <dd>metadata storage</dd>
+                <dt>내용</dt>
+                <dd>user pool bitmap, page table, frame table 같은 관리 정보</dd>
+                <dt>역할</dt>
+                <dd>frame 할당 상태, VA -> frame 연결, lazy/예약 상태를 기록</dd>
+              </dl>
+            </article>
+            <article class="term-card">
+              <span class="term-label">용어 2</span>
+              <h4>user virtual address (upage)</h4>
+              <dl>
+                <dt>위치</dt>
+                <dd>process virtual address space</dd>
+                <dt>분류</dt>
+                <dd>address key</dd>
+                <dt>내용</dt>
+                <dd>실제 byte를 담는 공간이 아님</dd>
+                <dt>역할</dt>
+                <dd>현재 process의 page table에서 frame을 찾기 위한 이름</dd>
+              </dl>
+            </article>
+            <article class="term-card">
+              <span class="term-label">용어 3</span>
+              <h4>user-pool physical frame</h4>
+              <dl>
+                <dt>위치</dt>
+                <dd>physical memory의 user pool</dd>
+                <dt>분류</dt>
+                <dd>data storage</dd>
+                <dt>내용</dt>
+                <dd>user code, data, BSS, stack page의 실제 byte</dd>
+                <dt>역할</dt>
+                <dd>bitmap이 가리키는 대상이며, 큰 메모리 사용량은 여기서 발생함</dd>
+              </dl>
+            </article>
+          </div>
+          <div class="bitmap-panel">
+            <article class="bitmap-card">
+              <h4>frame index와 bit의 관계</h4>
+              <p>예를 들어 bit 3이 1이면 user pool의 3번째 frame이 사용 중이라는 뜻입니다. 그 frame이 어떤 process의 어떤 upage에 붙었는지는 page table/frame table이 따로 연결합니다.</p>
+              <div class="bitmap-row" aria-label="bitmap example">
+                <span class="bit used">1</span>
+                <span class="bit">0</span>
+                <span class="bit used">1</span>
+                <span class="bit used">1</span>
+                <span class="bit">0</span>
+                <span class="bit">0</span>
+                <span class="bit used">1</span>
+                <span class="bit">0</span>
+              </div>
+            </article>
+            <article class="bitmap-card">
+              <h4>metadata와 data의 크기 감각</h4>
+              <p>bitmap은 page당 1 bit라서 작습니다. 큰 메모리는 bitmap이 아니라 실제 frame byte에서 발생합니다.</p>
+              <code class="formula">10000 frames * 1 bit = 10000 bits
+10000 bits / 8 = 1250 bytes ~= 1.22 KiB
+
+10000 frames * 4 KiB ~= 39.1 MiB data</code>
+            </article>
+          </div>
+        </div>
+        <div class="tab-panel" id="panel-storage" role="tabpanel" aria-labelledby="tab-storage" hidden>
+          <p><strong>VM에 주소 범위가 보인다는 말과 실제 RAM byte가 있다는 말은 다릅니다.</strong> 실제 접근 가능한 page는 page table mapping을 통해 physical frame에 닿습니다.</p>
+          <p>초록은 실제 byte-backed mapping, 주황은 metadata 또는 예약 상태입니다. metadata 자체도 kernel memory에 저장되는 byte지만 user page 내용은 아닙니다.</p>
+        </div>
+      </div>
+
+      <div class="map-scroll">
+        <div class="map-canvas">
+          <svg class="memory-svg" viewBox="0 0 1140 1180" role="img" aria-labelledby="memoryMapTitle memoryMapDesc">
+            <title id="memoryMapTitle">Pintos memory map</title>
+            <desc id="memoryMapDesc">Pintos의 virtual address space, physical memory, per-thread kernel page 사이의 direct mapping과 page table mapping 관계를 같은 SVG 좌표계에서 보여 준다.</desc>
+            <defs>
+              <pattern id="hatchPattern" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+                <rect width="10" height="10" fill="#fff"></rect>
+                <rect width="2" height="10" fill="#e4e4e8"></rect>
+              </pattern>
+              <marker id="arrowPrimary" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#0066cc"></path>
+              </marker>
+            </defs>
+
+            <!-- Coordinate reference:
+                 virtual map: x=380, width=300
+                 physical map: x=880, width=230
+                 thread page: x=35, width=174
+            -->
+
+            <text class="svg-title" x="530" y="42" text-anchor="middle">현재 process virtual address space</text>
+            <text class="svg-title" x="995" y="42" text-anchor="middle">physical memory (실제 RAM)</text>
+            <text class="svg-title" x="122" y="326" text-anchor="middle">per-thread kernel page</text>
+            <text class="svg-note" x="530" y="1112" text-anchor="middle">위쪽은 높은 virtual address, 아래쪽은 낮은 virtual address로 읽습니다.</text>
+
+            <rect class="mem-rect hatch-fill" x="380" y="76" width="300" height="36"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct focus-alias" x="380" y="112" width="300" height="126"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="238" width="300" height="50"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="288" width="300" height="90"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="378" width="300" height="47"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="425" width="300" height="47"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="472" width="300" height="58"></rect>
+            <rect class="mem-rect kernel-fill dim-target focus-direct" x="380" y="530" width="300" height="30"></rect>
+            <rect class="mem-rect hatch-fill dim-target focus-page" x="380" y="560" width="300" height="76"></rect>
+            <rect class="mem-rect user-fill dim-target focus-page focus-alias" x="380" y="636" width="300" height="132"></rect>
+            <rect class="mem-rect hatch-fill dim-target focus-page" x="380" y="768" width="300" height="122"></rect>
+            <rect class="mem-rect user-fill dim-target focus-page focus-alias" x="380" y="890" width="300" height="46"></rect>
+            <rect class="mem-rect user-fill dim-target focus-page focus-alias" x="380" y="936" width="300" height="46"></rect>
+            <rect class="mem-rect user-fill dim-target focus-page focus-alias" x="380" y="982" width="300" height="58"></rect>
+            <rect class="mem-rect hatch-fill" x="380" y="1040" width="300" height="28"></rect>
+
+            <rect class="mem-rect physical-fill dim-target focus-direct focus-page focus-alias" x="880" y="112" width="230" height="126"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="238" width="230" height="140"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="378" width="230" height="47"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="425" width="230" height="47"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="472" width="230" height="58"></rect>
+            <rect class="mem-rect physical-fill dim-target focus-direct" x="880" y="530" width="230" height="30"></rect>
+
+            <rect class="mem-rect thread-fill" x="35" y="354" width="174" height="48"></rect>
+            <rect class="mem-rect thread-fill" x="35" y="402" width="174" height="56"></rect>
+            <rect class="mem-rect stack-fill" x="35" y="458" width="174" height="110"></rect>
+            <rect class="mem-rect thread-fill" x="35" y="568" width="174" height="60"></rect>
+
+            <path class="mapping-direct dim-target focus-direct focus-alias" d="M 680 175 C 750 175, 810 175, 880 175"></path>
+            <path class="mapping-direct dim-target focus-direct" d="M 680 333 C 750 333, 810 333, 880 333"></path>
+            <path class="mapping-direct dim-target focus-direct" d="M 680 501 C 750 501, 810 501, 880 501"></path>
+            <path class="mapping-user dim-target focus-page focus-alias" d="M 680 913 C 790 913, 770 206, 880 206"></path>
+
+            <path class="range-brace dim-target focus-direct focus-alias" d="M 380 112 C 360 112, 356 132, 356 152 L 356 304 C 356 326, 344 326, 344 336 C 344 346, 356 346, 356 368 L 356 520 C 356 540, 360 560, 380 560"></path>
+            <path class="range-brace dim-target focus-page focus-alias" d="M 380 560 C 360 560, 356 586, 356 616 L 356 782 C 356 804, 344 804, 344 814 C 344 824, 356 824, 356 846 L 356 1018 C 356 1044, 360 1068, 380 1068"></path>
+
+            <line class="leader" x1="316" y1="112" x2="380" y2="112"></line>
+            <line class="leader dim-target focus-direct focus-alias" x1="316" y1="176" x2="380" y2="176"></line>
+            <line class="leader dim-target focus-direct focus-page" x1="316" y1="560" x2="380" y2="560"></line>
+            <line class="leader dim-target focus-page" x1="316" y1="636" x2="380" y2="636"></line>
+            <line class="leader dim-target focus-page focus-alias" x1="316" y1="913" x2="380" y2="913"></line>
+            <line class="leader" x1="316" y1="1040" x2="380" y2="1040"></line>
+            <line class="leader" x1="316" y1="1068" x2="380" y2="1068"></line>
+
+            <line class="kern-boundary dim-target focus-direct focus-page" x1="380" y1="560" x2="680" y2="560"></line>
+            <rect class="permission-badge dim-target focus-direct focus-page" x="696" y="546" width="128" height="28" rx="14"></rect>
+            <text class="permission-text dim-target focus-direct focus-page" x="760" y="564" text-anchor="middle">KERN_BASE 경계</text>
+
+            <g>
+              <circle class="num-dot" cx="400" cy="132" r="12"></circle>
+              <text class="num-text" x="400" y="136" text-anchor="middle">1</text>
+              <circle class="num-dot" cx="400" cy="308" r="12"></circle>
+              <text class="num-text" x="400" y="312" text-anchor="middle">2</text>
+              <circle class="num-dot warn" cx="400" cy="560" r="12"></circle>
+              <text class="num-text" x="400" y="564" text-anchor="middle">3</text>
+              <circle class="num-dot" cx="400" cy="656" r="12"></circle>
+              <text class="num-text" x="400" y="660" text-anchor="middle">4</text>
+              <circle class="num-dot" cx="400" cy="1002" r="12"></circle>
+              <text class="num-text" x="400" y="1006" text-anchor="middle">5</text>
+              <circle class="num-dot" cx="900" cy="132" r="12"></circle>
+              <text class="num-text" x="900" y="136" text-anchor="middle">6</text>
+            </g>
+
+            <text class="seg-text" x="530" y="99" text-anchor="middle">미사용 high kernel virtual 영역</text>
+            <text class="seg-text" x="530" y="144" text-anchor="middle">
+              <tspan class="seg-key" x="530">용어</tspan>
+              <tspan x="530" dy="15">user pool 물리 frame</tspan>
+              <tspan class="seg-key" x="530" dy="16">접근</tspan>
+              <tspan class="seg-small" x="530" dy="14">kernel direct map</tspan>
+              <tspan class="seg-key" x="530" dy="16">커널 VA</tspan>
+              <tspan class="seg-small" x="530" dy="14">KERN_BASE + physical address</tspan>
+            </text>
+            <text class="seg-text" x="530" y="255" text-anchor="middle">
+              <tspan class="seg-key" x="530">용어</tspan>
+              <tspan x="530" dy="15">allocator / page metadata</tspan>
+              <tspan class="seg-small" x="530" dy="14">bitmap / page tables</tspan>
+            </text>
+            <text class="seg-text" x="530" y="318" text-anchor="middle">
+              <tspan class="seg-key" x="530">용어</tspan>
+              <tspan x="530" dy="15">kernel pool 물리 frame</tspan>
+              <tspan class="seg-key" x="530" dy="16">접근</tspan>
+              <tspan class="seg-small" x="530" dy="14">kernel direct map</tspan>
+            </text>
+            <text class="seg-text" x="530" y="407" text-anchor="middle">kernel BSS</text>
+            <text class="seg-text" x="530" y="454" text-anchor="middle">kernel initialized data</text>
+            <text class="seg-text" x="530" y="506" text-anchor="middle">kernel code segment</text>
+            <text class="seg-text" x="530" y="550" text-anchor="middle">bootstrap mapping</text>
+            <text class="seg-text" x="530" y="606" text-anchor="middle">미매핑 user gap</text>
+            <text class="seg-text" x="530" y="690" text-anchor="middle">
+              <tspan class="seg-key" x="530">용어</tspan>
+              <tspan x="530" dy="15">user stack</tspan>
+              <tspan class="seg-key" x="530" dy="16">접근</tspan>
+              <tspan class="seg-small" x="530" dy="14">user mode VA</tspan>
+            </text>
+            <text class="seg-text" x="530" y="827" text-anchor="middle">
+              <tspan x="530">heap-like gap</tspan>
+              <tspan class="seg-small" x="530" dy="16">Project 2에서는 일반 heap 미구현</tspan>
+            </text>
+            <text class="seg-text" x="530" y="918" text-anchor="middle">user BSS</text>
+            <text class="seg-text" x="530" y="964" text-anchor="middle">user initialized data</text>
+            <text class="seg-text" x="530" y="1000" text-anchor="middle">
+              <tspan class="seg-key" x="530">용어</tspan>
+              <tspan x="530" dy="15">user code segment</tspan>
+              <tspan class="seg-small" x="530" dy="15">매핑: process page table</tspan>
+            </text>
+            <text class="seg-text" x="530" y="1058" text-anchor="middle">low 미매핑 영역</text>
+
+            <text class="seg-text" x="995" y="166" text-anchor="middle">
+              <tspan class="seg-key" x="995">용어</tspan>
+              <tspan x="995" dy="15">user pool</tspan>
+              <tspan class="seg-key" x="995" dy="16">역할</tspan>
+              <tspan class="seg-small" x="995" dy="14">user page용 frame</tspan>
+            </text>
+            <text class="seg-text" x="995" y="294" text-anchor="middle">
+              <tspan class="seg-key" x="995">용어</tspan>
+              <tspan x="995" dy="15">kernel pool</tspan>
+              <tspan class="seg-key" x="995" dy="16">역할</tspan>
+              <tspan class="seg-small" x="995" dy="14">kernel frame / metadata</tspan>
+            </text>
+            <text class="seg-text" x="995" y="407" text-anchor="middle">kernel BSS</text>
+            <text class="seg-text" x="995" y="454" text-anchor="middle">kernel initialized data</text>
+            <text class="seg-text" x="995" y="506" text-anchor="middle">kernel code segment</text>
+            <text class="seg-text" x="995" y="550" text-anchor="middle">bootstrap / low 1 MB</text>
+
+            <text class="seg-text" x="122" y="384" text-anchor="middle">...</text>
+            <text class="seg-text" x="122" y="436" text-anchor="middle">interrupt frame</text>
+            <text class="seg-text" x="122" y="500" text-anchor="middle">
+              <tspan class="seg-key" x="122">용어</tspan>
+              <tspan x="122" dy="15">kernel stack</tspan>
+              <tspan class="seg-key" x="122" dy="16">역할</tspan>
+              <tspan class="seg-small" x="122" dy="14">kernel mode 실행</tspan>
+            </text>
+            <text class="seg-text" x="122" y="586" text-anchor="middle">
+              <tspan class="seg-key" x="122">용어</tspan>
+              <tspan x="122" dy="15">struct thread</tspan>
+              <tspan class="seg-small" x="122" dy="15">pml4, status, magic</tspan>
+            </text>
+
+            <text class="addr-text" x="306" y="108" text-anchor="end">KERN_BASE + RAM</text>
+            <text class="addr-subtext" x="306" y="122" text-anchor="end">direct map 상한</text>
+            <text class="addr-text" x="306" y="172" text-anchor="end">KERN_BASE + paddr</text>
+            <text class="addr-subtext" x="306" y="186" text-anchor="end">ptov(paddr)</text>
+            <text class="addr-text" x="306" y="556" text-anchor="end">KERN_BASE + 0</text>
+            <text class="addr-subtext" x="306" y="570" text-anchor="end">= 0x8004000000</text>
+            <text class="addr-text" x="306" y="632" text-anchor="end">0x47480000</text>
+            <text class="addr-subtext" x="306" y="646" text-anchor="end">USER_STACK</text>
+            <text class="addr-text" x="306" y="909" text-anchor="end">upage</text>
+            <text class="addr-subtext" x="306" y="923" text-anchor="end">page-aligned VA</text>
+            <text class="addr-text" x="306" y="1036" text-anchor="end">0x400000</text>
+            <text class="addr-subtext" x="306" y="1050" text-anchor="end">user code 시작</text>
+            <text class="addr-text" x="306" y="1066" text-anchor="end">0x0</text>
+            <text class="addr-subtext" x="306" y="1080" text-anchor="end">null / low 영역</text>
+
+            <text class="svg-label" x="338" y="330" text-anchor="end">
+              <tspan x="338">kernel direct</tspan>
+              <tspan x="338" dy="14">map 범위</tspan>
+            </text>
+            <text class="svg-label" x="338" y="808" text-anchor="end">
+              <tspan x="338">user virtual</tspan>
+              <tspan x="338" dy="14">address 범위</tspan>
+            </text>
+
+            <rect class="route-badge" x="714" y="146" width="150" height="28" rx="14"></rect>
+            <text class="route-text" x="789" y="164" text-anchor="middle">kernel direct map</text>
+            <rect class="route-badge" x="714" y="742" width="150" height="28" rx="14"></rect>
+            <text class="route-text" x="789" y="760" text-anchor="middle">PML4 page 매핑</text>
+
+            <g class="demo-layer demo-direct">
+              <rect class="focus-box" x="374" y="106" width="312" height="460" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="460" rx="8"></rect>
+              <rect class="demo-callout" x="708" y="82" width="160" height="48" rx="8"></rect>
+              <text class="demo-callout-text" x="788" y="102" text-anchor="middle">KERN_BASE + paddr</text>
+              <text class="demo-callout-small" x="788" y="118" text-anchor="middle">같은 RAM offset</text>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="2.2s" repeatCount="indefinite" path="M 680 175 C 750 175, 810 175, 880 175"></animateMotion>
+              </circle>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="2.7s" repeatCount="indefinite" path="M 680 333 C 750 333, 810 333, 880 333"></animateMotion>
+              </circle>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="3.1s" repeatCount="indefinite" path="M 680 501 C 750 501, 810 501, 880 501"></animateMotion>
+              </circle>
+            </g>
+
+            <g class="demo-layer demo-page">
+              <rect class="focus-box" x="374" y="554" width="312" height="492" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="138" rx="8"></rect>
+              <rect class="pool-frame-chip" x="890" y="204" width="44" height="12" rx="3"></rect>
+              <rect class="pool-frame-chip" x="942" y="204" width="44" height="12" rx="3"></rect>
+              <rect class="pool-frame-chip" x="994" y="204" width="44" height="12" rx="3"></rect>
+              <rect class="pool-frame-chip" x="1046" y="204" width="44" height="12" rx="3"></rect>
+              <rect class="pool-frame-chip" x="890" y="222" width="68" height="10" rx="3"></rect>
+              <rect class="pool-frame-chip" x="966" y="222" width="68" height="10" rx="3"></rect>
+              <rect class="pool-frame-chip" x="1042" y="222" width="48" height="10" rx="3"></rect>
+              <rect class="pool-unbacked" x="386" y="566" width="288" height="58" rx="6"></rect>
+              <rect class="pool-backed" x="386" y="642" width="288" height="116" rx="6"></rect>
+              <rect class="pool-unbacked" x="386" y="778" width="288" height="102" rx="6"></rect>
+              <rect class="pool-backed" x="386" y="896" width="288" height="34" rx="6"></rect>
+              <rect class="pool-backed" x="386" y="942" width="288" height="34" rx="6"></rect>
+              <rect class="pool-backed" x="386" y="988" width="288" height="46" rx="6"></rect>
+              <rect class="pool-unbacked" x="386" y="1044" width="288" height="20" rx="5"></rect>
+              <rect class="demo-callout" x="704" y="1000" width="198" height="104" rx="8"></rect>
+              <text class="pool-legend-title" x="720" y="1030">page 탭 세부</text>
+              <rect class="pool-backed" x="720" y="1042" width="18" height="14" rx="3"></rect>
+              <text class="demo-callout-small" x="746" y="1052">
+                <tspan x="746">mapped page</tspan>
+                <tspan x="746" dy="13">-&gt; user pool frame</tspan>
+              </text>
+              <rect class="pool-unbacked" x="720" y="1074" width="18" height="14" rx="3"></rect>
+              <text class="demo-callout-small" x="746" y="1085">
+                <tspan x="746">gap / 미매핑</tspan>
+                <tspan x="746" dy="13">-&gt; 아직 frame 없음</tspan>
+              </text>
+              <rect class="demo-callout" x="710" y="844" width="132" height="54" rx="8"></rect>
+              <text class="demo-callout-text" x="776" y="866" text-anchor="middle">PML4 entry</text>
+              <text class="demo-callout-small" x="776" y="882" text-anchor="middle">upage -> frame</text>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="3.2s" repeatCount="indefinite" path="M 680 913 C 790 913, 770 206, 880 206"></animateMotion>
+              </circle>
+            </g>
+
+            <g class="demo-layer demo-alias">
+              <rect class="focus-box" x="374" y="106" width="312" height="138" rx="8"></rect>
+              <rect class="alias-candidate" x="386" y="642" width="288" height="116" rx="6"></rect>
+              <rect class="alias-candidate" x="386" y="896" width="288" height="34" rx="6"></rect>
+              <rect class="alias-candidate" x="386" y="942" width="288" height="34" rx="6"></rect>
+              <rect class="alias-candidate" x="386" y="988" width="288" height="46" rx="6"></rect>
+              <rect class="focus-box" x="374" y="630" width="312" height="416" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="138" rx="8"></rect>
+              <rect class="demo-callout" x="704" y="252" width="164" height="70" rx="8"></rect>
+              <text class="demo-callout-text" x="786" y="274" text-anchor="middle">매핑된 user page</text>
+              <text class="demo-callout-small" x="786" y="290" text-anchor="middle">같은 frame에</text>
+              <text class="demo-callout-small" x="786" y="306" text-anchor="middle">kernel direct-map VA도 있음</text>
+              <circle class="flow-dot" r="5">
+                <animateMotion dur="2.4s" repeatCount="indefinite" path="M 680 175 C 750 175, 810 175, 880 175"></animateMotion>
+              </circle>
+              <circle class="flow-dot alt" r="5">
+                <animateMotion dur="3.2s" repeatCount="indefinite" path="M 680 913 C 790 913, 770 206, 880 206"></animateMotion>
+              </circle>
+            </g>
+
+            <g class="demo-layer demo-threading">
+              <rect class="focus-box" x="374" y="630" width="312" height="416" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="138" rx="8"></rect>
+
+              <text class="context-label" x="158" y="630" text-anchor="middle">여러 user address space 묶음</text>
+              <rect class="context-card active" x="32" y="650" width="252" height="104" rx="8"></rect>
+              <text class="context-label" x="52" y="676">Process A 선택됨</text>
+              <text class="context-small" x="52" y="694">thread(s) -> PML4 A</text>
+              <text class="context-small" x="52" y="710">upage 0x500000 -> frame A</text>
+              <rect class="context-mini-page" x="202" y="668" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="690" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="712" width="56" height="16" rx="3"></rect>
+              <text class="context-small" x="230" y="742" text-anchor="middle">code/data/stack</text>
+
+              <rect class="context-card" x="32" y="770" width="252" height="104" rx="8"></rect>
+              <text class="context-label" x="52" y="796">Process B</text>
+              <text class="context-small" x="52" y="814">thread(s) -> PML4 B</text>
+              <text class="context-small" x="52" y="830">same upage -> frame B</text>
+              <rect class="context-mini-page" x="202" y="788" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="810" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="832" width="56" height="16" rx="3"></rect>
+              <text class="context-small" x="230" y="862" text-anchor="middle">다른 user VA 묶음</text>
+
+              <rect class="context-card idle" x="32" y="890" width="252" height="104" rx="8"></rect>
+              <text class="context-label" x="52" y="916">Process C</text>
+              <text class="context-small" x="52" y="934">thread(s) -> PML4 C</text>
+              <text class="context-small" x="52" y="950">same upage -> frame 없음</text>
+              <rect class="context-mini-page" x="202" y="908" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="930" width="56" height="16" rx="3"></rect>
+              <rect class="context-mini-page" x="202" y="952" width="56" height="16" rx="3"></rect>
+              <text class="context-small" x="230" y="982" text-anchor="middle">lazy / unmapped</text>
+
+              <rect class="context-frame" x="890" y="130" width="82" height="34" rx="5"></rect>
+              <text class="context-small" x="931" y="151" text-anchor="middle">frame A</text>
+              <rect class="context-frame alt" x="994" y="130" width="82" height="34" rx="5"></rect>
+              <text class="context-small" x="1035" y="151" text-anchor="middle">frame B</text>
+              <rect class="context-frame" x="890" y="184" width="82" height="34" rx="5"></rect>
+              <text class="context-small" x="931" y="205" text-anchor="middle">frame stack</text>
+
+              <path class="context-route" d="M 680 913 C 765 913, 760 147, 890 147"></path>
+              <path class="context-route alt" d="M 284 822 C 600 822, 680 147, 994 147"></path>
+
+              <rect class="demo-callout" x="704" y="746" width="176" height="124" rx="8"></rect>
+              <text class="demo-callout-text" x="792" y="770" text-anchor="middle">바뀌는 것 = active PML4</text>
+              <text class="demo-callout-small" x="792" y="790" text-anchor="middle">가운데 user VA 해석만</text>
+              <text class="demo-callout-small" x="792" y="808" text-anchor="middle">PML4 A/B/C로 달라짐</text>
+              <text class="demo-callout-small" x="792" y="826" text-anchor="middle">user pool frame들은</text>
+              <text class="demo-callout-small" x="792" y="844" text-anchor="middle">전역 RAM 안에 계속 있음</text>
+              <text class="demo-callout-small" x="792" y="862" text-anchor="middle">kernel direct map으로 접근</text>
+            </g>
+
+            <g class="demo-layer demo-contents">
+              <rect class="contents-highlight" x="374" y="106" width="312" height="460" rx="8"></rect>
+              <rect class="contents-highlight user" x="374" y="630" width="312" height="416" rx="8"></rect>
+              <rect class="contents-highlight physical" x="874" y="106" width="242" height="460" rx="8"></rect>
+              <rect class="contents-highlight thread" x="29" y="348" width="186" height="286" rx="8"></rect>
+              <text class="contents-tag" x="690" y="130">kernel code / data / BSS</text>
+              <text class="contents-tag" x="690" y="664">user code / data / BSS / stack</text>
+              <text class="contents-tag" x="1118" y="130" text-anchor="end">physical frame과 pool bitmap</text>
+              <text class="contents-tag" x="122" y="346" text-anchor="middle">struct thread + kernel stack</text>
+              <rect class="demo-callout" x="704" y="594" width="184" height="78" rx="8"></rect>
+              <text class="demo-callout-text" x="796" y="616" text-anchor="middle">아래 데이터 예시 참고</text>
+              <text class="demo-callout-small" x="796" y="634" text-anchor="middle">virtual page는 이름</text>
+              <text class="demo-callout-small" x="796" y="650" text-anchor="middle">physical frame은 byte 저장</text>
+            </g>
+
+            <g class="demo-layer demo-bitmap">
+              <rect class="focus-box" x="374" y="232" width="312" height="62" rx="8"></rect>
+              <rect class="focus-box" x="374" y="630" width="312" height="416" rx="8"></rect>
+              <rect class="focus-box alt" x="874" y="106" width="242" height="138" rx="8"></rect>
+              <rect class="demo-callout" x="704" y="236" width="162" height="118" rx="8"></rect>
+              <text class="demo-callout-text" x="785" y="258" text-anchor="middle">용어: bitmap</text>
+              <text class="demo-callout-small" x="785" y="274" text-anchor="middle">1 bit per page frame</text>
+              <g>
+                <rect class="bitmap-bit used" x="724" y="292" width="16" height="16" rx="3"></rect>
+                <text class="bitmap-bit-text" x="732" y="304" text-anchor="middle">1</text>
+                <rect class="bitmap-bit" x="744" y="292" width="16" height="16" rx="3"></rect>
+                <text class="bitmap-bit-text free" x="752" y="304" text-anchor="middle">0</text>
+                <rect class="bitmap-bit used" x="764" y="292" width="16" height="16" rx="3"></rect>
+                <text class="bitmap-bit-text" x="772" y="304" text-anchor="middle">1</text>
+                <rect class="bitmap-bit used" x="784" y="292" width="16" height="16" rx="3"></rect>
+                <text class="bitmap-bit-text" x="792" y="304" text-anchor="middle">1</text>
+                <rect class="bitmap-bit" x="804" y="292" width="16" height="16" rx="3"></rect>
+                <text class="bitmap-bit-text free" x="812" y="304" text-anchor="middle">0</text>
+                <rect class="bitmap-bit" x="824" y="292" width="16" height="16" rx="3"></rect>
+                <text class="bitmap-bit-text free" x="832" y="304" text-anchor="middle">0</text>
+              </g>
+              <text class="demo-callout-small" x="785" y="328" text-anchor="middle">1 = used, 0 = free</text>
+              <text class="demo-callout-small" x="785" y="344" text-anchor="middle">page 내용 아님</text>
+              <path class="leader" d="M 704 294 L 680 268"></path>
+              <path class="leader" d="M 866 294 L 880 176"></path>
+              <text class="contents-tag" x="690" y="668">용어: user virtual address (upage)</text>
+              <text class="contents-tag" x="690" y="682">역할: page table lookup key</text>
+              <text class="contents-tag" x="690" y="696">내용: page byte 없음</text>
+              <text class="contents-tag" x="1118" y="130" text-anchor="end">용어: user pool frame</text>
+              <text class="contents-tag" x="1118" y="144" text-anchor="end">내용: 실제 byte</text>
+            </g>
+
+            <g class="demo-layer demo-storage">
+              <rect class="vm-real-box" x="374" y="630" width="312" height="144" rx="8"></rect>
+              <rect class="vm-real-box" x="374" y="884" width="312" height="162" rx="8"></rect>
+              <rect class="vm-real-box" x="874" y="106" width="242" height="138" rx="8"></rect>
+              <rect class="vm-real-box" x="374" y="374" width="312" height="160" rx="8"></rect>
+              <rect class="vm-real-box" x="874" y="374" width="242" height="160" rx="8"></rect>
+
+              <rect class="vm-meta-box solid" x="374" y="232" width="312" height="62" rx="8"></rect>
+              <rect class="vm-meta-box" x="374" y="554" width="312" height="82" rx="8"></rect>
+              <rect class="vm-meta-box" x="374" y="768" width="312" height="122" rx="8"></rect>
+              <rect class="vm-meta-box" x="374" y="1040" width="312" height="28" rx="6"></rect>
+
+              <rect class="demo-callout" x="704" y="608" width="198" height="82" rx="8"></rect>
+              <text class="storage-label" x="803" y="630" text-anchor="middle">초록: 실제 byte 저장</text>
+              <text class="storage-label-small" x="803" y="648" text-anchor="middle">user pool frame은 전역 RAM</text>
+              <text class="storage-label-small" x="803" y="664" text-anchor="middle">process switch로 사라지지 않음</text>
+              <text class="storage-label-small" x="803" y="680" text-anchor="middle">VA -> frame mapping만 바뀜</text>
+
+              <rect class="demo-callout" x="704" y="778" width="208" height="94" rx="8"></rect>
+              <text class="storage-label" x="808" y="800" text-anchor="middle">주황: metadata/예약</text>
+              <text class="storage-label-small" x="808" y="818" text-anchor="middle">주소 범위는 보일 수 있음</text>
+              <text class="storage-label-small" x="808" y="834" text-anchor="middle">하지만 frame byte 없음</text>
+              <text class="storage-label-small" x="808" y="850" text-anchor="middle">SPT/PTE/bitmap이 상태 기록</text>
+
+              <rect class="demo-callout" x="704" y="226" width="184" height="62" rx="8"></rect>
+              <text class="storage-label" x="796" y="248" text-anchor="middle">metadata도 byte다</text>
+              <text class="storage-label-small" x="796" y="266" text-anchor="middle">kernel memory에 저장</text>
+              <text class="storage-label-small" x="796" y="282" text-anchor="middle">user page 내용은 아님</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="legend-item"><span class="swatch" style="background:#ffffff"></span>kernel virtual memory</span>
+        <span class="legend-item"><span class="swatch" style="background:#d8e8ff"></span>user virtual memory</span>
+        <span class="legend-item"><span class="swatch" style="background:#e7d8ef"></span>physical memory</span>
+        <span class="legend-item"><span class="swatch" style="background:repeating-linear-gradient(-45deg,#fff,#fff 8px,#e4e4e8 8px,#e4e4e8 10px)"></span>unmapped / reserved virtual area</span>
+        <span class="legend-item"><span class="arrow-sample"></span>실선 화살표 = kernel direct mapping</span>
+        <span class="legend-item"><span class="arrow-sample dashed"></span>점선 화살표 = user page table mapping</span>
+        <span class="legend-item"><span class="swatch" style="background:rgba(0,102,204,0.13);border-color:#0066cc"></span>page 탭 파란 강조 = user-pool frame이 붙은 mapped page</span>
+        <span class="legend-item"><span class="swatch" style="background:#fff;border-style:dashed"></span>page 탭 점선 강조 = 아직 physical frame이 없는 user virtual gap</span>
+        <span class="legend-item"><span class="swatch" style="background:rgba(24,128,56,0.12);border-color:#188038"></span>6번 탭 초록 = user pool frame 같은 실제 byte 저장 영역</span>
+        <span class="legend-item"><span class="swatch" style="background:rgba(245,166,35,0.12);border-color:#b06a00;border-style:dashed"></span>6번 탭 주황 = metadata 또는 예약 상태</span>
+      </div>
+    </section>
+
+    <section class="explain" id="explain" aria-label="map explanation">
+      <article class="explain-card">
+        <div class="num">1</div>
+        <div>
+          <h3>kernel direct map과 KERN_BASE</h3>
+          <p>Pintos는 physical memory를 `KERN_BASE` 위 kernel virtual address에 일대일로 매핑합니다. 그래서 kernel은 physical address를 포인터처럼 직접 쓰지 않고, `KERN_BASE + physical address` 형태의 kernel virtual address로 frame을 접근합니다.</p>
+          <code class="block">kernel virtual address = KERN_BASE + physical address
+physical address = kernel virtual address - KERN_BASE</code>
+          <p>`KERN_BASE`는 동시에 user/kernel 경계입니다. physical frame이 user page에 붙어 있으면, 같은 frame을 user VA와 kernel direct-map VA 양쪽에서 볼 수 있습니다.</p>
+          <p>이 direct-map 범위는 CPU가 표현할 수 있는 전체 virtual address 공간과 같은 말이 아닙니다. Pintos가 실제로 매핑하는 것은 machine의 physical memory 크기까지이고, OS 정책과 allocator 상태가 실제 사용 가능한 frame 수를 제한합니다.</p>
+        </div>
+      </article>
+
+      <article class="explain-card">
+        <div class="num">2</div>
+        <div>
+          <h3>user virtual page와 user pool frame</h3>
+          <p>가운데 아래의 user BSS, data, code, stack은 process별 user virtual memory입니다. 같은 virtual address라도 process마다 다른 frame에 매핑될 수 있습니다.</p>
+          <code class="block">Process A: user virtual 0x500000 -> physical frame A
+Process B: user virtual 0x500000 -> physical frame B</code>
+          <p>`user pool`은 user가 직접 보는 주소 공간이 아니라 user page에 붙일 전역 physical frame의 출처입니다. kernel은 direct map으로 이 frame들을 볼 수 있고, process context가 바뀌어도 user pool 자체가 바뀌지는 않습니다.</p>
+          <code class="block">1. user page가 실제 frame을 필요로 함
+2. allocator가 user pool에서 빈 frame을 선택함
+3. page table이 virtual page -> frame 관계를 기록함
+4. CPU/MMU가 접근 시 그 관계로 frame을 찾음</code>
+        </div>
+      </article>
+
+      <article class="explain-card">
+        <div class="num">3</div>
+        <div>
+          <h3>alias, bitmap, metadata</h3>
+          <p>physical frame이 붙은 user page는 user virtual address와 kernel direct-map address 양쪽에서 보일 수 있습니다. 이것은 복사가 아니라 같은 frame을 가리키는 virtual mapping이 둘이라는 뜻입니다.</p>
+          <code class="block">user virtual upage ───────┐
+                           ├─ same physical frame
+kernel virtual KERN_BASE+p ┘</code>
+          <p>bitmap과 page table은 이 frame의 사용 상태와 연결 관계를 기록하는 metadata입니다. 실제 code/data/stack byte는 metadata가 아니라 frame 안에 있습니다.</p>
+        </div>
+      </article>
+
+      <article class="explain-card">
+        <div class="num">4</div>
+        <div>
+          <h3>여러 user 공간과 mapping context</h3>
+          <p>각 process는 자기 user virtual address space와 page table을 하나의 묶음으로 갖습니다. 그래서 같은 `0x500000` 같은 upage라도 Process A에서는 frame A, Process B에서는 frame B, Process C에서는 아직 frame 없음으로 해석될 수 있습니다.</p>
+          <p>이때 frame A와 frame B는 모두 같은 전역 user pool 안에 남아 있습니다. 멀티스레드 관점에서는 같은 process 안의 thread들이 같은 user mapping 묶음을 공유하고, 다른 process의 thread는 다른 묶음을 봅니다. 왼쪽의 thread page/kernel stack은 thread별 kernel memory이고, 가운데 user 공간은 process별 mapping context입니다.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="summary" id="summary">
+      <h2>이 map의 핵심 결론</h2>
+      <ul>
+        <li>가운데는 virtual address space, 오른쪽은 실제 physical memory입니다.</li>
+        <li>kernel은 `KERN_BASE + physical address`로 RAM frame을 봅니다.</li>
+        <li>user page는 process별 page table을 거쳐 user-pool frame에 연결됩니다.</li>
+        <li>user pool physical frame은 전역 RAM 안에 남아 있고, switch되는 것은 active page table입니다.</li>
+        <li>CPU의 address 표현 범위보다 Pintos의 실제 resident memory 한계가 더 작습니다.</li>
+        <li>process마다 user address space/page table 묶음이 다르며, 같은 user VA도 다른 frame을 가리킬 수 있습니다.</li>
+        <li>thread page/kernel stack은 thread별이고, 같은 process의 thread들은 같은 user mapping 묶음을 공유합니다.</li>
+        <li>bitmap/page table은 metadata이고, 실제 byte는 physical frame 안에 있습니다.</li>
+      </ul>
+    </section>
+
+    <p class="sources">
+      기준 자료: `docs/reference/pintos-kaist-kr/2_project2/0_introduction.md`,
+      `docs/reference/pintos-kaist-kr/3_project3/0_introduction.md`,
+      `docs/reference/pintos-kaist-kr/5_appendix/0_threads.md`,
+      `docs/reference/pintos-kaist-kr/5_appendix/2_memory_allocation.md`,
+      `docs/reference/pintos-kaist-kr/5_appendix/3_virtual_address.md`,
+      `docs/reference/pintos-kaist-kr/5_appendix/4_page_table.md`.
+      이 HTML은 Pintos 메모리 구조 이해를 위한 시각 자료이며 과제 구현 코드를 포함하지 않습니다.
+    </p>
+  </main>
+  <script>
+    (() => {
+      const map = document.querySelector(".map-section[data-view]");
+      if (!map) {
+        return;
+      }
+
+      const buttons = Array.from(map.querySelectorAll("[data-view-button]"));
+      const panels = Array.from(map.querySelectorAll("[role='tabpanel']"));
+      const views = new Set(buttons.map((button) => button.dataset.viewButton));
+
+      const normalizeViewHash = () => location.hash.slice(1).replace(/^view-/, "");
+
+      const setView = (view, updateHash = true) => {
+        map.dataset.view = view;
+
+        buttons.forEach((button) => {
+          const active = button.dataset.viewButton === view;
+          button.setAttribute("aria-selected", String(active));
+          button.tabIndex = active ? 0 : -1;
+        });
+
+        panels.forEach((panel) => {
+          panel.hidden = panel.id !== `panel-${view}`;
+        });
+
+        if (updateHash) {
+          history.replaceState(null, "", `#view-${view}`);
+        }
+      };
+
+      buttons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+          setView(button.dataset.viewButton);
+        });
+
+        button.addEventListener("keydown", (event) => {
+          const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+          if (direction === 0) {
+            return;
+          }
+
+          event.preventDefault();
+          const nextIndex = (index + direction + buttons.length) % buttons.length;
+          buttons[nextIndex].focus();
+          setView(buttons[nextIndex].dataset.viewButton);
+        });
+      });
+
+      window.addEventListener("hashchange", () => {
+        const nextView = normalizeViewHash();
+        if (views.has(nextView)) {
+          setView(nextView, false);
+        }
+      });
+
+      const hashView = normalizeViewHash();
+      setView(views.has(hashView) ? hashView : map.dataset.view || "direct", false);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2071 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VM 메모리 구조 시각화</title>
+  <style>
+    :root {
+      --page: #e8edf3;
+      --stage: #fbfcfd;
+      --ink: #17202a;
+      --muted: #5a6472;
+      --line: #c8d1dc;
+      --blue: #2563eb;
+      --blue-soft: #eaf2ff;
+      --cyan: #0891b2;
+      --cyan-soft: #e6fbff;
+      --green: #16803a;
+      --green-soft: #e8f6ed;
+      --amber: #b45309;
+      --amber-soft: #fff3d2;
+      --violet: #7c3aed;
+      --violet-soft: #f0e9ff;
+      --rose: #e11d48;
+      --rose-soft: #fff1f4;
+      --panel: #ffffff;
+      --shadow: 0 18px 50px rgba(26, 38, 52, 0.16);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      overflow: auto;
+      background:
+        linear-gradient(135deg, rgba(37, 99, 235, 0.08), transparent 28%),
+        linear-gradient(215deg, rgba(22, 128, 58, 0.08), transparent 32%),
+        var(--page);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .stage {
+      width: 2180px;
+      height: 1030px;
+      margin: 32px auto;
+      display: grid;
+      grid-template-rows: 96px 830px 48px;
+      row-gap: 12px;
+      padding: 14px 18px;
+      border: 1px solid rgba(124, 135, 151, 0.26);
+      border-radius: var(--radius);
+      background: rgba(251, 252, 253, 0.96);
+      box-shadow: var(--shadow);
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 26px;
+      align-items: center;
+      min-height: 0;
+      border-bottom: 1px solid rgba(200, 209, 220, 0.76);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.1;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(6, 112px);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tab {
+      height: 44px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #283340;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.15;
+      cursor: pointer;
+      transition:
+        background 160ms ease,
+        border-color 160ms ease,
+        color 160ms ease,
+        box-shadow 160ms ease;
+    }
+
+    .tab[aria-selected="true"] {
+      color: #0f3a78;
+      border-color: rgba(37, 99, 235, 0.7);
+      background: #dceafe;
+      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.16);
+    }
+
+    .tab:focus-visible {
+      outline: 3px solid rgba(37, 99, 235, 0.24);
+      outline-offset: 2px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1640px 480px;
+      gap: 24px;
+      min-height: 0;
+    }
+
+    .canvas-wrap,
+    .panel {
+      height: 830px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .canvas-wrap {
+      display: grid;
+      grid-template-rows: 46px 1fr;
+      min-height: 0;
+    }
+
+    .map-strip {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 20px;
+      padding: 0 20px;
+      border-bottom: 1px solid #d7dee8;
+      background: #f7f9fb;
+    }
+
+    .map-strip strong {
+      font-size: 15px;
+    }
+
+    .map-strip span {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .map-frame {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) 184px;
+      gap: 10px;
+      min-height: 0;
+      padding: 12px 14px 10px;
+    }
+
+    #vm-map {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #vm-map text {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .svg-title {
+      fill: #17202a;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .svg-note,
+    .addr-label,
+    .minor-label {
+      fill: #647386;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .axis-label {
+      fill: #334155;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .bar-outline {
+      fill: #fff;
+      stroke: #7f8ea3;
+      stroke-width: 1.4;
+      rx: 8;
+      ry: 8;
+    }
+
+    .seg {
+      stroke: #ffffff;
+      stroke-width: 2;
+    }
+
+    .seg-kernel {
+      fill: var(--cyan-soft);
+    }
+
+    .seg-user {
+      fill: var(--blue-soft);
+    }
+
+    .seg-physical {
+      fill: var(--green-soft);
+    }
+
+    .seg-meta {
+      fill: var(--amber-soft);
+    }
+
+    .seg-backing {
+      fill: var(--violet-soft);
+    }
+
+    .seg-muted {
+      fill: #f4f7fa;
+    }
+
+    .seg-hatch {
+      fill: url(#hatch);
+    }
+
+    .seg-divider {
+      stroke: rgba(255, 255, 255, 0.82);
+      stroke-width: 2;
+    }
+
+    .seg-label {
+      fill: #17202a;
+      font-size: 13px;
+      font-weight: 800;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    .seg-sub {
+      fill: #526174;
+      font-size: 11px;
+      font-weight: 650;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    .card {
+      fill: #f8fbff;
+      stroke: #b8c6d8;
+      stroke-width: 1.2;
+      rx: 7;
+      ry: 7;
+    }
+
+    .card-title {
+      fill: #17202a;
+      font-size: 13px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+
+    .card-sub {
+      fill: #4b5a6c;
+      font-size: 11px;
+      font-weight: 650;
+      text-anchor: middle;
+    }
+
+    .frame-slice {
+      fill: rgba(248, 251, 255, 0.9);
+      stroke: #aebed2;
+      stroke-width: 1.15;
+      rx: 4;
+      ry: 4;
+    }
+
+    .highlight-ring {
+      fill: none;
+      stroke-width: 3.4;
+      rx: 8;
+      ry: 8;
+      pointer-events: none;
+    }
+
+    .highlight-ring.user {
+      stroke: rgba(37, 99, 235, 0.78);
+    }
+
+    .highlight-ring.physical {
+      stroke: rgba(22, 128, 58, 0.72);
+      stroke-dasharray: 10 6;
+      stroke-width: 2.4;
+    }
+
+    .highlight-ring.direct {
+      stroke: rgba(8, 145, 178, 0.82);
+    }
+
+    .highlight-ring.kernel {
+      stroke: rgba(8, 145, 178, 0.7);
+      stroke-dasharray: 9 6;
+    }
+
+    .highlight-ring.fault {
+      stroke: rgba(225, 29, 72, 0.82);
+      stroke-dasharray: 8 5;
+      stroke-width: 3.1;
+    }
+
+    .highlight-ring.evict {
+      stroke: rgba(124, 58, 237, 0.82);
+    }
+
+    .highlight-ring.meta {
+      stroke: rgba(180, 83, 9, 0.78);
+      stroke-dasharray: 4 5;
+      stroke-width: 2.7;
+    }
+
+    .highlight-ring.backing {
+      stroke: rgba(22, 128, 58, 0.82);
+      stroke-dasharray: 12 5;
+      stroke-width: 3.1;
+    }
+
+    .highlight-ring.scope {
+      stroke-width: 2.1;
+      stroke-dasharray: 15 7;
+      opacity: 0.86;
+      rx: 11;
+      ry: 11;
+    }
+
+    .highlight-ring.pair-scope {
+      stroke-width: 2.6;
+      stroke-dasharray: 22 9;
+      opacity: 0.58;
+      rx: 16;
+      ry: 16;
+      stroke-linejoin: round;
+    }
+
+    .boundary {
+      stroke: #e11d48;
+      stroke-width: 1.8;
+      stroke-dasharray: 7 6;
+    }
+
+    .route {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.6;
+    }
+
+    .route.user {
+      stroke: var(--blue);
+      stroke-dasharray: 7 6;
+      marker-end: url(#arrowUser);
+    }
+
+    .route.direct {
+      stroke: var(--cyan);
+      stroke-width: 1.8;
+      marker-end: url(#arrowDirect);
+    }
+
+    .route.kernel {
+      stroke: #0f766e;
+      stroke-dasharray: 12 6;
+      stroke-width: 1.85;
+      marker-end: url(#arrowKernel);
+    }
+
+    .route.meta {
+      stroke: var(--amber);
+      stroke-dasharray: 2 6;
+      stroke-width: 1.75;
+      marker-end: url(#arrowMeta);
+    }
+
+    .route.fault {
+      stroke: var(--rose);
+      stroke-width: 1.85;
+      marker-end: url(#arrowFault);
+    }
+
+    .route.evict {
+      stroke: var(--violet);
+      stroke-dasharray: 10 5;
+      stroke-width: 1.85;
+      marker-end: url(#arrowEvict);
+    }
+
+    .route.backing {
+      stroke: var(--green);
+      stroke-width: 1.85;
+      marker-end: url(#arrowBacking);
+    }
+
+    .badge circle {
+      fill: #17202a;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .badge text {
+      fill: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .map-item {
+      opacity: 0.18;
+      transition: opacity 160ms ease;
+    }
+
+    .map-item.is-base {
+      opacity: 0.48;
+    }
+
+    .map-item.is-active {
+      opacity: 1;
+    }
+
+    .map-item.is-hidden {
+      display: none;
+    }
+
+    .panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .panel-main {
+      padding: 28px 28px 18px;
+      min-height: 0;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 28px;
+      line-height: 1.16;
+      letter-spacing: 0;
+    }
+
+    .summary {
+      margin: 0 0 16px;
+      color: #354252;
+      font-size: 16px;
+      line-height: 1.52;
+    }
+
+    .panel-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .panel-list li {
+      position: relative;
+      padding-left: 18px;
+      color: #26313f;
+      font-size: 15px;
+      line-height: 1.46;
+    }
+
+    .panel-list li::before {
+      content: "";
+      position: absolute;
+      top: 9px;
+      left: 0;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .flow-list {
+      display: grid;
+      gap: 8px;
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: flow;
+    }
+
+    .flow-list li {
+      position: relative;
+      min-height: 24px;
+      padding-left: 34px;
+      color: #243041;
+      font-size: 14px;
+      line-height: 1.4;
+      counter-increment: flow;
+    }
+
+    .flow-list li::before {
+      content: counter(flow);
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border-radius: 50%;
+      background: #17202a;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1;
+    }
+
+    .flow-list[hidden] {
+      display: none;
+    }
+
+    .panel-note {
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      border: 1px solid rgba(180, 83, 9, 0.24);
+      border-radius: var(--radius);
+      background: var(--amber-soft);
+      color: #51340c;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .source-line {
+      padding: 14px 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      background: #f7f9fb;
+    }
+
+    .page-table-detail {
+      min-height: 0;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .detail-struct {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr) 310px;
+      gap: 12px;
+      height: 100%;
+      min-width: 0;
+    }
+
+    .struct-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 8px;
+      min-width: 0;
+      min-height: 0;
+      padding: 9px;
+      border: 1px solid #cbd6e3;
+      border-radius: 7px;
+      background: #f8fbff;
+    }
+
+    .struct-panel.is-page-table {
+      grid-template-rows: auto 1fr;
+      background: #fffaf0;
+    }
+
+    .struct-panel.is-virtual {
+      grid-template-rows: auto 1fr;
+      background: #f7fbff;
+    }
+
+    .struct-panel.is-ram {
+      background: #f8fff9;
+    }
+
+    .struct-title {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: baseline;
+      min-width: 0;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(203, 214, 227, 0.82);
+    }
+
+    .struct-title span {
+      min-width: 0;
+      color: #667487;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .struct-title strong {
+      min-width: 0;
+      color: #17202a;
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.1;
+      letter-spacing: 0;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .memory-block {
+      display: grid;
+      align-content: center;
+      min-height: 52px;
+      min-width: 0;
+      padding: 7px 9px;
+      border: 1px solid rgba(37, 99, 235, 0.36);
+      border-radius: 6px;
+      background: var(--blue-soft);
+    }
+
+    .memory-stack {
+      display: grid;
+      align-content: stretch;
+      gap: 7px;
+      min-height: 0;
+    }
+
+    .memory-block.is-kernel {
+      border-color: rgba(8, 145, 178, 0.36);
+      background: var(--cyan-soft);
+    }
+
+    .memory-block .block-label {
+      min-width: 0;
+      color: #3f5f91;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .memory-block strong {
+      min-width: 0;
+      margin-top: 6px;
+      color: #17202a;
+      font-size: 14px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .memory-block small {
+      min-width: 0;
+      margin-top: 4px;
+      color: #4f5f72;
+      font-size: 10px;
+      font-weight: 720;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .struct-kv {
+      display: grid;
+      gap: 5px;
+      margin: 0;
+    }
+
+    .struct-hidden-value {
+      display: none;
+    }
+
+    .struct-kv div {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 8px;
+      align-items: baseline;
+      min-width: 0;
+    }
+
+    .struct-kv dt {
+      color: #667487;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .struct-kv dd {
+      min-width: 0;
+      margin: 0;
+      color: #17202a;
+      font-size: 12px;
+      font-weight: 760;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-table-block {
+      display: grid;
+      grid-template-rows: repeat(3, 30px) minmax(45px, 1fr);
+      gap: 5px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .table-entry {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+      border: 1px solid #c7d4e4;
+      border-radius: 5px;
+      background: #fff;
+      padding: 5px 8px;
+    }
+
+    .table-entry.is-pte {
+      grid-template-columns: 72px minmax(0, 210px) 1fr;
+      border-color: rgba(180, 83, 9, 0.48);
+      background: #fff8e7;
+    }
+
+    .table-entry.is-bits {
+      grid-template-columns: 72px 1fr;
+      align-items: start;
+      min-height: 0;
+    }
+
+    .entry-key {
+      color: #5a6472;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .table-entry strong {
+      min-width: 0;
+      color: #17202a;
+      font-size: 12px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .table-entry small {
+      min-width: 0;
+      color: #4f5f72;
+      font-size: 11px;
+      font-weight: 650;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .detail-bits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .bit-chip {
+      display: inline-flex;
+      align-items: center;
+      height: 18px;
+      padding: 0 6px;
+      border: 1px solid rgba(23, 32, 42, 0.12);
+      border-radius: 4px;
+      background: #fff;
+      color: #314155;
+      font-size: 10px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .detail-frame-block {
+      display: grid;
+      place-items: center;
+      min-height: 72px;
+      min-width: 0;
+      border: 1px solid rgba(22, 128, 58, 0.38);
+      border-radius: 6px;
+      background:
+        linear-gradient(90deg, rgba(22, 128, 58, 0.1), rgba(22, 128, 58, 0.18)),
+        #f8fff9;
+      color: #135b2d;
+      font-size: 14px;
+      font-weight: 820;
+      text-align: center;
+    }
+
+    .detail-frame-block.is-empty {
+      border-color: rgba(225, 29, 72, 0.35);
+      background:
+        repeating-linear-gradient(
+          -45deg,
+          #fff,
+          #fff 8px,
+          #ffe6ec 8px,
+          #ffe6ec 15px
+        );
+      color: #a01536;
+    }
+
+    .detail-frame-block.is-evict {
+      border-color: rgba(124, 58, 237, 0.36);
+      background:
+        linear-gradient(90deg, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0.18)),
+        #fbf8ff;
+      color: #5b28b3;
+    }
+
+    .pt-array-shell {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) 350px;
+      gap: 12px;
+      height: 100%;
+      min-width: 0;
+    }
+
+    .pt-thread-card,
+    .pt-array-panel,
+    .frame-array-panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 8px;
+      min-width: 0;
+      min-height: 0;
+      padding: 9px;
+      border: 1px solid #cbd6e3;
+      border-radius: 7px;
+      background: #f8fbff;
+    }
+
+    .pt-array-panel {
+      background: #fffaf0;
+    }
+
+    .frame-array-panel {
+      background: #f8fff9;
+    }
+
+    .pt-title {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: baseline;
+      min-width: 0;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(203, 214, 227, 0.82);
+    }
+
+    .pt-title span {
+      min-width: 0;
+      color: #667487;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pt-title strong {
+      min-width: 0;
+      color: #17202a;
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.1;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pt-thread-meta {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      min-width: 0;
+    }
+
+    .pt-thread-meta div {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 8px;
+      align-items: baseline;
+      min-width: 0;
+    }
+
+    .pt-thread-meta dt {
+      color: #667487;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .pt-thread-meta dd {
+      min-width: 0;
+      margin: 0;
+      color: #17202a;
+      font-size: 12px;
+      font-weight: 760;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pt-slot-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .pt-slot {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 5px;
+      min-width: 0;
+      min-height: 0;
+      padding: 7px;
+      border: 1px solid #c7d4e4;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .pt-slot.is-active {
+      border-color: rgba(37, 99, 235, 0.72);
+      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.22);
+      background: #f5f9ff;
+    }
+
+    .pt-slot.is-missing {
+      border-color: rgba(225, 29, 72, 0.42);
+      background:
+        repeating-linear-gradient(
+          -45deg,
+          #fff,
+          #fff 8px,
+          #fff1f4 8px,
+          #fff1f4 15px
+        );
+    }
+
+    .pt-slot.is-evict {
+      border-color: rgba(124, 58, 237, 0.52);
+      background: #fbf8ff;
+    }
+
+    .pt-slot.is-arrow {
+      border-color: rgba(22, 128, 58, 0.52);
+      background:
+        linear-gradient(90deg, rgba(22, 128, 58, 0.08), rgba(37, 99, 235, 0.08)),
+        #fff;
+    }
+
+    .pt-slot.is-arrow .slot-index {
+      color: #16803a;
+    }
+
+    .pt-slot.is-arrow .slot-pte {
+      color: #135b2d;
+    }
+
+    .pt-slot.is-arrow .slot-frame {
+      border-color: rgba(22, 128, 58, 0.44);
+      background: #e8f6ed;
+      color: #135b2d;
+    }
+
+    .slot-index {
+      color: #667487;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .slot-va,
+    .slot-pte,
+    .slot-frame {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .slot-va {
+      color: #17202a;
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.1;
+    }
+
+    .slot-pte {
+      color: #5a6472;
+      font-size: 10px;
+      font-weight: 760;
+      line-height: 1.1;
+    }
+
+    .slot-frame {
+      align-self: end;
+      padding: 5px 6px;
+      border: 1px solid rgba(22, 128, 58, 0.26);
+      border-radius: 5px;
+      background: var(--green-soft);
+      color: #135b2d;
+      font-size: 11px;
+      font-weight: 820;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .pt-slot.is-missing .slot-frame {
+      border-color: rgba(225, 29, 72, 0.25);
+      background: #fff;
+      color: #a01536;
+    }
+
+    .frame-slot-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .frame-slot {
+      display: grid;
+      align-content: center;
+      min-width: 0;
+      min-height: 0;
+      padding: 8px;
+      border: 1px solid rgba(22, 128, 58, 0.34);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .frame-slot.is-active {
+      border-color: rgba(37, 99, 235, 0.72);
+      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.18);
+    }
+
+    .frame-slot.is-evict {
+      border-color: rgba(124, 58, 237, 0.45);
+      background: #fbf8ff;
+    }
+
+    .frame-slot.is-source {
+      border-color: rgba(180, 83, 9, 0.42);
+      background: #fff8e7;
+    }
+
+    .frame-slot strong,
+    .frame-slot small {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .frame-slot strong {
+      color: #17202a;
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.1;
+    }
+
+    .frame-slot small {
+      margin-top: 5px;
+      color: #4f5f72;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .footer {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 24px;
+      align-items: center;
+      min-height: 0;
+      padding: 0 2px;
+      border-top: 1px solid rgba(200, 209, 220, 0.76);
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 9px;
+      border-radius: 4px;
+      border: 1px solid rgba(23, 32, 42, 0.18);
+    }
+
+    .swatch.user {
+      background: var(--blue-soft);
+    }
+
+    .swatch.kernel {
+      background: var(--cyan-soft);
+    }
+
+    .swatch.physical {
+      background: var(--green-soft);
+    }
+
+    .swatch.metadata {
+      background: var(--amber-soft);
+    }
+
+    .arrow-sample {
+      width: 28px;
+      height: 0;
+      border-top: 2px solid var(--cyan);
+    }
+
+    .arrow-sample.dashed {
+      border-top-style: dashed;
+      border-color: var(--blue);
+    }
+
+    .arrow-sample.kernel {
+      border-color: #0f766e;
+      border-top-style: dashed;
+    }
+
+    .arrow-sample.fault {
+      border-color: var(--rose);
+    }
+
+    .arrow-sample.meta {
+      border-color: var(--amber);
+      border-top-style: dotted;
+    }
+
+    .arrow-sample.backing {
+      border-color: var(--green);
+    }
+
+    .arrow-sample.evict {
+      border-color: var(--violet);
+      border-top-style: dashed;
+    }
+
+    .takeaway {
+      min-width: 0;
+      color: #1c2734;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" id="stage" data-view="overview">
+    <header class="header">
+      <div>
+        <h1>VM 메모리 구조: kernel view와 user view</h1>
+        <p class="subtitle">세로 memory bar를 기준으로 virtual address space와 physical RAM을 나눠 본다.</p>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="VM 구조 보기"></nav>
+    </header>
+
+    <section class="workspace" aria-label="VM 메모리 구조 시각화">
+      <div class="canvas-wrap">
+        <div class="map-strip">
+          <strong>Memory bar map</strong>
+          <span>inline SVG: long vertical bars, segmented memory regions, minimal arrows</span>
+        </div>
+        <div class="map-frame">
+          <svg id="vm-map" viewBox="0 0 1640 774" role="img" aria-labelledby="map-title map-desc">
+            <title id="map-title">Pintos VM memory bar map</title>
+            <desc id="map-desc">세로 virtual memory bar와 physical memory bar를 나란히 두고 user mapping, kernel direct map, page fault, eviction 관계를 번호가 붙은 lane으로 보여 준다.</desc>
+            <defs>
+              <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+                <rect width="10" height="10" fill="#fff"></rect>
+                <rect width="2" height="10" fill="#e2e8f0"></rect>
+              </pattern>
+              <marker id="arrowUser" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#2563eb"></path>
+              </marker>
+              <marker id="arrowDirect" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#0891b2"></path>
+              </marker>
+              <marker id="arrowKernel" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#0f766e"></path>
+              </marker>
+              <marker id="arrowMeta" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#b45309"></path>
+              </marker>
+              <marker id="arrowFault" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#e11d48"></path>
+              </marker>
+              <marker id="arrowEvict" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#7c3aed"></path>
+              </marker>
+              <marker id="arrowBacking" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#16803a"></path>
+              </marker>
+            </defs>
+
+            <text class="svg-title" x="570" y="38" text-anchor="middle">current process virtual address space</text>
+            <text class="svg-title" x="1235" y="38" text-anchor="middle">physical memory (actual RAM)</text>
+            <text class="svg-note" x="570" y="744" text-anchor="middle">bar 안쪽은 memory region이고, bar 바깥 lane은 주소 해석 흐름이다.</text>
+
+            <g class="map-item" data-focus="overview kernel direct user fault evict">
+              <rect class="bar-outline" x="430" y="70" width="280" height="640"></rect>
+              <rect class="seg seg-muted" x="432" y="72" width="276" height="44"></rect>
+              <rect class="seg seg-kernel" x="432" y="116" width="276" height="282"></rect>
+              <line class="seg-divider" x1="432" y1="238" x2="708" y2="238"></line>
+              <line class="seg-divider" x1="432" y1="320" x2="708" y2="320"></line>
+              <line class="boundary" x1="414" y1="398" x2="724" y2="398"></line>
+              <rect class="seg seg-user" x="432" y="422" width="276" height="100"></rect>
+              <rect class="seg seg-hatch" x="432" y="522" width="276" height="92"></rect>
+              <rect class="seg seg-user" x="432" y="614" width="276" height="52"></rect>
+              <rect class="seg seg-user" x="432" y="666" width="276" height="42"></rect>
+
+              <text class="seg-label" x="570" y="99">high kernel gap</text>
+              <text class="seg-label" x="570" y="159">kernel direct-map window</text>
+              <text class="seg-sub" x="570" y="178">KERN_BASE + paddr aliases RAM</text>
+              <text class="seg-sub" x="570" y="197">includes user pool frames</text>
+              <text class="seg-label" x="570" y="274">RAM alias: allocator / page tables</text>
+              <text class="seg-sub" x="570" y="293">kernel pool physical frames</text>
+              <text class="seg-label" x="570" y="354">RAM alias: kernel image / low RAM</text>
+              <text class="seg-sub" x="570" y="373">same physical bytes through kernel VA</text>
+              <text class="axis-label" x="738" y="403">KERN_BASE boundary</text>
+              <text class="seg-label" x="570" y="463">user stack</text>
+              <text class="seg-sub" x="570" y="482">process-specific user VA</text>
+              <text class="seg-label" x="570" y="560">lazy / unmapped gap</text>
+              <text class="seg-sub" x="570" y="579">address exists, frame may not</text>
+              <text class="seg-label" x="570" y="646">user data / BSS</text>
+              <text class="seg-label" x="570" y="693">user code</text>
+            </g>
+
+            <g class="map-item" data-focus="overview kernel direct user fault evict">
+              <rect class="bar-outline" x="1090" y="86" width="292" height="590"></rect>
+              <rect class="seg seg-physical" x="1092" y="88" width="288" height="300"></rect>
+              <rect class="seg seg-meta" x="1092" y="388" width="288" height="110"></rect>
+              <rect class="seg seg-kernel" x="1092" y="498" width="288" height="92"></rect>
+              <rect class="seg seg-muted" x="1092" y="590" width="288" height="84"></rect>
+              <text class="seg-label" x="1236" y="116">user pool</text>
+              <text class="seg-sub" x="1236" y="135">global physical frame resource</text>
+              <text class="seg-label" x="1236" y="427">kernel pool</text>
+              <text class="seg-sub" x="1236" y="446">metadata / kernel objects</text>
+              <text class="seg-label" x="1236" y="535">kernel image / low RAM</text>
+              <text class="seg-label" x="1236" y="628">free / other frames</text>
+            </g>
+
+            <g class="map-item" data-show="overview kernel direct user fault evict" data-focus="overview kernel direct user fault evict">
+              <rect class="frame-slice" x="1110" y="158" width="236" height="44"></rect>
+              <text class="card-title" x="1228" y="178">Frame A</text>
+              <text class="card-sub" x="1228" y="193">Process A page bytes</text>
+              <rect class="frame-slice" x="1110" y="212" width="236" height="44"></rect>
+              <text class="card-title" x="1228" y="232">Frame B</text>
+              <text class="card-sub" x="1228" y="247">Process B page bytes</text>
+              <rect class="frame-slice" x="1110" y="266" width="236" height="44"></rect>
+              <text class="card-title" x="1228" y="286">Frame F</text>
+              <text class="card-sub" x="1228" y="301">resident page bytes</text>
+              <rect class="frame-slice" x="1110" y="320" width="236" height="44"></rect>
+              <text class="card-title" x="1228" y="340">Frame G</text>
+              <text class="card-sub" x="1228" y="355">new / page-in frame</text>
+            </g>
+
+            <g class="map-item" data-focus="overview kernel direct user fault evict">
+              <text class="addr-label" x="402" y="78" text-anchor="end">KERN_BASE + RAM</text>
+              <text class="addr-label" x="402" y="242" text-anchor="end">KERN_BASE + paddr</text>
+              <text class="addr-label" x="402" y="402" text-anchor="end">KERN_BASE</text>
+              <text class="addr-label" x="402" y="522" text-anchor="end">USER_STACK</text>
+              <text class="addr-label" x="402" y="694" text-anchor="end">0x400000 / low user</text>
+              <text class="addr-label" x="1406" y="94">high paddr</text>
+              <text class="addr-label" x="1406" y="676">low paddr</text>
+            </g>
+
+            <g class="map-item" data-show="overview user" data-focus="overview user">
+              <rect class="card" x="64" y="154" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="178">Process A page table</text>
+              <text class="card-sub" x="189" y="196">0x500000 -> Frame A</text>
+            </g>
+
+            <g class="map-item" data-show="user" data-focus="user">
+              <rect class="card" x="64" y="224" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="248">Process B page table</text>
+              <text class="card-sub" x="189" y="266">0x500000 -> Frame B</text>
+            </g>
+
+            <g class="map-item" data-show="user fault" data-focus="user fault">
+              <rect class="card" x="64" y="294" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="318">Process C page table</text>
+              <text class="card-sub" x="189" y="336">0x500000 -> not-present</text>
+            </g>
+
+            <g class="map-item" data-show="kernel" data-focus="kernel">
+              <rect class="card" x="64" y="154" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="178">Process A PML4</text>
+              <text class="card-sub" x="189" y="196">kernel half: shared entries</text>
+              <rect class="card" x="64" y="224" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="248">Process B PML4</text>
+              <text class="card-sub" x="189" y="266">kernel half: same entries</text>
+              <rect class="card" x="64" y="294" width="250" height="58"></rect>
+              <text class="card-title" x="189" y="318">Process C PML4</text>
+              <text class="card-sub" x="189" y="336">kernel half: same entries</text>
+            </g>
+
+            <g class="map-item" data-show="overview user fault" data-focus="overview user fault">
+              <rect class="card" x="800" y="168" width="150" height="52"></rect>
+              <text class="card-title" x="875" y="191">MMU / TLB</text>
+              <text class="card-sub" x="875" y="207">translate or fault</text>
+              <rect class="card" x="800" y="246" width="150" height="52"></rect>
+              <text class="card-title" x="875" y="269">Active page table</text>
+              <text class="card-sub" x="875" y="285">selected process</text>
+              <rect class="card" x="800" y="324" width="150" height="52"></rect>
+              <text class="card-title" x="875" y="347">Selected PTE</text>
+              <text class="card-sub" x="875" y="363">upage -> frame</text>
+            </g>
+
+            <g class="map-item" data-show="overview fault evict" data-focus="overview fault evict">
+              <rect class="card" x="1460" y="160" width="126" height="56"></rect>
+              <text class="card-title" x="1523" y="183">SPT</text>
+              <text class="card-sub" x="1523" y="199">page identity</text>
+              <rect class="card" x="1460" y="236" width="126" height="56"></rect>
+              <text class="card-title" x="1523" y="259">Frame table</text>
+              <text class="card-sub" x="1523" y="275">frame -> page</text>
+              <rect class="card" x="1460" y="312" width="126" height="56"></rect>
+              <text class="card-title" x="1523" y="335">Swap table</text>
+              <text class="card-sub" x="1523" y="351">slot state</text>
+              <rect class="card" x="1460" y="506" width="126" height="60"></rect>
+              <text class="card-title" x="1523" y="530">swap / file</text>
+              <text class="card-sub" x="1523" y="547">backing bytes</text>
+            </g>
+
+            <g class="map-item" data-show="overview" data-focus="overview">
+              <rect class="highlight-ring user scope" x="420" y="416" width="300" height="298"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="606"></rect>
+              <rect class="highlight-ring user" x="1106" y="154" width="244" height="52"></rect>
+              <rect class="highlight-ring direct scope" x="420" y="110" width="300" height="294"></rect>
+              <rect class="highlight-ring meta scope" x="1448" y="148" width="150" height="232"></rect>
+              <path class="route user" d="M 710 472 L 768 472 L 768 272 L 800 272"></path>
+              <path class="route user" d="M 950 350 L 1026 350 L 1026 184 L 1110 184"></path>
+              <path class="route direct" d="M 710 150 L 1072 150 L 1072 168 L 1110 168"></path>
+              <text class="minor-label" x="570" y="416" text-anchor="middle">entire user VA range</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">physical RAM aliases through KERN_BASE</text>
+              <text class="minor-label" x="1523" y="146" text-anchor="middle">VM metadata</text>
+              <g class="badge" transform="translate(724 472)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(786 272)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1072 180)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(1040 150)"><circle r="13"></circle><text>4</text></g>
+            </g>
+
+            <g class="map-item" data-show="user" data-focus="user">
+              <rect class="highlight-ring user scope" x="56" y="146" width="266" height="214"></rect>
+              <rect class="highlight-ring user scope" x="420" y="416" width="300" height="298"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="318"></rect>
+              <rect class="highlight-ring user" x="1106" y="154" width="244" height="52"></rect>
+              <rect class="highlight-ring user" x="1106" y="208" width="244" height="52"></rect>
+              <rect class="highlight-ring fault" x="426" y="522" width="288" height="92"></rect>
+              <rect class="highlight-ring meta scope" x="794" y="240" width="166" height="146"></rect>
+              <path class="route fault" d="M 314 323 L 392 323 L 392 568 L 432 568"></path>
+              <path class="route user" d="M 710 472 L 770 472 L 770 272 L 800 272"></path>
+              <path class="route user" d="M 950 338 L 1034 338 L 1034 180 L 1110 180"></path>
+              <path class="route user" d="M 950 362 L 1058 362 L 1058 234 L 1110 234"></path>
+              <text class="minor-label" x="189" y="144" text-anchor="middle">process-specific page tables</text>
+              <text class="minor-label" x="570" y="416" text-anchor="middle">all user VA segments</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">shared physical user pool</text>
+              <text class="minor-label" x="840" y="424">same user VA, different active page table</text>
+              <g class="badge" transform="translate(326 183)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(326 253)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(392 568)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(766 272)"><circle r="13"></circle><text>4</text></g>
+              <g class="badge" transform="translate(1058 234)"><circle r="13"></circle><text>5</text></g>
+            </g>
+
+            <g class="map-item" data-show="direct" data-focus="direct">
+              <path class="highlight-ring direct pair-scope" d="M 414 104 H 726 V 72 H 1396 V 690 H 1074 V 410 H 414 Z"></path>
+              <rect class="highlight-ring direct scope" x="420" y="110" width="300" height="294"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="606"></rect>
+              <rect class="highlight-ring direct" x="1106" y="154" width="244" height="52"></rect>
+              <rect class="highlight-ring direct" x="1106" y="262" width="244" height="52"></rect>
+              <rect class="highlight-ring direct" x="1088" y="388" width="296" height="110"></rect>
+              <rect class="highlight-ring direct" x="1088" y="498" width="296" height="92"></rect>
+              <path class="route direct" d="M 710 150 L 1070 150 L 1070 180 L 1110 180"></path>
+              <path class="route direct" d="M 710 178 L 1040 178 L 1040 288 L 1110 288"></path>
+              <path class="route direct" d="M 710 206 L 1020 206 L 1020 443 L 1092 443"></path>
+              <text class="minor-label" x="888" y="139" text-anchor="middle">kernel direct-map alias lane</text>
+              <text class="minor-label" x="904" y="70" text-anchor="middle">one direct-map relation: KERN_BASE + paddr names physical RAM</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">direct map can name RAM frames</text>
+              <g class="badge" transform="translate(724 150)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(1040 288)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1020 443)"><circle r="13"></circle><text>3</text></g>
+            </g>
+
+            <g class="map-item" data-show="kernel" data-focus="kernel">
+              <rect class="highlight-ring kernel scope" x="56" y="146" width="266" height="214"></rect>
+              <rect class="highlight-ring kernel scope" x="420" y="64" width="300" height="340"></rect>
+              <rect class="highlight-ring direct" x="426" y="116" width="288" height="282"></rect>
+              <path class="route kernel" d="M 314 183 L 374 183 L 374 150 L 432 150"></path>
+              <path class="route kernel" d="M 314 253 L 390 253 L 390 274 L 432 274"></path>
+              <path class="route kernel" d="M 314 323 L 374 323 L 374 354 L 432 354"></path>
+              <text class="minor-label" x="189" y="144" text-anchor="middle">each process has its own PML4 root</text>
+              <text class="minor-label" x="570" y="64" text-anchor="middle">same kernel-side entries above KERN_BASE</text>
+              <text class="minor-label" x="896" y="410">context switch keeps this half consistent</text>
+              <g class="badge" transform="translate(326 183)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(390 274)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(724 274)"><circle r="13"></circle><text>3</text></g>
+            </g>
+
+            <g class="map-item" data-show="fault" data-focus="fault">
+              <rect class="highlight-ring fault" x="426" y="522" width="288" height="92"></rect>
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="318"></rect>
+              <rect class="highlight-ring user" x="1106" y="316" width="244" height="52"></rect>
+              <rect class="highlight-ring meta scope" x="1448" y="148" width="150" height="232"></rect>
+              <rect class="highlight-ring backing" x="1456" y="502" width="134" height="68"></rect>
+              <path class="route fault" d="M 314 323 L 392 323 L 392 568 L 432 568"></path>
+              <path class="route fault" d="M 710 568 L 756 568 L 756 194 L 800 194"></path>
+              <path class="route meta" d="M 950 194 L 1002 194 L 1002 60 L 1438 60 L 1438 188 L 1460 188"></path>
+              <path class="route backing" d="M 1460 536 L 1424 536 L 1424 380 L 1362 380 L 1362 356 L 1346 356"></path>
+              <path class="route user" d="M 950 350 L 1030 350 L 1030 334 L 1110 334"></path>
+              <text class="minor-label" x="570" y="516" text-anchor="middle">faultable user VA gap</text>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">user pool frame allocation target</text>
+              <text class="minor-label" x="1523" y="146" text-anchor="middle">fault metadata</text>
+              <g class="badge" transform="translate(392 568)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(760 194)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1438 188)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(1424 380)"><circle r="13"></circle><text>4</text></g>
+              <g class="badge" transform="translate(1030 334)"><circle r="13"></circle><text>5</text></g>
+            </g>
+
+            <g class="map-item" data-show="evict" data-focus="evict">
+              <rect class="highlight-ring physical scope" x="1080" y="78" width="310" height="318"></rect>
+              <rect class="highlight-ring evict" x="1106" y="262" width="244" height="52"></rect>
+              <rect class="highlight-ring evict" x="1106" y="316" width="244" height="52"></rect>
+              <rect class="highlight-ring meta scope" x="1448" y="148" width="150" height="232"></rect>
+              <rect class="highlight-ring backing" x="1456" y="502" width="134" height="68"></rect>
+              <path class="route evict" d="M 1346 288 L 1416 288 L 1416 264 L 1460 264"></path>
+              <path class="route meta" d="M 1460 264 L 1434 264 L 1434 188 L 1460 188"></path>
+              <path class="route backing" d="M 1586 340 L 1622 340 L 1622 536 L 1586 536"></path>
+              <path class="route evict" d="M 1346 288 L 1372 288 L 1372 342 L 1346 342"></path>
+              <text class="minor-label" x="1236" y="80" text-anchor="middle">resident frames inside user pool</text>
+              <text class="minor-label" x="1523" y="146" text-anchor="middle">page identity metadata</text>
+              <g class="badge" transform="translate(1362 288)"><circle r="13"></circle><text>1</text></g>
+              <g class="badge" transform="translate(1434 188)"><circle r="13"></circle><text>2</text></g>
+              <g class="badge" transform="translate(1622 536)"><circle r="13"></circle><text>3</text></g>
+              <g class="badge" transform="translate(1372 342)"><circle r="13"></circle><text>4</text></g>
+            </g>
+          </svg>
+
+          <section class="page-table-detail" aria-labelledby="detail-title">
+            <div class="pt-array-shell">
+              <section class="pt-thread-card" aria-label="current thread page table root">
+                <div class="pt-title">
+                  <span id="detail-eyebrow"></span>
+                  <strong id="detail-title"></strong>
+                </div>
+                <dl class="pt-thread-meta">
+                  <div>
+                    <dt>thread</dt>
+                    <dd id="detail-summary"></dd>
+                  </div>
+                  <div>
+                    <dt>root</dt>
+                    <dd id="detail-pml4"></dd>
+                  </div>
+                  <div>
+                    <dt>view</dt>
+                    <dd id="detail-frame-note"></dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section class="pt-array-panel" aria-label="active page table entries array">
+                <div class="pt-title">
+                  <span>active page_table[]</span>
+                  <strong id="detail-pml4-sub"></strong>
+                </div>
+                <div class="pt-slot-grid" id="detail-slots"></div>
+              </section>
+
+              <section class="frame-array-panel" aria-label="physical frame array">
+                <div class="pt-title">
+                  <span>physical frame[]</span>
+                  <strong id="detail-frame-title"></strong>
+                </div>
+                <div class="frame-slot-grid" id="detail-frame-array"></div>
+              </section>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <aside class="panel" aria-labelledby="panel-title">
+        <div class="panel-main">
+          <p class="eyebrow" id="panel-eyebrow"></p>
+          <h2 id="panel-title"></h2>
+          <p class="summary" id="panel-summary"></p>
+          <ul class="panel-list" id="panel-list"></ul>
+          <ol class="flow-list" id="flow-list"></ol>
+          <p class="panel-note" id="panel-note"></p>
+        </div>
+        <div></div>
+        <div class="source-line">기준: docs/reference/pintos-kaist-original의 Virtual Address, Page Table, VM Management, Anonymous Page, Swap In/Out. 렌더링: inline SVG + CSS + vanilla JS.</div>
+      </aside>
+    </section>
+
+    <footer class="footer">
+      <div class="legend" aria-label="범례">
+        <span class="legend-item"><span class="swatch user"></span>User VA region</span>
+        <span class="legend-item"><span class="swatch kernel"></span>Kernel VA/direct map</span>
+        <span class="legend-item"><span class="swatch physical"></span>Physical RAM</span>
+        <span class="legend-item"><span class="swatch metadata"></span>VM metadata</span>
+        <span class="legend-item"><span class="arrow-sample"></span>direct map</span>
+        <span class="legend-item"><span class="arrow-sample kernel"></span>shared kernel entries</span>
+        <span class="legend-item"><span class="arrow-sample dashed"></span>user page mapping</span>
+        <span class="legend-item"><span class="arrow-sample fault"></span>fault path</span>
+        <span class="legend-item"><span class="arrow-sample meta"></span>metadata lookup</span>
+        <span class="legend-item"><span class="arrow-sample backing"></span>backing bytes</span>
+        <span class="legend-item"><span class="arrow-sample evict"></span>eviction</span>
+      </div>
+      <div class="takeaway" id="takeaway"></div>
+    </footer>
+  </main>
+
+  <script>
+    const viewOrder = ["overview", "kernel", "direct", "user", "fault", "evict"];
+
+    const views = {
+      overview: {
+        tab: "전체 구조",
+        eyebrow: "Overview",
+        title: "세로 memory bar로 VA와 RAM을 분리해서 본다",
+        summary: "전체 뷰는 user VA, active page_table[], physical frame[], kernel direct-map, VM metadata의 위치만 한 번에 잡는다.",
+        points: [
+          "User VA는 현재 thread가 선택한 page table entry를 통해 frame에 닿는다.",
+          "KERN_BASE 위 direct-map은 physical RAM의 kernel-side alias다.",
+          "SPT/frame table/backing store는 page identity와 resident frame 상태를 보조한다."
+        ],
+        flow: [
+          "현재 thread의 user VA가 active page_table[] slot 하나를 선택한다.",
+          "그 PTE가 physical frame[] 안의 resident frame을 가리킨다.",
+          "Kernel direct-map VA는 같은 physical frame을 kernel-side name으로 볼 수 있다."
+        ],
+        note: "두 주소 이름이 같은 RAM frame을 가리킬 수 있지만, byte 저장소가 두 벌이라는 뜻은 아니다.",
+        takeaway: "핵심 연결: user VA -> active page table/PTE -> physical frame <- kernel direct-map VA",
+        detail: {
+          eyebrow: "Page Table Zoom",
+          title: "selected user page",
+          summary: "user VA -> PTE -> frame",
+          upage: "0x500000",
+          upageSub: "user VA",
+          pml4: "Process A page table",
+          pml4Sub: "PML4 root",
+          walk: "PML4 -> PDP -> PD -> PT",
+          walkSub: "VA indices",
+          pte: "PTE present",
+          pteSub: "Frame A",
+          bits: ["present=1", "rw=1", "user=1", "target=Frame A"],
+          kpage: "KERN_BASE + paddr(A)",
+          kpageSub: "direct-map alias",
+          frameTitle: "Frame A",
+          frameLabel: "Process A page bytes",
+          frameNote: "resident bytes",
+          frameClass: "",
+          slots: [
+            { index: "[0]", va: "user code", pte: "present | user", frame: "Frame F" },
+            { index: "[1]", va: "0x500000", pte: "present | rw", frame: "Frame A", className: "is-active" },
+            { index: "[2]", va: "user stack", pte: "present | rw", frame: "Frame B" },
+            { index: "[3]", va: "lazy gap", pte: "not-present", frame: "no frame", className: "is-missing" },
+            { index: "[4]", va: "kernel alias", pte: "supervisor", frame: "same RAM" }
+          ],
+          frames: [
+            { title: "Frame A", note: "0x500000 bytes", className: "is-active" },
+            { title: "Frame B", note: "stack page bytes" },
+            { title: "Frame F", note: "code/data bytes" },
+            { title: "Frame G", note: "free / future page-in" }
+          ]
+        }
+      },
+      kernel: {
+        tab: "kernel PML4",
+        eyebrow: "Shared Kernel Entries",
+        title: "process별 PML4는 user half가 달라도 kernel half를 공유한다",
+        summary: "Kernel view는 direct-map 주소식보다 process A/B/C의 page table 안에 같은 kernel-side entries가 들어간다는 구조를 보여 준다.",
+        points: [
+          "Context switch는 user half의 해석을 바꾸지만 kernel half는 같은 기준으로 유지된다.",
+          "각 process PML4에는 kernel code, kernel objects, direct-map window에 필요한 supervisor entries가 공통으로 존재한다.",
+          "User mode는 이 entries를 사용할 수 없다. supervisor permission이 접근을 막는다."
+        ],
+        flow: [
+          "Process A/B/C는 서로 다른 PML4 root를 가진다.",
+          "각 PML4의 user half는 process마다 다른 page_table[] slot을 가진다.",
+          "각 PML4의 kernel half는 같은 kernel-side entries를 유지한다."
+        ],
+        note: "Direct-map의 KERN_BASE + paddr 관계는 direct map 탭에서 따로 본다. 여기서는 page table 안의 공통 kernel half가 초점이다.",
+        takeaway: "Kernel view: per-process PML4 roots, shared kernel-side entries.",
+        detail: {
+          eyebrow: "Kernel PML4 Half",
+          title: "shared entries",
+          summary: "current kernel thread",
+          upage: "KERN_BASE + paddr",
+          upageSub: "kernel VA",
+          pml4: "A / B / C PML4 roots",
+          pml4Sub: "same kernel half",
+          walk: "PML4 -> lower levels",
+          walkSub: "kernel indices",
+          pte: "supervisor PTE",
+          pteSub: "physical frame",
+          bits: ["present=1", "user=0", "global mapping", "target=physical RAM"],
+          kpage: "direct-map VA",
+          kpageSub: "process-invariant",
+          frameTitle: "kernel-side targets",
+          frameLabel: "RAM bytes",
+          frameNote: "kernel half",
+          frameClass: "",
+          slots: [
+            { index: "A[k]", va: "kernel half", pte: "supervisor", frame: "shared entries", className: "is-active" },
+            { index: "B[k]", va: "kernel half", pte: "supervisor", frame: "same entries", className: "is-active" },
+            { index: "C[k]", va: "kernel half", pte: "supervisor", frame: "same entries", className: "is-active" },
+            { index: "A[u]", va: "user half", pte: "Process A only", frame: "Frame A" },
+            { index: "B[u]", va: "user half", pte: "Process B only", frame: "Frame B" }
+          ],
+          frames: [
+            { title: "kernel code", note: "shared supervisor mapping", className: "is-active" },
+            { title: "page tables", note: "kernel pool objects" },
+            { title: "direct map", note: "same kernel-side range" },
+            { title: "user frames", note: "selected by user half" }
+          ]
+        }
+      },
+      direct: {
+        tab: "direct map",
+        eyebrow: "Kernel Direct Map",
+        title: "KERN_BASE + paddr는 frame의 kernel-side alias다",
+        summary: "Virtual bar의 direct-map window는 physical RAM bar의 frame 구간을 kernel VA로 보는 긴 창이다.",
+        points: [
+          "KERN_BASE + paddr(F)는 frame F의 현재 byte를 보여 준다.",
+          "User pool frame도 RAM에 올라와 있으면 direct-map 대상이다.",
+          "pml4_set_page의 kpage는 frame을 식별하는 kernel virtual address로 이해하면 된다."
+        ],
+        flow: [
+          "Direct-map window에서 만든 kernel VA가 Frame A를 가리킨다.",
+          "같은 방식으로 user pool의 Frame F도 kernel VA 이름을 얻는다.",
+          "Kernel pool frame도 RAM frame이므로 direct-map window로 접근된다."
+        ],
+        note: "Direct map은 page의 영구 신분증이 아니라 현재 physical frame을 보는 kernel-side 이름이다.",
+        takeaway: "Direct map은 복사본이 아니라 같은 frame의 kernel-side name이다.",
+        detail: {
+          eyebrow: "Direct-map Alias",
+          title: "direct-map alias",
+          summary: "PTE target + kernel alias",
+          upage: "0x500000",
+          upageSub: "user VA",
+          pml4: "process page table",
+          pml4Sub: "user mapping",
+          walk: "PTE lookup",
+          walkSub: "target lookup",
+          pte: "PTE target",
+          pteSub: "Frame F",
+          bits: ["present=1", "target=Frame F", "kpage names frame", "same bytes"],
+          kpage: "KERN_BASE + paddr(F)",
+          kpageSub: "direct-map alias",
+          frameTitle: "Frame F",
+          frameLabel: "same physical bytes",
+          frameNote: "frame bytes",
+          frameClass: "",
+          slots: [
+            { index: "[0]", va: "0x500000", pte: "user PTE", frame: "Frame F", className: "is-active" },
+            { index: "[1]", va: "KERN_BASE+F", pte: "direct map", frame: "Frame F", className: "is-active" },
+            { index: "[2]", va: "KERN_BASE+A", pte: "direct map", frame: "Frame A" },
+            { index: "[3]", va: "KERN_BASE+KP", pte: "direct map", frame: "kernel pool" },
+            { index: "[4]", va: "lazy gap", pte: "not-present", frame: "no frame", className: "is-missing" }
+          ],
+          frames: [
+            { title: "Frame F", note: "same physical bytes", className: "is-active" },
+            { title: "Frame A", note: "other user page" },
+            { title: "kernel pool", note: "allocator bytes" },
+            { title: "Frame G", note: "unused here" }
+          ]
+        }
+      },
+      user: {
+        tab: "user view",
+        eyebrow: "Per-process User View",
+        title: "같은 0x500000도 active page table에 따라 다르게 보인다",
+        summary: "왼쪽의 Process A/B/C는 같은 user VA 이름을 쓰지만, 선택된 PML4에 따라 오른쪽 user pool의 다른 frame 또는 not-present 상태로 이어진다.",
+        points: [
+          "바뀌는 것은 user pool이 아니라 CPU가 현재 사용하는 PML4다.",
+          "User pool은 모든 process가 경쟁하는 하나의 전역 physical frame 자원이다.",
+          "같은 process의 thread는 user address space를 공유하지만, 다른 process는 다른 user mapping을 쓴다."
+        ],
+        flow: [
+          "Process A의 page table은 같은 user VA를 Frame A로 해석한다.",
+          "Process B의 page table은 같은 user VA를 Frame B로 해석한다.",
+          "Process C에서는 그 user VA가 not-present라서 resident frame이 없다.",
+          "Active page table/PTE가 현재 해석 규칙이며, context switch 때 이 규칙이 바뀐다.",
+          "전체 user VA range와 Frame A/B 묶음은 user 영역이 실제 byte 저장소가 아니라 frame을 바라본다는 점을 보여 준다."
+        ],
+        note: "Process별 view는 주소 이름의 해석 규칙이 달라진다는 뜻이지 RAM pool이 복제된다는 뜻이 아니다.",
+        takeaway: "User view 전환의 중심은 active page table이고, physical user pool은 전역 자원으로 남는다.",
+        detail: {
+          eyebrow: "Per-process Mapping",
+          title: "per-process page tables",
+          summary: "same VA, different PTEs",
+          upage: "0x500000",
+          upageSub: "same user VA",
+          pml4: "A / B / C page table",
+          pml4Sub: "active root",
+          walk: "same VA indices",
+          walkSub: "per-root lookup",
+          pte: "different PTEs",
+          pteSub: "A->Frame A, B->Frame B",
+          bits: ["A: Frame A", "B: Frame B", "C: not-present", "active table decides"],
+          kpage: "selected frame alias",
+          kpageSub: "mapped only",
+          frameTitle: "Frame A / Frame B",
+          frameLabel: "selected frame bytes",
+          frameNote: "active output",
+          frameClass: "",
+          slots: [
+            { index: "A[0]", va: "0x500000", pte: "present", frame: "Frame A", className: "is-active" },
+            { index: "A[1]", va: "stack", pte: "present", frame: "Frame B" },
+            { index: "B[0]", va: "0x500000", pte: "present", frame: "Frame B", className: "is-active" },
+            { index: "C[0]", va: "0x500000", pte: "not-present", frame: "no frame", className: "is-missing" },
+            { index: "C[1]", va: "lazy gap", pte: "SPT only", frame: "no frame", className: "is-missing" }
+          ],
+          frames: [
+            { title: "Frame A", note: "Process A mapping", className: "is-active" },
+            { title: "Frame B", note: "Process B / stack" },
+            { title: "Frame F", note: "resident page" },
+            { title: "Frame G", note: "not selected" }
+          ]
+        }
+      },
+      fault: {
+        tab: "page fault",
+        eyebrow: "Fault Recovery",
+        title: "not-present fault는 OS가 metadata로 복구할 수 있다",
+        summary: "Fault 흐름은 memory bar와 하단 page table detail을 함께 본다. MMU fault, SPT lookup, frame 확보, backing load, PTE update 순서다.",
+        points: [
+          "SPT는 lazy page, swap 위치, file offset 같은 page identity를 기억한다.",
+          "Frame은 user pool에서 확보되고, kernel은 direct-map VA로 그 frame의 byte를 채운다.",
+          "PTE가 갱신되면 fault가 났던 instruction을 다시 실행할 수 있다."
+        ],
+        flow: [
+          "Not-present user VA가 lazy/unmapped gap에서 접근된다.",
+          "MMU/TLB가 translation 실패를 page fault로 올린다.",
+          "Kernel은 SPT에서 page identity와 backing 정보를 찾는다.",
+          "Backing bytes를 새 user-pool frame에 direct-map VA로 채운다.",
+          "PTE가 Frame G를 가리키도록 갱신되어 user VA가 다시 유효해진다."
+        ],
+        note: "MMU가 disk에서 page를 읽어 오는 것이 아니다. 실패 감지와 복구 책임은 분리된다.",
+        takeaway: "Fault path: user VA miss -> SPT -> user pool frame -> direct-map load -> PTE update",
+        detail: {
+          eyebrow: "Fault Transition",
+          title: "page fault updates one slot",
+          summary: "faulting thread",
+          upage: "0x500000",
+          upageSub: "fault VA",
+          pml4: "Process C page table",
+          pml4Sub: "before -> after PTE update",
+          walk: "PTE lookup fails",
+          walkSub: "not-present",
+          pte: "not-present -> present",
+          pteSub: "Frame G",
+          bits: ["present=0 -> 1", "target none -> Frame G", "rw/user from SPT", "retry instruction"],
+          kpage: "KERN_BASE + paddr(G)",
+          kpageSub: "direct-map alias",
+          frameTitle: "Frame G",
+          frameLabel: "resident page bytes",
+          frameNote: "C page_table[1]",
+          frameClass: "",
+          slots: [
+            { index: "[0]", va: "user code", pte: "present", frame: "Frame F" },
+            { index: "[1] before", va: "0x500000", pte: "not-present", frame: "no frame", className: "is-missing" },
+            { index: "fault", va: "SPT lookup", pte: "backing -> load", frame: "-> Frame G", className: "is-arrow" },
+            { index: "[1] after", va: "0x500000", pte: "present | rw", frame: "Frame G", className: "is-active" },
+            { index: "[2]", va: "user stack", pte: "present", frame: "Frame B" }
+          ],
+          frames: [
+            { title: "backing", note: "file/swap page bytes", className: "is-source" },
+            { title: "Frame G", note: "page-in target", className: "is-active" },
+            { title: "Frame F", note: "resident page" },
+            { title: "Frame B", note: "stack page" }
+          ]
+        }
+      },
+      evict: {
+        tab: "eviction/swap",
+        eyebrow: "Eviction And Backing Store",
+        title: "frame은 재사용되고 page identity는 metadata에 남는다",
+        summary: "Eviction은 physical memory bar 안의 frame 구간이 다른 page로 바뀔 수 있음을 보여 준다. page identity는 SPT와 backing store에 남는다.",
+        points: [
+          "Evicted page byte는 swap slot이나 file-backed store로 나간다.",
+          "Process의 PTE는 not-present가 되고, frame F는 다른 page에 재사용될 수 있다.",
+          "나중에 같은 user VA가 fault를 내면 새 frame G에 page-in될 수 있다."
+        ],
+        flow: [
+          "Frame F가 victim frame으로 선택된다.",
+          "SPT/frame table은 어떤 page가 밀려나는지 metadata로 기록한다.",
+          "Page bytes는 swap/file backing store로 나간다.",
+          "Frame은 재사용되고, 이후 같은 page는 다른 frame으로 page-in될 수 있다."
+        ],
+        note: "Direct map은 특정 user page가 아니라 physical frame의 현재 내용을 본다.",
+        takeaway: "Eviction은 page identity와 resident frame을 분리해서 생각해야 한다.",
+        detail: {
+          eyebrow: "Eviction Transition",
+          title: "eviction PTE transition",
+          summary: "present -> not-present",
+          upage: "0x500000",
+          upageSub: "evicted VA",
+          pml4: "process page table",
+          pml4Sub: "cleared root",
+          walk: "PTE update",
+          walkSub: "not-resident",
+          pte: "present -> not-present",
+          pteSub: "Frame F",
+          bits: ["present=1 -> 0", "dirty saved if needed", "target cleared", "future fault -> Frame G"],
+          kpage: "old alias invalid for page",
+          kpageSub: "reusable frame",
+          frameTitle: "Frame F",
+          frameLabel: "reusable frame bytes",
+          frameNote: "reusable bytes",
+          frameClass: "is-evict",
+          slots: [
+            { index: "[0]", va: "0x500000", pte: "1 -> 0", frame: "Frame F", className: "is-evict" },
+            { index: "[1]", va: "future fault", pte: "not-present", frame: "Frame G", className: "is-missing" },
+            { index: "[2]", va: "user stack", pte: "present", frame: "Frame B" },
+            { index: "[3]", va: "swap slot", pte: "backing", frame: "saved bytes" },
+            { index: "[4]", va: "victim frame", pte: "reusable", frame: "Frame F", className: "is-evict" }
+          ],
+          frames: [
+            { title: "Frame F", note: "victim / reusable", className: "is-evict" },
+            { title: "Frame G", note: "future page-in" },
+            { title: "Frame B", note: "still mapped" },
+            { title: "swap/file", note: "saved page bytes" }
+          ]
+        }
+      }
+    };
+
+    const stage = document.getElementById("stage");
+    const tabs = document.getElementById("tabs");
+    const panelEyebrow = document.getElementById("panel-eyebrow");
+    const panelTitle = document.getElementById("panel-title");
+    const panelSummary = document.getElementById("panel-summary");
+    const panelList = document.getElementById("panel-list");
+    const flowList = document.getElementById("flow-list");
+    const panelNote = document.getElementById("panel-note");
+    const takeaway = document.getElementById("takeaway");
+    const mapItems = Array.from(document.querySelectorAll(".map-item"));
+    const detailEyebrow = document.getElementById("detail-eyebrow");
+    const detailTitle = document.getElementById("detail-title");
+    const detailSummary = document.getElementById("detail-summary");
+    const detailPml4 = document.getElementById("detail-pml4");
+    const detailPml4Sub = document.getElementById("detail-pml4-sub");
+    const detailFrameTitle = document.getElementById("detail-frame-title");
+    const detailFrameNote = document.getElementById("detail-frame-note");
+    const detailSlots = document.getElementById("detail-slots");
+    const detailFrameArray = document.getElementById("detail-frame-array");
+
+    function renderDetail(detail) {
+      detailEyebrow.textContent = detail.eyebrow;
+      detailTitle.textContent = detail.title;
+      detailSummary.textContent = detail.summary;
+      detailPml4.textContent = detail.pml4;
+      detailPml4Sub.textContent = detail.pml4Sub;
+      detailFrameTitle.textContent = detail.frameTitle;
+      detailFrameNote.textContent = detail.frameNote;
+
+      detailSlots.innerHTML = "";
+      for (const slot of detail.slots) {
+        const node = document.createElement("div");
+        node.className = `pt-slot ${slot.className || ""}`.trim();
+
+        const index = document.createElement("span");
+        index.className = "slot-index";
+        index.textContent = slot.index;
+
+        const va = document.createElement("strong");
+        va.className = "slot-va";
+        va.textContent = slot.va;
+
+        const pte = document.createElement("span");
+        pte.className = "slot-pte";
+        pte.textContent = slot.pte;
+
+        const frame = document.createElement("span");
+        frame.className = "slot-frame";
+        frame.textContent = slot.frame;
+
+        node.append(index, va, pte, frame);
+        detailSlots.appendChild(node);
+      }
+
+      detailFrameArray.innerHTML = "";
+      for (const frame of detail.frames) {
+        const node = document.createElement("div");
+        node.className = `frame-slot ${frame.className || ""}`.trim();
+
+        const title = document.createElement("strong");
+        title.textContent = frame.title;
+
+        const note = document.createElement("small");
+        note.textContent = frame.note;
+
+        node.append(title, note);
+        detailFrameArray.appendChild(node);
+      }
+    }
+
+    function setView(viewId, updateHash) {
+      const id = views[viewId] ? viewId : "overview";
+      const view = views[id];
+      stage.dataset.view = id;
+
+      if (updateHash && window.location.hash !== `#view-${id}`) {
+        window.history.replaceState(null, "", `#view-${id}`);
+      }
+
+      for (const button of tabs.querySelectorAll("button")) {
+        button.setAttribute("aria-selected", String(button.dataset.view === id));
+      }
+
+      panelEyebrow.textContent = view.eyebrow;
+      panelTitle.textContent = view.title;
+      panelSummary.textContent = view.summary;
+      panelNote.textContent = view.note;
+      takeaway.textContent = view.takeaway;
+      panelList.innerHTML = "";
+      for (const point of view.points) {
+        const li = document.createElement("li");
+        li.textContent = point;
+        panelList.appendChild(li);
+      }
+
+      flowList.innerHTML = "";
+      const flow = view.flow || [];
+      flowList.hidden = flow.length === 0;
+      for (const step of flow) {
+        const li = document.createElement("li");
+        li.textContent = step;
+        flowList.appendChild(li);
+      }
+
+      renderDetail(view.detail);
+
+      for (const item of mapItems) {
+        const focus = (item.dataset.focus || "").split(/\s+/).filter(Boolean);
+        const show = (item.dataset.show || "").split(/\s+/).filter(Boolean);
+        const hidden = show.length > 0 && !show.includes(id);
+        const active = focus.includes(id);
+        item.classList.toggle("is-hidden", hidden);
+        item.classList.toggle("is-active", !hidden && active);
+        item.classList.toggle("is-base", !hidden && !active);
+      }
+    }
+
+    function viewFromHash() {
+      const raw = window.location.hash.replace(/^#view-/, "");
+      return views[raw] ? raw : "overview";
+    }
+
+    function initTabs() {
+      for (const id of viewOrder) {
+        const button = document.createElement("button");
+        button.className = "tab";
+        button.type = "button";
+        button.dataset.view = id;
+        button.textContent = views[id].tab;
+        button.addEventListener("click", () => setView(id, true));
+        tabs.appendChild(button);
+      }
+    }
+
+    initTabs();
+    setView(viewFromHash(), false);
+
+    window.addEventListener("hashchange", () => {
+      setView(viewFromHash(), false);
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") {
+        return;
+      }
+      const current = viewFromHash();
+      const index = viewOrder.indexOf(current);
+      const delta = event.key === "ArrowRight" ? 1 : -1;
+      const next = viewOrder[(index + delta + viewOrder.length) % viewOrder.length];
+      setView(next, true);
+    });
+  </script>
+</body>
+</html>
