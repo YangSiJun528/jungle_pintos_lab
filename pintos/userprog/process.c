@@ -272,12 +272,9 @@ process_wait (tid_t child_tid UNUSED) {
 	/* XXX: Hint) process_wait(initd)에서 Pintos가 종료되므로, process_wait를
 	 * XXX:       구현하기 전에는 여기에 무한 루프를 넣는 것을 권장한다. */
 
-	/* TODO: 나중에 적절하게 바꾸기.
-	 * 무한루프는 직접 꺼줘야 해서,
-	 * 스택 확인용으로 적당히 돌다 꺼지게 함. */
-	size_t wait = 1 << 20;
-	while (wait)
+	for (int i = 1000000000; i >= 0; i--) {
 		barrier ();
+	}
 	return -1;
 }
 
