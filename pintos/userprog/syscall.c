@@ -210,22 +210,35 @@ handle_wait (struct syscall_entry *entry UNUSED) {
 	ASSERT (false); /* 현재 처리할 수 없는 syscall */
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// bool create (const char *file, unsigned initial_size);
+// 인자 2개
+// 리턴값 bool - 성공하면 true, 실패하면 false
 static void
-handle_create (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_create (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	const char *filename = (const char *) entry->args[0];
+	size_t initial_size = (size_t) entry->args[1];
+
+	if (!is_valid_user_string ((char *) filename)) {
+		exit (-1);
+	}
+
+	entry->return_value = filesys_create (filename, initial_size);
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// bool remove (const char *file);
+// 인자 2개
+// 리턴값 bool - 성공하면 true, 실패하면 false
 static void
-handle_remove (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
-	//TODO: 이건 문제가, 파일 fd에 쓰이는 상황이면 살아있고, 나중에 지워질 때 제거해야 함.
-	// 별도 flag 값이 필요해보이고, 다른 곳에서 쓰는지 등 파악이 가능해야 함.
-	// filesys.h 의 remove 는 바로 삭제하기 때문에 특별한 처리가 필요할 듯?
-	// 그래서 일단 fork/exec 이후에 구현할지 생각 중
+handle_remove (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	const char *filename = (const char *) entry->args[0];
+
+	if (!is_valid_user_string ((char *) filename)) {
+		exit (-1);
+	}
+
+	entry->return_value = filesys_remove (filename);
 }
 
 // int open (const char *file);
