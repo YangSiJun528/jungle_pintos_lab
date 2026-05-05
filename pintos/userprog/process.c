@@ -31,8 +31,8 @@ struct fork_context {
 	struct thread *parent;
 	struct intr_frame parent_frame;
 	struct child_state *child_state;
-	struct semaphore child_ready;
-	struct semaphore fork_done;
+	struct semaphore child_ready; // 설정 완료 후에 자식이 읽도록 순서 제어
+	struct semaphore fork_done;   // 자식이 공유 자원을 읽는 동안 해제하지 않도록 순서 제어
 	bool success;
 };
 
@@ -127,6 +127,7 @@ process_fork (const char *name, struct intr_frame *if_) {
 
 	list_push_back(&parent->children, &child_state->elem);
 
+	// 자식 스레드를 생성, 스케줄러에 따라 부모보다 먼저 실행될 수 있으므로 순서 제어가 필요
 	tid = thread_create(name, PRI_DEFAULT, __do_fork, &fork_ctx);
 	if (tid == TID_ERROR) {
 		goto out_del_child;
@@ -221,21 +222,23 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
  *       따라서 process_fork의 두 번째 인자를 이 함수에 전달해야 한다. */
 static void
 __do_fork (void *aux) {
+	struct fork_context *fork_ctx = aux;
 	struct intr_frame if_;
-	struct thread *parent = (struct thread *) aux;
+	struct thread *parent;
 	struct thread *current = thread_current ();
-	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
-	/* TODO: 어떤 방식으로든 parent_if를 전달한다. 즉, process_fork()의 if_이다. */
-	struct intr_frame *parent_if;
-	bool succ = true;
 
-	/* 1. Read the cpu context to local stack. */
-	/* 1. CPU 컨텍스트를 로컬 스택으로 읽어 온다. */
-	memcpy (&if_, parent_if, sizeof (struct intr_frame));
+	// parent가 child를 깨우면 진행
+	sema_down (&fork_ctx->child_ready);
 
-	/* 2. Duplicate PT */
+	parent = fork_ctx->parent;
+	current->child_state = fork_ctx->child_state;
+
+	/* 1. 부모의 컨텍스트를 로컬 스택으로 읽어 온다. */
+	memcpy (&if_, &fork_ctx->parent_frame, sizeof if_);
+	if_.R.rax = 0;
+
 	/* 2. PT를 복제한다. */
-	current->pml4 = pml4_create();
+	current->pml4 = pml4_create ();
 	if (current->pml4 == NULL)
 		goto error;
 
@@ -249,23 +252,31 @@ __do_fork (void *aux) {
 		goto error;
 #endif
 
-	/* TODO: Your code goes here.
-	 * TODO: Hint) To duplicate the file object, use `file_duplicate`
-	 * TODO:       in include/filesys/file.h. Note that parent should not return
-	 * TODO:       from the fork() until this function successfully duplicates
-	 * TODO:       the resources of parent.*/
-	/* TODO: 여기에 코드를 작성한다.
-	 * TODO: Hint) 파일 오브젝트를 복제하려면 include/filesys/file.h의
-	 * TODO:       `file_duplicate`를 사용한다. 이 함수가 부모의 리소스를
-	 * TODO:       성공적으로 복제하기 전까지 부모는 fork()에서 리턴하면 안 된다. */
+	/* 부모의 파일 디스크립터를 복제 */
+	struct list_elem *e = list_begin (&parent->file_descriptors);
+	while (e != list_end (&parent->file_descriptors)) {
+		struct file_descriptor *parent_fde =
+			list_entry (e, struct file_descriptor, elem);
+		struct file *dup_file = file_duplicate (parent_fde->file);
+		if (dup_file == NULL)
+			goto error;
+		if (fd_alloc (dup_file) == -1) {
+			file_close (dup_file);
+			goto error;
+		}
+		e = list_next (e);
+	}
 
 	process_init ();
 
-	/* Finally, switch to the newly created process. */
+	fork_ctx->success = true;
+	sema_up (&fork_ctx->fork_done); // child가 parent를 꺠움
+
 	/* 마지막으로 새로 생성한 프로세스로 전환한다. */
-	if (succ)
-		do_iret (&if_);
+	do_iret (&if_);
 error:
+	fork_ctx->success = false;
+	sema_up (&fork_ctx->fork_done);
 	thread_exit ();
 }
 
