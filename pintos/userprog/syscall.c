@@ -235,16 +235,21 @@ handle_open (struct syscall_entry *entry) {
 		exit (-1);
 	}
 
+	// 파일 열기, 실패하면 -1을 리턴값으로 설정하고 종료
 	struct file *file = filesys_open (filename);
 	if (file == NULL) {
 		entry->return_value = -1;
 		return;
 	}
 
+	// thread의 fds에 새로운 fd 할당, 실패하면 -1을 리턴값으로 설정하고 종료
 	int fd = fd_alloc (file);
 	if (fd == -1) {
 		file_close (file);
+		entry->return_value = -1;
+		return;
 	}
+
 	entry->return_value = fd;
 }
 
@@ -276,12 +281,14 @@ handle_write (struct syscall_entry *entry) {
 		exit (-1);
 	}
 
+	// STDOUT_FILENO 이면 콘솔에 쓰기
 	if (fd == STDOUT_FILENO) {
 		putbuf (buffer, size);
 		entry->return_value = size;
 		return;
 	}
 
+	// STDIN_FILENO은 지원하지 않음, 종료
 	if (fd == STDIN_FILENO) {
 		exit (-1);
 	}
@@ -320,10 +327,11 @@ handle_close (struct syscall_entry *entry) {
 	}
 }
 
+// 프로세스 종료 시 사용
 static void
 exit (int status) {
 	thread_current ()->exit_status = status;
-	thread_exit ();
+	thread_exit (); // 내부적으로 process_exit() 호출
 }
 
 static bool

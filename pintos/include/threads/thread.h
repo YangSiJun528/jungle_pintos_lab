@@ -11,6 +11,8 @@
 #include "vm/vm.h"
 #endif
 
+// thread가 가지는 file_descriptors의 elem (줄여서 fde)
+// 동일한 파일을 여러 스레드가 볼 수 있으나, fde 자체는 스레드가 소유한다
 struct file_descriptor {
 	int fd;
 	struct list_elem elem;
