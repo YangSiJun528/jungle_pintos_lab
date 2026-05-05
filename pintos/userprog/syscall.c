@@ -7,11 +7,13 @@
 #include "userprog/gdt.h"
 #include "threads/flags.h"
 #include "intrinsic.h"
+#include "devices/input.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/mmu.h"
 #include "filesys/filesys.h"
 #include "filesys/file.h"
+#include "threads/init.h"
 
 struct syscall_entry {
 	/* system call number */
@@ -36,7 +38,7 @@ void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 static void init_syscall_entry (struct intr_frame *, struct syscall_entry *);
 static void dispatch_syscall (struct syscall_entry *);
-static void handle_halt (struct syscall_entry *);
+static void handle_halt (void);
 static void handle_exit (struct syscall_entry *);
 static void handle_fork (struct syscall_entry *);
 static void handle_exec (struct syscall_entry *);
@@ -126,7 +128,7 @@ static void
 dispatch_syscall (struct syscall_entry *entry) {
 	switch (entry->syscall_num) {
 		case SYS_HALT:
-			handle_halt (entry);
+			handle_halt ();
 			break;
 		case SYS_EXIT:
 			handle_exit (entry);
@@ -172,11 +174,10 @@ dispatch_syscall (struct syscall_entry *entry) {
 	}
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
 static void
-handle_halt (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_halt (void) {
+	//TODO: OS 자체를 강제로 끄는거 같아서, 스레드 종료나 그런거 없이 닫음 처리함. 맞는지 체크 필요
+	power_off();
 }
 
 // void exit (int status);
@@ -221,6 +222,10 @@ static void
 handle_remove (struct syscall_entry *entry UNUSED) {
 	barrier ();
 	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+	//TODO: 이건 문제가, 파일 fd에 쓰이는 상황이면 살아있고, 나중에 지워질 때 제거해야 함.
+	// 별도 flag 값이 필요해보이고, 다른 곳에서 쓰는지 등 파악이 가능해야 함.
+	// filesys.h 의 remove 는 바로 삭제하기 때문에 특별한 처리가 필요할 듯?
+	// 그래서 일단 fork/exec 이후에 구현할지 생각 중
 }
 
 // int open (const char *file);
@@ -253,23 +258,71 @@ handle_open (struct syscall_entry *entry) {
 	entry->return_value = fd;
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// int filesize (int fd);
+// 인자 1개
+// 리턴값 int - 파일의 크기(바이트 단위)
 static void
-handle_filesize (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_filesize (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	int fd = (int) entry->args[0];
+
+	// STD OUT/IN은 잘못된 요청임
+	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
+		exit (-1);
+	}
+
+	struct file *file = fd_lookup (fd);
+	if (file == NULL) {
+		exit (-1);
+	}
+
+	entry->return_value = file_length (file);
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// int read (int fd, void *buffer, unsigned size);
+// 인자 3개
+// 리턴값 int - 읽은 바이트 수, 읽을 수 없으면 0, 예외 상황은 -1
 static void
-handle_read (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_read (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	int fd = (int) entry->args[0];
+	uint8_t *buffer = (void *) entry->args[1];
+	size_t size = entry->args[2];
+
+	if (!is_valid_user_buffer ((void *) buffer, size)) {
+		exit (-1);
+	}
+
+	// STDOUT_FILENO은 지원하지 않음, 종료
+	if (fd == STDOUT_FILENO) {
+		exit (-1);
+	}
+
+	// STDIN_FILENO이면 키보드의 입력을 받기
+	if (fd == STDIN_FILENO) {
+		//TODO: 파일이 아니라 끝까지 무조건 버퍼 다 채울때까지 대기하는듯?
+		// input_getc 자체에서 wait 한다고 하니까 락이나 sleep을 고려할 필요는 없어보임
+		size_t idx = 0;
+		while (idx == (size - 1)) {
+			buffer[idx] = input_getc();
+			idx++;
+		}
+		entry->return_value = size;
+		return;
+	}
+
+	struct file *file = fd_lookup (fd);
+	if (file == NULL) {
+		exit (-1);
+	}
+
+	// TODO: 이게 커서가 end면 0 반환해야하는데, 테스트 실패하면 추가 분기처리 필요
+	entry->return_value = file_read (file, buffer, size);
 }
 
 // int write (int fd, const void *buffer, unsigned size);
 // 인자 3개
-// 리턴값 int - 쓴 바이트 수, 쓸 수 없으면 0
+// 리턴값 int - 쓴 바이트 수, 쓸 수 없으면 0, 예외 상황은 -1
 static void
 handle_write (struct syscall_entry *entry) {
 	entry->should_return_value = true;
@@ -301,18 +354,46 @@ handle_write (struct syscall_entry *entry) {
 	entry->return_value = file_write (file, buffer, size);
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// void seek (int fd, unsigned position);
+// 인자 2개
+// 리턴값 없음
 static void
-handle_seek (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_seek (struct syscall_entry *entry) {
+	int fd = (int) entry->args[0];
+	off_t position = (off_t) entry->args[1];
+
+	// STD OUT/IN은 잘못된 요청임
+	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
+		exit (-1);
+	}
+
+	struct file *file = fd_lookup (fd);
+	if (file == NULL) {
+		exit (-1);
+	}
+
+	file_seek (file, position);
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// unsigned tell (int fd);
+// 인자 2개
+// 리턴값 off_t, 다음 바이트의 위치
 static void
-handle_tell (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_tell (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	int fd = (int) entry->args[0];
+
+	// STD OUT/IN은 잘못된 요청임
+	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
+		exit (-1);
+	}
+
+	struct file *file = fd_lookup (fd);
+	if (file == NULL) {
+		exit (-1);
+	}
+
+	entry->return_value = file_tell (file);
 }
 
 // void close (int fd);
