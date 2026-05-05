@@ -55,9 +55,7 @@ process_init (void) {
 tid_t
 process_create_initd (const char *file_name) {
 	char *fn_copy;
-	char *prog_copy;
-	char *prog_name;
-	char *save_ptr;
+	char prog_name[16];
 	tid_t tid;
 
 	/* Make a copy of FILE_NAME.
@@ -69,21 +67,16 @@ process_create_initd (const char *file_name) {
 		return TID_ERROR;
 	strlcpy (fn_copy, file_name, PGSIZE);
 
-	// "progname foo bar baz" 형태로 들어오는 값 중 프로그램 이름(progname)만 추출
-	prog_copy = palloc_get_page (0);
-	if (prog_copy == NULL) {
-		palloc_free_page (fn_copy);
-		return TID_ERROR;
-	}
-	strlcpy (prog_copy, file_name, PGSIZE);
-	prog_name = strtok_r (prog_copy, " ", &save_ptr);
+	// thread_create()는 thread name을 최대 16글자까지만 사용하며,
+	// 전달된 이름은 내부 공간에 복사되어 저장된다.
+	// 따라서 file_name에서 첫 공백 전까지, 최대 prog_name 크기만큼만 복사하여 념겨준다.
+	size_t len = strcspn(file_name, " ");
+	strlcpy(prog_name, file_name, len + 1 < sizeof prog_name ? len + 1 : sizeof prog_name);
 
 	/* Create a new thread to execute FILE_NAME. */
 	/* FILE_NAME을 실행할 새 스레드를 만든다. */
 	tid = thread_create (prog_name, PRI_DEFAULT, initd, fn_copy);
 
-	// thread_create 에서 prog_name 문자열을 복사하여 사용하므로 free
-	palloc_free_page (prog_copy);
 	if (tid == TID_ERROR)
 		palloc_free_page (fn_copy);
 	return tid;
