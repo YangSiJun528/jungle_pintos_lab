@@ -24,14 +24,23 @@
 #include "vm/vm.h"
 #endif
 
-/* C99 표준 상 128까지는 필요하다지만,
-   그러면 포인터 메모리로만 1kb되버리고, 실제로 그렇게까지 필요한 케이스도 적을꺼라
-   임의로 더 낮은 값으로 설정 */
-#define MAX_ARGC 32
+/* C99 표준 상 128 이상, pintos 요구사항은 없음 */
+#define MAX_ARGC 128
+
+struct fork_context {
+	struct thread *parent;
+	struct intr_frame parent_frame;
+	struct child_state *child_state;
+	struct semaphore child_ready;
+	struct semaphore fork_done;
+	bool success;
+};
 
 static void process_cleanup (void);
 static bool load (const char *cmd, struct intr_frame *if_);
 static void initd (void *f_name);
+static void init_fork_context (struct fork_context *, struct intr_frame *,
+		struct child_state *);
 static void __do_fork (void *);
 static int parse_arg (char *cmd, char **arg_buf);
 
@@ -103,11 +112,62 @@ initd (void *f_name) {
  * 리턴하며, 스레드를 만들 수 없으면 TID_ERROR를 리턴한다. */
 tid_t
 process_fork (const char *name, struct intr_frame *if_) {
-	/* Clone current thread to new thread.*/
-	/* 현재 스레드를 새 스레드로 클론한다. */
-	return thread_create (name,
-			PRI_DEFAULT, __do_fork, thread_current ());
+	tid_t tid = TID_ERROR; // 성공하면 덮어씌워짐 아니면 실패 상태
+	struct thread *parent = thread_current();
+	struct fork_context fork_ctx;
+	struct child_state *child_state;
+
+	child_state = malloc(sizeof *child_state);
+	if (child_state == NULL) {
+		goto out;
+	}
+
+	init_child_state(child_state);
+	init_fork_context(&fork_ctx, if_, child_state);
+
+	list_push_back(&parent->children, &child_state->elem);
+
+	tid = thread_create(name, PRI_DEFAULT, __do_fork, &fork_ctx);
+	if (tid == TID_ERROR) {
+		goto out_del_child;
+	}
+
+	child_state->tid = tid;
+
+	sema_up(&fork_ctx.child_ready); // parent가 child에게 처리 가능하다고 알림
+	sema_down(&fork_ctx.fork_done); // child가 parent에게 처리가 완료되었음을 알림
+
+	if (!fork_ctx.success) {
+		goto out_del_child;
+	}
+
+	// fork가 성공했으면 child_state는 child process가 소유한 상태이므로 free하지 않음.
+	return tid;
+
+out_del_child:
+	list_remove(&child_state->elem);
+	free(child_state);
+
+out:
+	return tid;
 }
+
+static void
+init_fork_context (struct fork_context *ctx, struct intr_frame *parent_if,
+		struct child_state *child_state) {
+	ASSERT (ctx != NULL);
+	ASSERT (parent_if != NULL);
+	ASSERT (child_state != NULL);
+
+	ctx->parent = thread_current ();
+	ctx->parent_frame = *parent_if;
+	ctx->child_state = child_state;
+	ctx->success = false;
+
+	sema_init (&ctx->child_ready, 0); /* parent가 up -> child가 처리 시작 */
+	sema_init (&ctx->fork_done, 0);   /* child가 up -> parent에서 후처리 */
+}
+
 
 #ifndef VM
 /* Duplicate the parent's address space by passing this function to the
@@ -428,7 +488,7 @@ load (const char *cmd, struct intr_frame *if_) {
 	bool success = false;
 	int i;
 
-	char *arg_buf[128];
+	char *arg_buf[MAX_ARGC];
 	int argc = parse_arg (cmd, arg_buf);
 	/* 파싱 실패 시 전체 작업 실패. */
 	if (argc == -1)
@@ -528,6 +588,7 @@ load (const char *cmd, struct intr_frame *if_) {
 	if (!setup_stack (if_))
 		goto done;
 
+	// TODO: 이거 좀 별로인듯? 외부 함수로 적절하게 빼던가 하기.
 	/* Start address. */
 	/* 시작 주소. */
 	if_->rip = ehdr.e_entry;
@@ -874,7 +935,7 @@ parse_arg (char *cmd, char **arg_buf) {
 	/* 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 참고. */
 	for (token = strtok_r (cmd, delim, &save_ptr); token != NULL;
 			token = strtok_r (NULL, delim, &save_ptr)) {
-		if (argc >= 128) {
+		if (argc >= MAX_ARGC) {
 			/* 사이즈 제한 넘어가면 실패. */
 			return -1;
 		}

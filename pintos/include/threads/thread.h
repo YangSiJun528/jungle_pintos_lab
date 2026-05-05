@@ -5,6 +5,8 @@
 #include <list.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+#include "synch.h"
 #include "threads/interrupt.h"
 #include "threads/fixed-point.h"
 #ifdef VM
@@ -39,6 +41,16 @@ enum thread_status {
 typedef int tid_t;
 #define TID_ERROR ((tid_t) -1)          /* Error value for tid_t. */
 /* tid_t의 에러 값. */
+
+struct child_state {
+	tid_t tid;
+	int status; // thread의 exit_status와 동일한 역할, 중복이지만 공유/전달 목적으로 사용
+	bool waited;
+	bool exited;
+	struct semaphore wait_sema; // 부모가 내가 종료되기를 대기하는 경우 사용
+	struct list_elem elem;
+};
+
 
 /* Thread priorities. */
 /* 스레드 priority. */
@@ -150,9 +162,13 @@ struct thread {
 	uint64_t *pml4;                     /* Page map level 4 */
 	/* Page map level 4이다. */
 
-	int exit_status; //TODO: 나중에 이름 바꿀 수도?
+	int exit_status;
 
 	struct list file_descriptors; /* fd 번호 오름차순으로 정렬 유지. 최대 128개. */
+
+	struct list children; // 내가 관리하는 자식들의 child_state 목록 (부모 입장)
+
+	struct child_state *child_state; // 부모가 접근할 수 있는 내 상태, 공유 목적으로 사용 (자식 입장)
 
 #endif
 #ifdef VM
@@ -225,6 +241,8 @@ void thread_mlfqs_recalc_shcd_queue (void);
 #ifdef USERPROG
 #define FD_MIN 2
 #define FD_MAX 128 /* open() 성공 fd 범위: [FD_MIN, FD_MAX] */
+
+void init_child_state (struct child_state *);
 
 int fd_alloc (struct file *);
 struct file *fd_lookup (int);

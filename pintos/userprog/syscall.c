@@ -235,7 +235,7 @@ handle_wait (struct syscall_entry *entry) {
 	entry->should_return_value = true;
 	pid_t pid = (pid_t) entry->args[0];
 
-	entry->return_value = process_wait(pid);
+	entry->return_value = process_wait (pid);
 }
 
 // bool create (const char *file, unsigned initial_size);
@@ -245,7 +245,7 @@ static void
 handle_create (struct syscall_entry *entry) {
 	entry->should_return_value = true;
 	const char *filename = (const char *) entry->args[0];
-	size_t initial_size = (size_t) entry->args[1];
+	size_t initial_size = entry->args[1];
 
 	if (!is_valid_user_string (filename)) {
 		exit (-1);

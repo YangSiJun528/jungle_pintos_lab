@@ -1027,6 +1027,15 @@ cmp_fd_less (const struct list_elem *a, const struct list_elem *b,
 	return fda->fd < fdb->fd;
 }
 
+void
+init_child_state (struct child_state *child_state) {
+	child_state->tid = TID_ERROR;
+	child_state->status = 0;
+	child_state->waited = false;
+	child_state->exited = false;
+	sema_init (&child_state->wait_sema, 0);
+}
+
 /* fds에 새로운 file 추가.
  * 처리 후 fd 반환, 만약 정상적인 처리가 불가능하다면 -1 반환. */
 int
