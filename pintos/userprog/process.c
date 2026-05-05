@@ -102,7 +102,7 @@ initd (void *f_name) {
 /* 현재 프로세스를 `name`이라는 이름으로 클론한다. 새 프로세스의 thread id를
  * 리턴하며, 스레드를 만들 수 없으면 TID_ERROR를 리턴한다. */
 tid_t
-process_fork (const char *name, struct intr_frame *if_ UNUSED) {
+process_fork (const char *name, struct intr_frame *if_) {
 	/* Clone current thread to new thread.*/
 	/* 현재 스레드를 새 스레드로 클론한다. */
 	return thread_create (name,
