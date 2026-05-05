@@ -36,7 +36,14 @@ struct fork_context {
 	bool success;
 };
 
+/* initd 스레드에게 child_state를 전달하기 위한 전역변수.
+   process_create_initd()에서 thread_create() 호출 전에 쓰고,
+   initd()에서 읽으므로 레이스 없음. */
+static struct child_state *initd_child_state;
+
 static void process_cleanup (void);
+static void process_cleanup_user_memory (void);
+static void process_cleanup_files (void);
 static bool load (const char *cmd, struct intr_frame *if_);
 static void initd (void *f_name);
 static void init_fork_context (struct fork_context *, struct intr_frame *,
@@ -82,12 +89,29 @@ process_create_initd (const char *file_name) {
 	size_t len = strcspn(file_name, " ");
 	strlcpy(prog_name, file_name, len + 1 < sizeof prog_name ? len + 1 : sizeof prog_name);
 
+	struct child_state *cs = malloc (sizeof *cs);
+	if (cs == NULL) {
+		palloc_free_page (fn_copy);
+		return TID_ERROR;
+	}
+	init_child_state (cs);
+
+	/* thread_create 전에 전역변수에 써둔다. initd()는 생성된 이후에만 읽으므로 레이스 없음. */
+	initd_child_state = cs;
+
 	/* Create a new thread to execute FILE_NAME. */
 	/* FILE_NAME을 실행할 새 스레드를 만든다. */
 	tid = thread_create (prog_name, PRI_DEFAULT, initd, fn_copy);
-
-	if (tid == TID_ERROR)
+	if (tid == TID_ERROR) {
+		initd_child_state = NULL;
+		free (cs);
 		palloc_free_page (fn_copy);
+		return TID_ERROR;
+	}
+
+	cs->tid = tid;
+	list_push_back (&thread_current ()->children, &cs->elem);
+
 	return tid;
 }
 
@@ -95,6 +119,9 @@ process_create_initd (const char *file_name) {
 /* 첫 유저 프로세스를 실행하는 스레드 함수. */
 static void
 initd (void *f_name) {
+	thread_current ()->child_state = initd_child_state;
+	initd_child_state = NULL;
+
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
 #endif
@@ -130,7 +157,10 @@ process_fork (const char *name, struct intr_frame *if_) {
 	// 자식 스레드를 생성, 스케줄러에 따라 부모보다 먼저 실행될 수 있으므로 순서 제어가 필요
 	tid = thread_create(name, PRI_DEFAULT, __do_fork, &fork_ctx);
 	if (tid == TID_ERROR) {
-		goto out_del_child;
+		// 자식 스레드가 아예 생성되지 않아서 child 측 참조가 없음 → 직접 free
+		list_remove(&child_state->elem);
+		free(child_state);
+		goto out;
 	}
 
 	child_state->tid = tid;
@@ -139,15 +169,13 @@ process_fork (const char *name, struct intr_frame *if_) {
 	sema_down(&fork_ctx.fork_done); // child가 parent에게 처리가 완료되었음을 알림
 
 	if (!fork_ctx.success) {
-		goto out_del_child;
+		// 자식이 child_state를 참조한 채 thread_exit() 예정이므로 release로 처리
+		list_remove(&child_state->elem);
+		child_state_release(child_state); // parent 측 참조 해제
+		goto out;
 	}
 
-	// fork가 성공했으면 child_state는 child process가 소유한 상태이므로 free하지 않음.
 	return tid;
-
-out_del_child:
-	list_remove(&child_state->elem);
-	free(child_state);
 
 out:
 	return tid;
@@ -183,31 +211,29 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 	void *newpage;
 	bool writable;
 
-	/* 1. TODO: If the parent_page is kernel page, then return immediately. */
-	/* 1. TODO: parent_page가 커널 페이지라면 즉시 리턴한다. */
+	/* 1. If the parent_page is kernel page, then return immediately. */
+	if (is_kernel_vaddr (va))
+		return true;
 
 	/* 2. Resolve VA from the parent's page map level 4. */
-	/* 2. 부모의 page map level 4에서 VA를 해석한다. */
 	parent_page = pml4_get_page (parent->pml4, va);
 
-	/* 3. TODO: Allocate new PAL_USER page for the child and set result to
-	 *    TODO: NEWPAGE. */
-	/* 3. TODO: 자식 프로세스를 위한 새 PAL_USER 페이지를 할당하고 결과를
-	 *    TODO: NEWPAGE에 설정한다. */
+	/* 3. Allocate new PAL_USER page for the child and set result to NEWPAGE. */
+	newpage = palloc_get_page (PAL_USER);
+	if (newpage == NULL)
+		return false;
 
-	/* 4. TODO: Duplicate parent's page to the new page and
-	 *    TODO: check whether parent's page is writable or not (set WRITABLE
-	 *    TODO: according to the result). */
-	/* 4. TODO: 부모 페이지를 새 페이지에 복제하고, 부모 페이지가 writable인지
-	 *    TODO: 확인한 뒤 그 결과에 따라 WRITABLE을 설정한다. */
+	/* 4. Duplicate parent's page to the new page and check whether parent's
+	 *    page is writable or not (set WRITABLE according to the result). */
+	memcpy (newpage, parent_page, PGSIZE);
+	writable = is_writable (pte);
 
 	/* 5. Add new page to child's page table at address VA with WRITABLE
 	 *    permission. */
-	/* 5. 자식의 페이지 테이블에 VA 주소로 새 페이지를 추가하고 WRITABLE
-	 *    퍼미션을 적용한다. */
 	if (!pml4_set_page (current->pml4, va, newpage, writable)) {
-		/* 6. TODO: if fail to insert page, do error handling. */
-		/* 6. TODO: 페이지 삽입에 실패하면 에러 핸들링을 수행한다. */
+		/* 6. if fail to insert page, do error handling. */
+		palloc_free_page (newpage);
+		return false;
 	}
 	return true;
 }
@@ -298,9 +324,10 @@ process_exec (void *f_name) {
 	_if.cs = SEL_UCSEG;
 	_if.eflags = FLAG_IF | FLAG_MBS;
 
-	/* We first kill the current context */
-	/* 먼저 현재 컨텍스트를 정리한다. */
-	process_cleanup ();
+	/* exec는 현재 스레드/프로세스의 커널 상태는 유지하고,
+       유저 프로그램 실행 이미지(code/data/stack)만 새 프로그램으로 교체한다.
+	   따라서 fd table은 닫으면 안 되고, 기존 유저 주소공간(pml4)만 제거한다. */
+	process_cleanup_user_memory ();
 
 	/* And then load the binary */
 	/* 그 다음 바이너리를 로드한다. */
@@ -336,17 +363,23 @@ process_exec (void *f_name) {
  *
  * 이 함수는 problem 2-2에서 구현한다. 지금은 아무 일도 하지 않는다. */
 int
-process_wait (tid_t child_tid UNUSED) {
-	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
-	 * XXX:       to add infinite loop here before
-	 * XXX:       implementing the process_wait. */
-	/* XXX: Hint) process_wait(initd)에서 Pintos가 종료되므로, process_wait를
-	 * XXX:       구현하기 전에는 여기에 무한 루프를 넣는 것을 권장한다. */
+process_wait (tid_t child_tid) {
+	struct child_state *cs = child_lookup (child_tid);
 
-	for (int i = 10000; i >= 0; i--) {
-		thread_yield ();
-	}
-	return -1;
+	/* 자식이 없거나 이미 wait한 경우 */
+	if (cs == NULL || cs->waited)
+		return -1;
+
+	cs->waited = true;
+
+	if (!cs->exited)
+		sema_down (&cs->wait_sema);
+
+	int status = cs->status;
+	list_remove (&cs->elem);
+	child_state_release (cs); // parent 측 참조 해제
+
+	return status;
 }
 
 /* Exit the process. This function is called by thread_exit (). */
@@ -354,8 +387,24 @@ process_wait (tid_t child_tid UNUSED) {
 void
 process_exit (void) {
 	struct thread *curr = thread_current ();
-
 	printf ("%s: exit(%d)\n", curr->name, curr->exit_status);
+
+	/* 자식에게 exit status를 전달하고 대기 중인 부모를 깨운다. */
+	if (curr->child_state != NULL) {
+		curr->child_state->status = curr->exit_status;
+		curr->child_state->exited = true;
+		sema_up (&curr->child_state->wait_sema);
+		child_state_release (curr->child_state); // child 측 참조 해제
+		curr->child_state = NULL;
+	}
+
+	/* 내 자식 목록에 남은 child_state의 parent 측 참조를 해제한다. */
+	while (!list_empty (&curr->children)) {
+		struct list_elem *e = list_pop_front (&curr->children);
+		struct child_state *cs = list_entry (e, struct child_state, elem);
+		child_state_release (cs); // parent 측 참조 해제
+	}
+
 	process_cleanup ();
 }
 
@@ -363,6 +412,12 @@ process_exit (void) {
 /* 현재 프로세스의 리소스를 해제한다. */
 static void
 process_cleanup (void) {
+	process_cleanup_files ();
+	process_cleanup_user_memory ();
+}
+
+static void
+process_cleanup_files (void) {
 	struct thread *curr = thread_current ();
 
 	while (!list_empty (&curr->file_descriptors)) {
@@ -371,6 +426,11 @@ process_cleanup (void) {
 		file_close (fde->file);
 		free (fde);
 	}
+}
+
+static void
+process_cleanup_user_memory (void) {
+	struct thread *curr = thread_current ();
 
 #ifdef VM
 	supplemental_page_table_kill (&curr->spt);

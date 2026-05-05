@@ -670,6 +670,8 @@ init_thread (struct thread *t, const char *name, int priority) {
 	list_init (&t->donations);
 #ifdef USERPROG
 	list_init (&t->file_descriptors);
+	list_init (&t->children);
+	t->child_state = NULL;
 #endif
 }
 
@@ -1034,6 +1036,18 @@ init_child_state (struct child_state *child_state) {
 	child_state->waited = false;
 	child_state->exited = false;
 	sema_init (&child_state->wait_sema, 0);
+	child_state->refcnt = 2;
+	lock_init (&child_state->lock);
+}
+
+/* refcnt를 하나 줄이고, 0이 되면 free한다. */
+void
+child_state_release (struct child_state *cs) {
+	lock_acquire (&cs->lock);
+	int remaining = --cs->refcnt;
+	lock_release (&cs->lock);
+	if (remaining == 0)
+		free (cs);
 }
 
 /* fds에 새로운 file 추가.
@@ -1091,6 +1105,20 @@ fd_close (int fd) {
 }
 
 /* fd에 해당되는 descriptor 찾기, table에 없는 fd는 NULL 반환. */
+struct child_state *
+child_lookup (tid_t tid) {
+	struct thread *t = thread_current ();
+	struct list_elem *e = list_begin (&t->children);
+
+	while (e != list_end (&t->children)) {
+		struct child_state *cs = list_entry (e, struct child_state, elem);
+		if (cs->tid == tid)
+			return cs;
+		e = list_next (e);
+	}
+	return NULL;
+}
+
 static struct file_descriptor *
 fd_find (struct list *fds, int fd) {
 	struct list_elem *e = list_begin (fds);
