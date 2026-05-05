@@ -13,6 +13,8 @@
 #include "intrinsic.h"
 #ifdef USERPROG
 #include "userprog/process.h"
+#include "filesys/file.h"
+#include "threads/malloc.h"
 #endif
 
 // mlfqs 처리를 돕는 헬퍼 매크로. 외부 공개가 필요 없어서 내부 선언
@@ -109,6 +111,8 @@ static tid_t allocate_tid (void);
 static bool cmp_wakeup_ticks_less (const struct list_elem *a,
 		const struct list_elem *b, void *aux UNUSED);
 static void thread_mlfqs_recalc_priority (struct thread *t);
+static struct file_descriptor *fd_find (struct list *fds, int fd);
+static int fd_next_available (struct list *fds);
 
 /* Returns true if T appears to point to a valid thread. */
 /* T가 유효한 스레드를 가리키는 것처럼 보이면 true를 리턴한다. */
@@ -664,6 +668,9 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->magic = THREAD_MAGIC;
 	t->wait_on_lock = NULL;
 	list_init (&t->donations);
+#ifdef USERPROG
+	list_init (&t->file_descriptors);
+#endif
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
@@ -1010,3 +1017,112 @@ thread_mlfqs_recalc_shcd_queue (void) {
 		e = list_next(e);
 	}
 }
+
+#ifdef USERPROG
+bool
+cmp_fd_less (const struct list_elem *a, const struct list_elem *b,
+		void *aux UNUSED) {
+	const struct file_descriptor *fda = list_entry (a, struct file_descriptor, elem);
+	const struct file_descriptor *fdb = list_entry (b, struct file_descriptor, elem);
+	return fda->fd < fdb->fd;
+}
+
+/* fds에 새로운 file 추가.
+ * 처리 후 fd 반환, 만약 정상적인 처리가 불가능하다면 -1 반환. */
+int
+fd_alloc (struct file *file) {
+	struct thread *t = thread_current ();
+	struct list *fds = &t->file_descriptors;
+	int fd = fd_next_available (fds);
+
+	if (fd == -1)
+		return -1;
+
+	ASSERT (fd >= FD_MIN && fd <= FD_MAX);
+
+	struct file_descriptor *fde = malloc (sizeof *fde);
+	if (fde == NULL)
+		return -1;
+
+	fde->fd = fd;
+	fde->file = file;
+
+	list_insert_ordered (fds, &fde->elem, cmp_fd_less, NULL);
+
+	return fd;
+}
+
+/* fd에 해당되는 파일 찾기, table에 없는 fd는 NULL 반환. */
+struct file *
+fd_lookup (int fd) {
+	ASSERT (fd >= FD_MIN && fd <= FD_MAX);
+
+	struct thread *t = thread_current ();
+	struct file_descriptor *fde = fd_find (&t->file_descriptors, fd);
+
+	return fde == NULL ? NULL : fde->file;
+}
+
+/* fd에 해당되는 파일 닫기, 성공 여부 반환 */
+bool
+fd_close (int fd) {
+	ASSERT (fd >= FD_MIN && fd <= FD_MAX);
+
+	struct thread *t = thread_current ();
+	struct file_descriptor *fde = fd_find (&t->file_descriptors, fd);
+
+	if (fde == NULL)
+		return false;
+
+	list_remove (&fde->elem);
+	file_close (fde->file);
+	free (fde);
+
+	return true;
+}
+
+/* fd에 해당되는 descriptor 찾기, table에 없는 fd는 NULL 반환. */
+static struct file_descriptor *
+fd_find (struct list *fds, int fd) {
+	struct list_elem *e = list_begin (fds);
+
+	while (e != list_end (fds)) {
+		struct file_descriptor *fde = list_entry (e, struct file_descriptor, elem);
+
+		if (fde->fd == fd)
+			return fde;
+
+		if (fde->fd > fd)
+			break;
+
+		e = list_next (e);
+	}
+
+	return NULL;
+}
+
+/* 다음 가능한 fd 번호를 반환한다. 가능한 번호가 없다면 -1을 반환한다. */
+static int
+fd_next_available (struct list *fds) {
+	int candidate = FD_MIN;
+	struct list_elem *e = list_begin (fds);
+
+	while (e != list_end (fds)) {
+		struct file_descriptor *fde = list_entry (e, struct file_descriptor, elem);
+
+		if (candidate > FD_MAX)
+			return -1;
+
+		if (fde->fd > candidate)
+			break;
+
+		if (fde->fd == candidate)
+			candidate++;
+
+		e = list_next (e);
+	}
+
+	return candidate <= FD_MAX ? candidate : -1;
+}
+
+#endif
