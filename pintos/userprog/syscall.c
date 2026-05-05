@@ -14,6 +14,9 @@
 #include "filesys/filesys.h"
 #include "filesys/file.h"
 #include "threads/init.h"
+#include "userprog/process.h"
+
+typedef tid_t pid_t;
 
 struct syscall_entry {
 	/* system call number */
@@ -37,10 +40,10 @@ struct syscall_entry {
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 static void init_syscall_entry (struct intr_frame *, struct syscall_entry *);
-static void dispatch_syscall (struct syscall_entry *);
+static void dispatch_syscall (struct intr_frame *, struct syscall_entry *);
 static void handle_halt (void);
 static void handle_exit (struct syscall_entry *);
-static void handle_fork (struct syscall_entry *);
+static void handle_fork (struct intr_frame *, struct syscall_entry *);
 static void handle_exec (struct syscall_entry *);
 static void handle_wait (struct syscall_entry *);
 static void handle_create (struct syscall_entry *);
@@ -52,7 +55,7 @@ static void handle_write (struct syscall_entry *);
 static void handle_seek (struct syscall_entry *);
 static void handle_tell (struct syscall_entry *);
 static void handle_close (struct syscall_entry *);
-static void exit (int status);
+static void _exit (int status);
 static void *get_next_page_if_valid (void *);
 static bool is_valid_user_buffer (void *, size_t);
 static bool is_valid_user_string (char *);
@@ -104,7 +107,7 @@ syscall_handler (struct intr_frame *f) {
 	struct syscall_entry entry;
 
 	init_syscall_entry (f, &entry);
-	dispatch_syscall (&entry);
+	dispatch_syscall (f, &entry);
 
 	if (entry.should_return_value) {
 		f->R.rax = entry.return_value;
@@ -125,7 +128,7 @@ init_syscall_entry (struct intr_frame *f, struct syscall_entry *entry) {
 }
 
 static void
-dispatch_syscall (struct syscall_entry *entry) {
+dispatch_syscall (struct intr_frame *f, struct syscall_entry *entry) {
 	switch (entry->syscall_num) {
 		case SYS_HALT:
 			handle_halt ();
@@ -134,7 +137,7 @@ dispatch_syscall (struct syscall_entry *entry) {
 			handle_exit (entry);
 			break;
 		case SYS_FORK:
-			handle_fork (entry);
+			handle_fork (f, entry);
 			break;
 		case SYS_EXEC:
 			handle_exec (entry);
@@ -186,28 +189,54 @@ handle_halt (void) {
 static void
 handle_exit (struct syscall_entry *entry) {
 	int status = (int) entry->args[0];
-	exit (status);
+	_exit (status);
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// pid_t fork (const char *thread_name);
+// 인자 1개
+// 리턴값 pid_t - parent(현재스레드)에선 새로 생성된 pid, child는 0, 에러 시 TID_ERROR
 static void
-handle_fork (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_fork (struct intr_frame *f, struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	const char *thread_name = (const char *) entry->args[0];
+
+	if (!is_valid_user_string ((char *) thread_name)) {
+		_exit (-1);
+	}
+
+	// tid_t는 커널 스레드, pid_t는 사용자 프로세스 식별용,
+	// 이 구현에서는 1:1로 매핑하여 동일한 값을 가짐. (typedef 사용)
+	entry->should_return_value = process_fork (thread_name, f);
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// int exec (const char *cmd_line);
+// 인자 1개
+// 리턴값 int - 성공 시 프로그램이 전환되므로 리턴 없음. 실패 시 -1 반환
 static void
-handle_exec (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_exec (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	//TODO: 이거 보니까 argument passing 처리할 때, 이름이 cmd_line을 하는게 일관성 있는듯? 나중에 바꾸기
+	const char *cmd_line = (const char *) entry->args[0];
+
+	if (!is_valid_user_string (cmd_line)) {
+		_exit (-1);
+	}
+
+	entry->return_value = process_exec (cmd_line);
+	if (entry->return_value == -1) {
+		_exit (-1);
+	}
 }
 
-/* TODO: 구현하면 UNUSED, ASSERT 빼기 */
+// int wait (pid_t pid);
+// 인자 1개
+// 리턴값 int - 해당 child의 exit status 값, 예외 상황에선 -1
 static void
-handle_wait (struct syscall_entry *entry UNUSED) {
-	barrier ();
-	ASSERT (false); /* 현재 처리할 수 없는 syscall */
+handle_wait (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	pid_t pid = (pid_t) entry->args[0];
+
+	entry->return_value = process_wait (pid);
 }
 
 // bool create (const char *file, unsigned initial_size);
@@ -217,10 +246,10 @@ static void
 handle_create (struct syscall_entry *entry) {
 	entry->should_return_value = true;
 	const char *filename = (const char *) entry->args[0];
-	size_t initial_size = (size_t) entry->args[1];
+	size_t initial_size = entry->args[1];
 
-	if (!is_valid_user_string ((char *) filename)) {
-		exit (-1);
+	if (!is_valid_user_string (filename)) {
+		_exit (-1);
 	}
 
 	entry->return_value = filesys_create (filename, initial_size);
@@ -234,8 +263,8 @@ handle_remove (struct syscall_entry *entry) {
 	entry->should_return_value = true;
 	const char *filename = (const char *) entry->args[0];
 
-	if (!is_valid_user_string ((char *) filename)) {
-		exit (-1);
+	if (!is_valid_user_string (filename)) {
+		_exit (-1);
 	}
 
 	entry->return_value = filesys_remove (filename);
@@ -249,8 +278,8 @@ handle_open (struct syscall_entry *entry) {
 	entry->should_return_value = true;
 	const char *filename = (const char *) entry->args[0];
 
-	if (!is_valid_user_string ((char *) filename)) {
-		exit (-1);
+	if (!is_valid_user_string (filename)) {
+		_exit (-1);
 	}
 
 	// 파일 열기, 실패하면 -1을 리턴값으로 설정하고 종료
@@ -281,12 +310,12 @@ handle_filesize (struct syscall_entry *entry) {
 
 	// STD OUT/IN은 잘못된 요청임
 	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	struct file *file = fd_lookup (fd);
 	if (file == NULL) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	entry->return_value = file_length (file);
@@ -302,13 +331,13 @@ handle_read (struct syscall_entry *entry) {
 	uint8_t *buffer = (void *) entry->args[1];
 	size_t size = entry->args[2];
 
-	if (!is_valid_user_buffer ((void *) buffer, size)) {
-		exit (-1);
+	if (!is_valid_user_buffer (buffer, size)) {
+		_exit (-1);
 	}
 
 	// STDOUT_FILENO은 지원하지 않음, 종료
 	if (fd == STDOUT_FILENO) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	// STDIN_FILENO이면 키보드의 입력을 받기
@@ -326,7 +355,7 @@ handle_read (struct syscall_entry *entry) {
 
 	struct file *file = fd_lookup (fd);
 	if (file == NULL) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	// TODO: 이게 커서가 end면 0 반환해야하는데, 테스트 실패하면 추가 분기처리 필요
@@ -344,7 +373,7 @@ handle_write (struct syscall_entry *entry) {
 	size_t size = entry->args[2];
 
 	if (!is_valid_user_buffer ((void *) buffer, size)) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	// STDOUT_FILENO 이면 콘솔에 쓰기
@@ -356,12 +385,12 @@ handle_write (struct syscall_entry *entry) {
 
 	// STDIN_FILENO은 지원하지 않음, 종료
 	if (fd == STDIN_FILENO) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	struct file *file = fd_lookup (fd);
 	if (file == NULL) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	entry->return_value = file_write (file, buffer, size);
@@ -377,12 +406,12 @@ handle_seek (struct syscall_entry *entry) {
 
 	// STD OUT/IN은 잘못된 요청임
 	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	struct file *file = fd_lookup (fd);
 	if (file == NULL) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	file_seek (file, position);
@@ -398,12 +427,12 @@ handle_tell (struct syscall_entry *entry) {
 
 	// STD OUT/IN은 잘못된 요청임
 	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	struct file *file = fd_lookup (fd);
 	if (file == NULL) {
-		exit (-1);
+		_exit (-1);
 	}
 
 	entry->return_value = file_tell (file);
@@ -417,13 +446,13 @@ handle_close (struct syscall_entry *entry) {
 	int fd = (int) entry->args[0];
 
 	if (fd == STDIN_FILENO || fd == STDOUT_FILENO || !fd_close (fd)) {
-		exit (-1);
+		_exit (-1);
 	}
 }
 
 // 프로세스 종료 시 사용
 static void
-exit (int status) {
+_exit (int status) {
 	thread_current ()->exit_status = status;
 	thread_exit (); // 내부적으로 process_exit() 호출
 }

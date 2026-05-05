@@ -24,14 +24,23 @@
 #include "vm/vm.h"
 #endif
 
-/* C99 표준 상 128까지는 필요하다지만,
-   그러면 포인터 메모리로만 1kb되버리고, 실제로 그렇게까지 필요한 케이스도 적을꺼라
-   임의로 더 낮은 값으로 설정 */
-#define MAX_ARGC 32
+/* C99 표준 상 128 이상, pintos 요구사항은 없음 */
+#define MAX_ARGC 128
+
+struct fork_context {
+	struct thread *parent;
+	struct intr_frame parent_frame;
+	struct child_state *child_state;
+	struct semaphore child_ready; // 설정 완료 후에 자식이 읽도록 순서 제어
+	struct semaphore fork_done;   // 자식이 공유 자원을 읽는 동안 해제하지 않도록 순서 제어
+	bool success;
+};
 
 static void process_cleanup (void);
 static bool load (const char *cmd, struct intr_frame *if_);
 static void initd (void *f_name);
+static void init_fork_context (struct fork_context *, struct intr_frame *,
+		struct child_state *);
 static void __do_fork (void *);
 static int parse_arg (char *cmd, char **arg_buf);
 
@@ -55,9 +64,7 @@ process_init (void) {
 tid_t
 process_create_initd (const char *file_name) {
 	char *fn_copy;
-	char *prog_copy;
-	char *prog_name;
-	char *save_ptr;
+	char prog_name[16];
 	tid_t tid;
 
 	/* Make a copy of FILE_NAME.
@@ -69,21 +76,16 @@ process_create_initd (const char *file_name) {
 		return TID_ERROR;
 	strlcpy (fn_copy, file_name, PGSIZE);
 
-	// "progname foo bar baz" 형태로 들어오는 값 중 프로그램 이름(progname)만 추출
-	prog_copy = palloc_get_page (0);
-	if (prog_copy == NULL) {
-		palloc_free_page (fn_copy);
-		return TID_ERROR;
-	}
-	strlcpy (prog_copy, file_name, PGSIZE);
-	prog_name = strtok_r (prog_copy, " ", &save_ptr);
+	// thread_create()는 thread name을 최대 16글자까지만 사용하며,
+	// 전달된 이름은 내부 공간에 복사되어 저장된다.
+	// 따라서 file_name에서 첫 공백 전까지, 최대 prog_name 크기만큼만 복사하여 념겨준다.
+	size_t len = strcspn(file_name, " ");
+	strlcpy(prog_name, file_name, len + 1 < sizeof prog_name ? len + 1 : sizeof prog_name);
 
 	/* Create a new thread to execute FILE_NAME. */
 	/* FILE_NAME을 실행할 새 스레드를 만든다. */
 	tid = thread_create (prog_name, PRI_DEFAULT, initd, fn_copy);
 
-	// thread_create 에서 prog_name 문자열을 복사하여 사용하므로 free
-	palloc_free_page (prog_copy);
 	if (tid == TID_ERROR)
 		palloc_free_page (fn_copy);
 	return tid;
@@ -109,12 +111,64 @@ initd (void *f_name) {
 /* 현재 프로세스를 `name`이라는 이름으로 클론한다. 새 프로세스의 thread id를
  * 리턴하며, 스레드를 만들 수 없으면 TID_ERROR를 리턴한다. */
 tid_t
-process_fork (const char *name, struct intr_frame *if_ UNUSED) {
-	/* Clone current thread to new thread.*/
-	/* 현재 스레드를 새 스레드로 클론한다. */
-	return thread_create (name,
-			PRI_DEFAULT, __do_fork, thread_current ());
+process_fork (const char *name, struct intr_frame *if_) {
+	tid_t tid = TID_ERROR; // 성공하면 덮어씌워짐 아니면 실패 상태
+	struct thread *parent = thread_current();
+	struct fork_context fork_ctx;
+	struct child_state *child_state;
+
+	child_state = malloc(sizeof *child_state);
+	if (child_state == NULL) {
+		goto out;
+	}
+
+	init_child_state(child_state);
+	init_fork_context(&fork_ctx, if_, child_state);
+
+	list_push_back(&parent->children, &child_state->elem);
+
+	// 자식 스레드를 생성, 스케줄러에 따라 부모보다 먼저 실행될 수 있으므로 순서 제어가 필요
+	tid = thread_create(name, PRI_DEFAULT, __do_fork, &fork_ctx);
+	if (tid == TID_ERROR) {
+		goto out_del_child;
+	}
+
+	child_state->tid = tid;
+
+	sema_up(&fork_ctx.child_ready); // parent가 child에게 처리 가능하다고 알림
+	sema_down(&fork_ctx.fork_done); // child가 parent에게 처리가 완료되었음을 알림
+
+	if (!fork_ctx.success) {
+		goto out_del_child;
+	}
+
+	// fork가 성공했으면 child_state는 child process가 소유한 상태이므로 free하지 않음.
+	return tid;
+
+out_del_child:
+	list_remove(&child_state->elem);
+	free(child_state);
+
+out:
+	return tid;
 }
+
+static void
+init_fork_context (struct fork_context *ctx, struct intr_frame *parent_if,
+		struct child_state *child_state) {
+	ASSERT (ctx != NULL);
+	ASSERT (parent_if != NULL);
+	ASSERT (child_state != NULL);
+
+	ctx->parent = thread_current ();
+	ctx->parent_frame = *parent_if;
+	ctx->child_state = child_state;
+	ctx->success = false;
+
+	sema_init (&ctx->child_ready, 0); /* parent가 up -> child가 처리 시작 */
+	sema_init (&ctx->fork_done, 0);   /* child가 up -> parent에서 후처리 */
+}
+
 
 #ifndef VM
 /* Duplicate the parent's address space by passing this function to the
@@ -168,21 +222,23 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
  *       따라서 process_fork의 두 번째 인자를 이 함수에 전달해야 한다. */
 static void
 __do_fork (void *aux) {
+	struct fork_context *fork_ctx = aux;
 	struct intr_frame if_;
-	struct thread *parent = (struct thread *) aux;
+	struct thread *parent;
 	struct thread *current = thread_current ();
-	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
-	/* TODO: 어떤 방식으로든 parent_if를 전달한다. 즉, process_fork()의 if_이다. */
-	struct intr_frame *parent_if;
-	bool succ = true;
 
-	/* 1. Read the cpu context to local stack. */
-	/* 1. CPU 컨텍스트를 로컬 스택으로 읽어 온다. */
-	memcpy (&if_, parent_if, sizeof (struct intr_frame));
+	// parent가 child를 깨우면 진행
+	sema_down (&fork_ctx->child_ready);
 
-	/* 2. Duplicate PT */
+	parent = fork_ctx->parent;
+	current->child_state = fork_ctx->child_state;
+
+	/* 1. 부모의 컨텍스트를 로컬 스택으로 읽어 온다. */
+	memcpy (&if_, &fork_ctx->parent_frame, sizeof if_);
+	if_.R.rax = 0;
+
 	/* 2. PT를 복제한다. */
-	current->pml4 = pml4_create();
+	current->pml4 = pml4_create ();
 	if (current->pml4 == NULL)
 		goto error;
 
@@ -196,23 +252,31 @@ __do_fork (void *aux) {
 		goto error;
 #endif
 
-	/* TODO: Your code goes here.
-	 * TODO: Hint) To duplicate the file object, use `file_duplicate`
-	 * TODO:       in include/filesys/file.h. Note that parent should not return
-	 * TODO:       from the fork() until this function successfully duplicates
-	 * TODO:       the resources of parent.*/
-	/* TODO: 여기에 코드를 작성한다.
-	 * TODO: Hint) 파일 오브젝트를 복제하려면 include/filesys/file.h의
-	 * TODO:       `file_duplicate`를 사용한다. 이 함수가 부모의 리소스를
-	 * TODO:       성공적으로 복제하기 전까지 부모는 fork()에서 리턴하면 안 된다. */
+	/* 부모의 파일 디스크립터를 복제 */
+	struct list_elem *e = list_begin (&parent->file_descriptors);
+	while (e != list_end (&parent->file_descriptors)) {
+		struct file_descriptor *parent_fde =
+			list_entry (e, struct file_descriptor, elem);
+		struct file *dup_file = file_duplicate (parent_fde->file);
+		if (dup_file == NULL)
+			goto error;
+		if (fd_alloc (dup_file) == -1) {
+			file_close (dup_file);
+			goto error;
+		}
+		e = list_next (e);
+	}
 
 	process_init ();
 
-	/* Finally, switch to the newly created process. */
+	fork_ctx->success = true;
+	sema_up (&fork_ctx->fork_done); // child가 parent를 꺠움
+
 	/* 마지막으로 새로 생성한 프로세스로 전환한다. */
-	if (succ)
-		do_iret (&if_);
+	do_iret (&if_);
 error:
+	fork_ctx->success = false;
+	sema_up (&fork_ctx->fork_done);
 	thread_exit ();
 }
 
@@ -435,7 +499,7 @@ load (const char *cmd, struct intr_frame *if_) {
 	bool success = false;
 	int i;
 
-	char *arg_buf[128];
+	char *arg_buf[MAX_ARGC];
 	int argc = parse_arg (cmd, arg_buf);
 	/* 파싱 실패 시 전체 작업 실패. */
 	if (argc == -1)
@@ -535,6 +599,7 @@ load (const char *cmd, struct intr_frame *if_) {
 	if (!setup_stack (if_))
 		goto done;
 
+	// TODO: 이거 좀 별로인듯? 외부 함수로 적절하게 빼던가 하기.
 	/* Start address. */
 	/* 시작 주소. */
 	if_->rip = ehdr.e_entry;
@@ -881,7 +946,7 @@ parse_arg (char *cmd, char **arg_buf) {
 	/* 처음에는 처리할 문자열를 넘겨줘야 함. strtok_r() 참고. */
 	for (token = strtok_r (cmd, delim, &save_ptr); token != NULL;
 			token = strtok_r (NULL, delim, &save_ptr)) {
-		if (argc >= 128) {
+		if (argc >= MAX_ARGC) {
 			/* 사이즈 제한 넘어가면 실패. */
 			return -1;
 		}
