@@ -77,22 +77,34 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/userprog" \
 ## 결과 확인
 
 ```bash
-for t in create-null create-bad-ptr create-bound open-null open-bad-ptr open-boundary read-bad-ptr read-boundary write-bad-ptr write-boundary exec-bad-ptr exec-boundary fork-boundary bad-read bad-write bad-read2 bad-write2 bad-jump bad-jump2; do
-  base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-null.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-bad-ptr.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-bound.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-null.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-bad-ptr.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-boundary.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/read-bad-ptr.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/read-boundary.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/write-bad-ptr.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/write-boundary.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-bad-ptr.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-boundary.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/fork-boundary.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/bad-read.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/bad-write.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/bad-read2.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/bad-write2.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/bad-jump.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/bad-jump2.result"
 
-cat "$PINTOS_ROOT/userprog/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/userprog/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=bad-read
-base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/bad-read.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/bad-read.errors"
 ```
 
 ## 실패 시 확인할 포인트

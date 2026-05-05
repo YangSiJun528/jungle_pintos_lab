@@ -44,24 +44,23 @@ make -C "$PINTOS_ROOT/filesys" \
 ## 결과 확인
 
 ```bash
-for t in symlink-file symlink-dir symlink-link syn-rw; do
-  base="$PINTOS_ROOT/filesys/build/tests/filesys/extended/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-  printf '== %s.errors ==\n' "$t"
-  cat "$base.errors"
-done
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-file.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-file.errors"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-dir.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-dir.errors"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-link.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-link.errors"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/syn-rw.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/syn-rw.errors"
 
-cat "$PINTOS_ROOT/filesys/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/filesys/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=symlink-link
-base="$PINTOS_ROOT/filesys/build/tests/filesys/extended/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-link.output"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-link.errors"
 ```
 
 ## 실패 시 확인할 포인트

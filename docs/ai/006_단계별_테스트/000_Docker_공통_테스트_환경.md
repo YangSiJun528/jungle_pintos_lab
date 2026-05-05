@@ -44,7 +44,7 @@ make -C "$PINTOS_ROOT/filesys" build/tests/filesys/base/sm-create.result
 cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-none.result"
 cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-none.output"
 cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-none.errors"
-cat "$PINTOS_ROOT/userprog/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/userprog/build/results"
 ```
 
 ## 단계별 문서 사용 순서

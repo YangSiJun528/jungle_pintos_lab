@@ -55,22 +55,22 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/vm" \
 ## 결과 확인
 
 ```bash
-for t in page-linear page-parallel page-merge-seq page-merge-par page-merge-stk page-merge-mm page-shuffle; do
-  base="$PINTOS_ROOT/vm/build/tests/vm/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-linear.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-parallel.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-merge-seq.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-merge-par.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-merge-stk.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-merge-mm.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-shuffle.result"
 
-cat "$PINTOS_ROOT/vm/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/vm/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=page-merge-par
-base="$PINTOS_ROOT/vm/build/tests/vm/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-merge-par.output"
+cat "$PINTOS_ROOT/vm/build/tests/vm/page-merge-par.errors"
 ```
 
 ## 실패 시 확인할 포인트

@@ -78,22 +78,34 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/userprog" \
 ## 결과 확인
 
 ```bash
-for t in halt exit create-normal create-empty create-null create-bad-ptr create-long create-exists create-bound open-normal open-missing open-boundary open-empty open-null open-bad-ptr open-twice read-normal write-normal close-normal; do
-  base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/halt.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exit.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-normal.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-empty.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-null.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-bad-ptr.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-long.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-exists.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/create-bound.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-normal.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-missing.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-boundary.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-empty.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-null.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-bad-ptr.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-twice.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/read-normal.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/write-normal.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/close-normal.result"
 
-cat "$PINTOS_ROOT/userprog/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/userprog/build/results"
 ```
 
 실패한 테스트만 자세히 본다.
 
 ```bash
-t=open-normal
-base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-normal.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-normal.errors"
 ```
 
 ## 실패 시 확인할 포인트

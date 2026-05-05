@@ -71,24 +71,29 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/userprog" \
 ## 결과 확인
 
 ```bash
-for t in open-twice close-twice close-bad-fd read-zero read-stdout read-bad-fd write-zero write-stdin write-bad-fd multi-child-fd rox-simple rox-child rox-multichild; do
-  base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/open-twice.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/close-twice.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/close-bad-fd.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/read-zero.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/read-stdout.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/read-bad-fd.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/write-zero.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/write-stdin.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/write-bad-fd.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/multi-child-fd.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/rox-simple.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/rox-child.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/rox-multichild.result"
 
 cat "$PINTOS_ROOT/userprog/build/tests/userprog/no-vm/multi-oom.result"
-cat "$PINTOS_ROOT/userprog/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/userprog/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=multi-child-fd
-base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-cat "$base.output"
-cat "$base.errors"
-
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/multi-child-fd.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/multi-child-fd.errors"
 cat "$PINTOS_ROOT/userprog/build/tests/userprog/no-vm/multi-oom.output"
 cat "$PINTOS_ROOT/userprog/build/tests/userprog/no-vm/multi-oom.errors"
 ```

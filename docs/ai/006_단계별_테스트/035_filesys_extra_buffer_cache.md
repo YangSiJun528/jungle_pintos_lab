@@ -55,12 +55,10 @@ make -C "$PINTOS_ROOT/filesys" \
 ## 결과 확인
 
 ```bash
-base="$PINTOS_ROOT/filesys/build/tests/filesys/buffer-cache/bc-easy"
-cat "$base.result"
-cat "$base.output"
-cat "$base.errors"
-
-cat "$PINTOS_ROOT/filesys/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/buffer-cache/bc-easy.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/buffer-cache/bc-easy.output"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/buffer-cache/bc-easy.errors"
+cat "$PINTOS_ROOT/filesys/build/results"
 ```
 
 ## 실패 시 확인할 포인트

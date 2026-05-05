@@ -69,22 +69,41 @@ make -C "$PINTOS_ROOT/filesys" \
 ## 결과 확인
 
 ```bash
-for t in dir-empty-name dir-mk-tree dir-mkdir dir-open dir-over-file dir-rm-cwd dir-rm-parent dir-rm-root dir-rm-tree dir-rmdir dir-under-file dir-vine grow-create grow-dir-lg grow-file-size grow-root-lg grow-root-sm grow-seq-lg grow-seq-sm grow-sparse grow-tell grow-two-files syn-rw symlink-file symlink-dir symlink-link; do
-  base="$PINTOS_ROOT/filesys/build/tests/filesys/extended/$t-persistence"
-  printf '\n== %s-persistence.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-empty-name-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-mk-tree-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-mkdir-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-open-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-over-file-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rm-cwd-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rm-parent-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rm-root-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rm-tree-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rmdir-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-under-file-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-vine-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-create-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-dir-lg-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-file-size-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-root-lg-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-root-sm-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-seq-lg-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-seq-sm-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-sparse-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-tell-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-two-files-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/syn-rw-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-file-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-dir-persistence.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/symlink-link-persistence.result"
 
-cat "$PINTOS_ROOT/filesys/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/filesys/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=grow-sparse-persistence
-base="$PINTOS_ROOT/filesys/build/tests/filesys/extended/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-sparse-persistence.output"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-sparse-persistence.errors"
 ```
 
 ## 실패 시 확인할 포인트
