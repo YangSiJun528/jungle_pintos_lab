@@ -50,12 +50,10 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/vm" \
 ## 결과 확인
 
 ```bash
-base="$PINTOS_ROOT/vm/build/tests/vm/cow/cow-simple"
-cat "$base.result"
-cat "$base.output"
-cat "$base.errors"
-
-cat "$PINTOS_ROOT/vm/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/vm/build/tests/vm/cow/cow-simple.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/cow/cow-simple.output"
+cat "$PINTOS_ROOT/vm/build/tests/vm/cow/cow-simple.errors"
+cat "$PINTOS_ROOT/vm/build/results"
 ```
 
 ## 실패 시 확인할 포인트

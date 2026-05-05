@@ -49,24 +49,23 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/vm" \
 ## 결과 확인
 
 ```bash
-for t in swap-file swap-anon swap-iter swap-fork; do
-  base="$PINTOS_ROOT/vm/build/tests/vm/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-  printf '== %s.errors ==\n' "$t"
-  cat "$base.errors"
-done
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-file.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-file.errors"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-anon.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-anon.errors"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-iter.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-iter.errors"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-fork.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-fork.errors"
 
-cat "$PINTOS_ROOT/vm/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/vm/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=swap-anon
-base="$PINTOS_ROOT/vm/build/tests/vm/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-anon.output"
+cat "$PINTOS_ROOT/vm/build/tests/vm/swap-anon.errors"
 ```
 
 ## 실패 시 확인할 포인트

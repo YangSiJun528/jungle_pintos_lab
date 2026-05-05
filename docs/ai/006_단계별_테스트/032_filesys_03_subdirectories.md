@@ -54,22 +54,27 @@ make -C "$PINTOS_ROOT/filesys" \
 ## 결과 확인
 
 ```bash
-for t in dir-empty-name dir-mk-tree dir-mkdir dir-open dir-over-file dir-rm-cwd dir-rm-parent dir-rm-root dir-rm-tree dir-rmdir dir-under-file dir-vine; do
-  base="$PINTOS_ROOT/filesys/build/tests/filesys/extended/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-empty-name.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-mk-tree.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-mkdir.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-open.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-over-file.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rm-cwd.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rm-parent.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rm-root.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rm-tree.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-rmdir.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-under-file.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-vine.result"
 
-cat "$PINTOS_ROOT/filesys/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/filesys/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=dir-mk-tree
-base="$PINTOS_ROOT/filesys/build/tests/filesys/extended/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-mk-tree.output"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/dir-mk-tree.errors"
 ```
 
 ## 실패 시 확인할 포인트

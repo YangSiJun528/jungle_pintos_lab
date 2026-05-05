@@ -57,17 +57,14 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/userprog" \
 ## 결과 확인
 
 ```bash
-for t in dup2-simple dup2-complex; do
-  base="$PINTOS_ROOT/userprog/build/tests/userprog/dup2/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-  printf '== %s.output ==\n' "$t"
-  cat "$base.output"
-  printf '== %s.errors ==\n' "$t"
-  cat "$base.errors"
-done
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/dup2/dup2-simple.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/dup2/dup2-simple.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/dup2/dup2-simple.errors"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/dup2/dup2-complex.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/dup2/dup2-complex.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/dup2/dup2-complex.errors"
 
-cat "$PINTOS_ROOT/userprog/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/userprog/build/results"
 ```
 
 ## 실패 시 확인할 포인트

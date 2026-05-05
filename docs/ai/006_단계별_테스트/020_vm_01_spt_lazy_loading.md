@@ -55,22 +55,21 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/vm" \
 ## 결과 확인
 
 ```bash
-for t in lazy-file lazy-anon pt-bad-addr pt-bad-read pt-write-code pt-write-code2; do
-  base="$PINTOS_ROOT/vm/build/tests/vm/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/vm/build/tests/vm/lazy-file.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/lazy-anon.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/pt-bad-addr.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/pt-bad-read.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/pt-write-code.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/pt-write-code2.result"
 
-cat "$PINTOS_ROOT/vm/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/vm/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=lazy-file
-base="$PINTOS_ROOT/vm/build/tests/vm/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/vm/build/tests/vm/lazy-file.output"
+cat "$PINTOS_ROOT/vm/build/tests/vm/lazy-file.errors"
 ```
 
 ## 실패 시 확인할 포인트

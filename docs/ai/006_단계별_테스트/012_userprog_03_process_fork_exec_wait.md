@@ -75,22 +75,32 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/userprog" \
 ## 결과 확인
 
 ```bash
-for t in fork-once fork-multiple fork-recursive fork-read fork-close fork-boundary exec-once exec-arg exec-boundary exec-missing exec-bad-ptr exec-read wait-simple wait-twice wait-killed wait-bad-pid multi-recurse; do
-  base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/fork-once.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/fork-multiple.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/fork-recursive.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/fork-read.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/fork-close.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/fork-boundary.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-once.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-arg.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-boundary.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-missing.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-bad-ptr.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-read.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/wait-simple.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/wait-twice.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/wait-killed.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/wait-bad-pid.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/multi-recurse.result"
 
-cat "$PINTOS_ROOT/userprog/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/userprog/build/results"
 ```
 
 실패한 테스트의 실행 로그를 본다.
 
 ```bash
-t=exec-once
-base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-once.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/exec-once.errors"
 ```
 
 ## 실패 시 확인할 포인트

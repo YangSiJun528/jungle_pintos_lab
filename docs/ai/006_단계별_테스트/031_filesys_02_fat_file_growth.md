@@ -52,22 +52,25 @@ make -C "$PINTOS_ROOT/filesys" \
 ## 결과 확인
 
 ```bash
-for t in grow-create grow-file-size grow-root-sm grow-root-lg grow-dir-lg grow-seq-sm grow-seq-lg grow-sparse grow-tell grow-two-files; do
-  base="$PINTOS_ROOT/filesys/build/tests/filesys/extended/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-create.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-file-size.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-root-sm.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-root-lg.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-dir-lg.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-seq-sm.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-seq-lg.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-sparse.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-tell.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-two-files.result"
 
-cat "$PINTOS_ROOT/filesys/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/filesys/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=grow-sparse
-base="$PINTOS_ROOT/filesys/build/tests/filesys/extended/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-sparse.output"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/extended/grow-sparse.errors"
 ```
 
 ## 실패 시 확인할 포인트

@@ -92,22 +92,40 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/vm" \
 ## 결과 확인
 
 ```bash
-for t in mmap-read mmap-close mmap-unmap mmap-overlap mmap-twice mmap-write mmap-ro mmap-exit mmap-shuffle mmap-bad-fd mmap-clean mmap-inherit mmap-misalign mmap-null mmap-over-code mmap-over-data mmap-over-stk mmap-remove mmap-zero mmap-bad-fd2 mmap-bad-fd3 mmap-zero-len mmap-off mmap-bad-off mmap-kernel; do
-  base="$PINTOS_ROOT/vm/build/tests/vm/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-read.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-close.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-unmap.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-overlap.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-twice.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-write.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-ro.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-exit.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-shuffle.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-bad-fd.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-clean.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-inherit.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-misalign.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-null.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-over-code.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-over-data.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-over-stk.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-remove.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-zero.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-bad-fd2.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-bad-fd3.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-zero-len.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-off.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-bad-off.result"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-kernel.result"
 
-cat "$PINTOS_ROOT/vm/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/vm/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=mmap-write
-base="$PINTOS_ROOT/vm/build/tests/vm/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-write.output"
+cat "$PINTOS_ROOT/vm/build/tests/vm/mmap-write.errors"
 ```
 
 ## 실패 시 확인할 포인트

@@ -69,22 +69,28 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/filesys" \
 ## 결과 확인
 
 ```bash
-for t in lg-create lg-full lg-random lg-seq-block lg-seq-random sm-create sm-full sm-random sm-seq-block sm-seq-random syn-read syn-remove syn-write; do
-  base="$PINTOS_ROOT/filesys/build/tests/filesys/base/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-done
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/lg-create.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/lg-full.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/lg-random.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/lg-seq-block.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/lg-seq-random.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/sm-create.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/sm-full.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/sm-random.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/sm-seq-block.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/sm-seq-random.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/syn-read.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/syn-remove.result"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/syn-write.result"
 
-cat "$PINTOS_ROOT/filesys/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/filesys/build/results"
 ```
 
 실패 로그:
 
 ```bash
-t=sm-create
-base="$PINTOS_ROOT/filesys/build/tests/filesys/base/$t"
-cat "$base.output"
-cat "$base.errors"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/sm-create.output"
+cat "$PINTOS_ROOT/filesys/build/tests/filesys/base/sm-create.errors"
 ```
 
 ## 실패 시 확인할 포인트

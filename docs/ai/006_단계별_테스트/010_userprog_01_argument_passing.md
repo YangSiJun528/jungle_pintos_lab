@@ -51,17 +51,23 @@ make -j"$(nproc)" -C "$PINTOS_ROOT/userprog" \
 ## 결과 확인
 
 ```bash
-for t in args-none args-single args-multiple args-many args-dbl-space; do
-  base="$PINTOS_ROOT/userprog/build/tests/userprog/$t"
-  printf '\n== %s.result ==\n' "$t"
-  cat "$base.result"
-  printf '== %s.output ==\n' "$t"
-  cat "$base.output"
-  printf '== %s.errors ==\n' "$t"
-  cat "$base.errors"
-done
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-none.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-none.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-none.errors"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-single.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-single.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-single.errors"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-multiple.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-multiple.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-multiple.errors"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-many.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-many.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-many.errors"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-dbl-space.result"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-dbl-space.output"
+cat "$PINTOS_ROOT/userprog/build/tests/userprog/args-dbl-space.errors"
 
-cat "$PINTOS_ROOT/userprog/build/results" 2>/dev/null || true
+cat "$PINTOS_ROOT/userprog/build/results"
 ```
 
 ## 실패 시 확인할 포인트
