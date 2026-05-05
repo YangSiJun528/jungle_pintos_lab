@@ -6,7 +6,9 @@
 #include "threads/loader.h"
 #include "userprog/gdt.h"
 #include "threads/flags.h"
+#include "threads/palloc.h"
 #include "intrinsic.h"
+#include "string.h"
 #include "devices/input.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
@@ -206,7 +208,7 @@ handle_fork (struct intr_frame *f, struct syscall_entry *entry) {
 
 	// tid_t는 커널 스레드, pid_t는 사용자 프로세스 식별용,
 	// 이 구현에서는 1:1로 매핑하여 동일한 값을 가짐. (typedef 사용)
-	entry->should_return_value = process_fork (thread_name, f);
+	entry->return_value = process_fork (thread_name, f);
 }
 
 // int exec (const char *cmd_line);
@@ -222,7 +224,16 @@ handle_exec (struct syscall_entry *entry) {
 		_exit (-1);
 	}
 
-	entry->return_value = process_exec (cmd_line);
+	char *cmd_copy = palloc_get_page (0);
+	if (cmd_copy == NULL) {
+		entry->return_value = -1;
+		return;
+	}
+	strlcpy (cmd_copy, cmd_line, PGSIZE);
+
+	// exec 시 cleanup으로 사용자 공간의 메모리가 제거되므로
+	// 커널 메모리 공간에서 args를 복사해서 넘김
+	entry->return_value = process_exec (cmd_copy);
 	if (entry->return_value == -1) {
 		_exit (-1);
 	}

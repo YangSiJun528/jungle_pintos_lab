@@ -49,6 +49,8 @@ struct child_state {
 	bool exited;
 	struct semaphore wait_sema; // 부모가 내가 종료되기를 대기하는 경우 사용
 	struct list_elem elem;
+	int refcnt;       // 2(부모, 자식)로 시작, 0이 되면 free
+	struct lock lock; // refcnt 보호용
 };
 
 
@@ -243,6 +245,8 @@ void thread_mlfqs_recalc_shcd_queue (void);
 #define FD_MAX 128 /* open() 성공 fd 범위: [FD_MIN, FD_MAX] */
 
 void init_child_state (struct child_state *);
+void child_state_release (struct child_state *);
+struct child_state *child_lookup (tid_t tid);
 
 int fd_alloc (struct file *);
 struct file *fd_lookup (int);
