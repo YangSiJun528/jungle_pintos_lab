@@ -1037,18 +1037,21 @@ init_child_state (struct child_state *child_state) {
 	child_state->waited = false;
 	child_state->exited = false;
 	sema_init (&child_state->wait_sema, 0);
-	child_state->refcnt = 2;
+	child_state->refcnt = 2; /* 부모, 자식 2개 */
 	lock_init (&child_state->lock);
 }
 
 /* refcnt를 하나 줄이고, 0이 되면 free한다. */
 void
-child_state_release (struct child_state *cs) {
-	lock_acquire (&cs->lock);
-	int remaining = --cs->refcnt;
-	lock_release (&cs->lock);
-	if (remaining == 0)
-		free (cs);
+child_state_release (struct child_state *child_state) {
+	ASSERT (child_state->refcnt > 0);
+	lock_acquire (&child_state->lock);
+	child_state->refcnt--;
+	int remaining = child_state->refcnt;
+	lock_release (&child_state->lock);
+	if (remaining == 0) {
+		free (child_state);
+	}
 }
 
 /* fds에 새로운 file 추가.

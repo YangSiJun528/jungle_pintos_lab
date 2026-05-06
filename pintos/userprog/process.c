@@ -39,6 +39,9 @@ struct fork_context {
 /* initd 스레드에게 child_state를 전달하기 위한 전역변수.
    process_create_initd()에서 thread_create() 호출 전에 쓰고,
    initd()에서 읽으므로 레이스 없음. */
+// initd는 리눅스의 systemd와 같은 포지션임. 그래서 부모가 없다고 봐도 되는데,
+// child_state가 필요한 이유는 process_wait()에서 child_state를 필요로 하기 때문.
+// 전역으로 관리하는게 그리 좋아보이진 않는데, 스택으로 넘겨주려면 불필요하게 코드가 많아서져서 뺌.
 static struct child_state *initd_child_state;
 
 static void process_cleanup (void);
@@ -120,7 +123,7 @@ process_create_initd (const char *file_name) {
 static void
 initd (void *f_name) {
 	thread_current ()->child_state = initd_child_state;
-	initd_child_state = NULL;
+	initd_child_state = NULL; // 설정 후 전역변수로 접근할 일 없으니까 제거
 
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
@@ -407,7 +410,8 @@ void
 process_exit (void) {
 	struct thread *curr = thread_current ();
 
-	/* child_state가 NULL이면 fork 중 실패한 미완성 프로세스이므로 출력하지 않는다. */
+	/* 에러 상황 발생 시 child_state를 NULL인 상태에서 호출될 수 있는데,
+	   정상적인 요청이 아니므로 출력하지 않는다. */
 	if (curr->child_state != NULL) {
 		printf ("%s: exit(%d)\n", curr->name, curr->exit_status);
 		curr->child_state->status = curr->exit_status;
@@ -684,7 +688,6 @@ load (const char *cmd, struct intr_frame *if_) {
 	if (!setup_stack (if_))
 		goto done;
 
-	// TODO: 이거 좀 별로인듯? 외부 함수로 적절하게 빼던가 하기.
 	/* Start address. */
 	/* 시작 주소. */
 	if_->rip = ehdr.e_entry;
