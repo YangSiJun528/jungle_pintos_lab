@@ -13,9 +13,51 @@
 /* 파일 시스템을 담고 있는 디스크. */
 struct disk *filesys_disk;
 
+/* 한 번에 하나의 프로세스만 파일시스템 코드를 실행하도록 직렬화하는 락.
+ * filesys 레이어 내부에서만 정의·사용한다. 외부 모듈은 직접 접근하지 않는다. */
 struct lock filesys_lock;
 
 static void do_format (void);
+
+/* ── internal _unlocked helpers ──────────────────────────────
+ * 아래 함수들은 filesys_lock이 이미 잡혀 있다고 가정한다.
+ * ─────────────────────────────────────────────────────────── */
+
+static bool
+filesys_create_unlocked (const char *name, off_t initial_size) {
+	disk_sector_t inode_sector = 0;
+	struct dir *dir = dir_open_root ();
+	bool success = (dir != NULL
+			&& free_map_allocate (1, &inode_sector)
+			&& inode_create (inode_sector, initial_size)
+			&& dir_add (dir, name, inode_sector));
+	if (!success && inode_sector != 0)
+		free_map_release (inode_sector, 1);
+	dir_close (dir);
+	return success;
+}
+
+static struct file *
+filesys_open_unlocked (const char *name) {
+	struct dir *dir = dir_open_root ();
+	struct inode *inode = NULL;
+	if (dir != NULL)
+		dir_lookup (dir, name, &inode);
+	dir_close (dir);
+	return file_open (inode);
+}
+
+static bool
+filesys_remove_unlocked (const char *name) {
+	struct dir *dir = dir_open_root ();
+	bool success = dir != NULL && dir_remove (dir, name);
+	dir_close (dir);
+	return success;
+}
+
+/* ── public API ──────────────────────────────────────────────
+ * 아래 함수들은 filesys_lock을 잡고 _unlocked 헬퍼를 호출한다.
+ * ─────────────────────────────────────────────────────────── */
 
 /* Initializes the file system module.
  * If FORMAT is true, reformats the file system. */
@@ -72,17 +114,10 @@ filesys_done (void) {
  * NAME이라는 파일이 이미 있거나 내부 메모리 할당이 실패하면 실패한다. */
 bool
 filesys_create (const char *name, off_t initial_size) {
-	disk_sector_t inode_sector = 0;
-	struct dir *dir = dir_open_root ();
-	bool success = (dir != NULL
-			&& free_map_allocate (1, &inode_sector)
-			&& inode_create (inode_sector, initial_size)
-			&& dir_add (dir, name, inode_sector));
-	if (!success && inode_sector != 0)
-		free_map_release (inode_sector, 1);
-	dir_close (dir);
-
-	return success;
+	lock_acquire (&filesys_lock);
+	bool result = filesys_create_unlocked (name, initial_size);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Opens the file with the given NAME.
@@ -95,14 +130,10 @@ filesys_create (const char *name, off_t initial_size) {
  * NAME이라는 파일이 없거나 내부 메모리 할당이 실패하면 실패한다. */
 struct file *
 filesys_open (const char *name) {
-	struct dir *dir = dir_open_root ();
-	struct inode *inode = NULL;
-
-	if (dir != NULL)
-		dir_lookup (dir, name, &inode);
-	dir_close (dir);
-
-	return file_open (inode);
+	lock_acquire (&filesys_lock);
+	struct file *result = filesys_open_unlocked (name);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Deletes the file named NAME.
@@ -114,11 +145,10 @@ filesys_open (const char *name) {
  * NAME이라는 파일이 없거나 내부 메모리 할당이 실패하면 실패한다. */
 bool
 filesys_remove (const char *name) {
-	struct dir *dir = dir_open_root ();
-	bool success = dir != NULL && dir_remove (dir, name);
-	dir_close (dir);
-
-	return success;
+	lock_acquire (&filesys_lock);
+	bool result = filesys_remove_unlocked (name);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Formats the file system. */

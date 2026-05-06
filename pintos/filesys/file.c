@@ -2,6 +2,10 @@
 #include <debug.h>
 #include "filesys/inode.h"
 #include "threads/malloc.h"
+#include "threads/synch.h"
+
+/* filesys_lock은 filesys.c에서 정의된다. */
+extern struct lock filesys_lock;
 
 /* An open file. */
 /* 열린 파일. */
@@ -13,6 +17,101 @@ struct file {
 	bool deny_write;            /* Has file_deny_write() been called? */
 	/* file_deny_write()가 호출되었는지 여부. */
 };
+
+/* ── internal _unlocked helpers ──────────────────────────────
+ * 아래 함수들은 filesys_lock이 이미 잡혀 있다고 가정한다.
+ * file.c 내부 또는 filesys 내부 레이어에서만 호출한다.
+ * ─────────────────────────────────────────────────────────── */
+
+static void
+file_allow_write_unlocked (struct file *file) {
+	ASSERT (file != NULL);
+	if (file->deny_write) {
+		file->deny_write = false;
+		inode_allow_write (file->inode);
+	}
+}
+
+static void
+file_deny_write_unlocked (struct file *file) {
+	ASSERT (file != NULL);
+	if (!file->deny_write) {
+		file->deny_write = true;
+		inode_deny_write (file->inode);
+	}
+}
+
+static void
+file_close_unlocked (struct file *file) {
+	if (file != NULL) {
+		file_allow_write_unlocked (file);
+		inode_close (file->inode);
+		free (file);
+	}
+}
+
+static off_t
+file_read_unlocked (struct file *file, void *buffer, off_t size) {
+	off_t bytes_read = inode_read_at (file->inode, buffer, size, file->pos);
+	file->pos += bytes_read;
+	return bytes_read;
+}
+
+/* non-static: bitmap.c에서 _unlocked 경로로 사용한다. */
+off_t
+file_read_at_unlocked (struct file *file, void *buffer, off_t size,
+		off_t file_ofs) {
+	return inode_read_at (file->inode, buffer, size, file_ofs);
+}
+
+static off_t
+file_write_unlocked (struct file *file, const void *buffer, off_t size) {
+	off_t bytes_written = inode_write_at (file->inode, buffer, size, file->pos);
+	file->pos += bytes_written;
+	return bytes_written;
+}
+
+/* non-static: bitmap.c에서 _unlocked 경로로 사용한다. */
+off_t
+file_write_at_unlocked (struct file *file, const void *buffer, off_t size,
+		off_t file_ofs) {
+	return inode_write_at (file->inode, buffer, size, file_ofs);
+}
+
+static off_t
+file_length_unlocked (struct file *file) {
+	ASSERT (file != NULL);
+	return inode_length (file->inode);
+}
+
+static void
+file_seek_unlocked (struct file *file, off_t new_pos) {
+	ASSERT (file != NULL);
+	ASSERT (new_pos >= 0);
+	file->pos = new_pos;
+}
+
+static off_t
+file_tell_unlocked (struct file *file) {
+	ASSERT (file != NULL);
+	return file->pos;
+}
+
+static struct file *
+file_duplicate_unlocked (struct file *file) {
+	struct file *nfile = file_open (inode_reopen (file->inode));
+	if (nfile) {
+		nfile->pos = file->pos;
+		if (file->deny_write)
+			file_deny_write_unlocked (nfile);
+	}
+	return nfile;
+}
+
+/* ── public locked API ───────────────────────────────────────
+ * 아래 함수들은 filesys_lock을 직접 잡고 _unlocked 헬퍼를 호출한다.
+ * 외부 모듈(userprog 등)은 이 함수들만 사용한다.
+ * ─────────────────────────────────────────────────────────── */
 
 /* Opens a file for the given INODE, of which it takes ownership,
  * and returns the new file.  Returns a null pointer if an
@@ -49,24 +148,19 @@ file_reopen (struct file *file) {
  * 리턴한다. 실패하면 null pointer를 리턴한다. */
 struct file *
 file_duplicate (struct file *file) {
-	struct file *nfile = file_open (inode_reopen (file->inode));
-	if (nfile) {
-		nfile->pos = file->pos;
-		if (file->deny_write)
-			file_deny_write (nfile);
-	}
-	return nfile;
+	lock_acquire (&filesys_lock);
+	struct file *result = file_duplicate_unlocked (file);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Closes FILE. */
 /* FILE을 닫는다. */
 void
 file_close (struct file *file) {
-	if (file != NULL) {
-		file_allow_write (file);
-		inode_close (file->inode);
-		free (file);
-	}
+	lock_acquire (&filesys_lock);
+	file_close_unlocked (file);
+	lock_release (&filesys_lock);
 }
 
 /* Returns the inode encapsulated by FILE. */
@@ -87,9 +181,10 @@ file_get_inode (struct file *file) {
  * 읽은 byte 수만큼 FILE의 위치를 전진시킨다. */
 off_t
 file_read (struct file *file, void *buffer, off_t size) {
-	off_t bytes_read = inode_read_at (file->inode, buffer, size, file->pos);
-	file->pos += bytes_read;
-	return bytes_read;
+	lock_acquire (&filesys_lock);
+	off_t result = file_read_unlocked (file, buffer, size);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Reads SIZE bytes from FILE into BUFFER,
@@ -103,7 +198,10 @@ file_read (struct file *file, void *buffer, off_t size) {
  * 파일의 현재 위치는 바뀌지 않는다. */
 off_t
 file_read_at (struct file *file, void *buffer, off_t size, off_t file_ofs) {
-	return inode_read_at (file->inode, buffer, size, file_ofs);
+	lock_acquire (&filesys_lock);
+	off_t result = file_read_at_unlocked (file, buffer, size, file_ofs);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Writes SIZE bytes from BUFFER into FILE,
@@ -120,9 +218,10 @@ file_read_at (struct file *file, void *buffer, off_t size, off_t file_ofs) {
  * 읽은 byte 수만큼 FILE의 위치를 전진시킨다. */
 off_t
 file_write (struct file *file, const void *buffer, off_t size) {
-	off_t bytes_written = inode_write_at (file->inode, buffer, size, file->pos);
-	file->pos += bytes_written;
-	return bytes_written;
+	lock_acquire (&filesys_lock);
+	off_t result = file_write_unlocked (file, buffer, size);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Writes SIZE bytes from BUFFER into FILE,
@@ -140,7 +239,10 @@ file_write (struct file *file, const void *buffer, off_t size) {
 off_t
 file_write_at (struct file *file, const void *buffer, off_t size,
 		off_t file_ofs) {
-	return inode_write_at (file->inode, buffer, size, file_ofs);
+	lock_acquire (&filesys_lock);
+	off_t result = file_write_at_unlocked (file, buffer, size, file_ofs);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Prevents write operations on FILE's underlying inode
@@ -149,11 +251,9 @@ file_write_at (struct file *file, const void *buffer, off_t size,
  * 대한 write operation을 막는다. */
 void
 file_deny_write (struct file *file) {
-	ASSERT (file != NULL);
-	if (!file->deny_write) {
-		file->deny_write = true;
-		inode_deny_write (file->inode);
-	}
+	lock_acquire (&filesys_lock);
+	file_deny_write_unlocked (file);
+	lock_release (&filesys_lock);
 }
 
 /* Re-enables write operations on FILE's underlying inode.
@@ -163,19 +263,19 @@ file_deny_write (struct file *file) {
  * 같은 inode를 연 다른 파일 때문에 write가 여전히 거부될 수도 있다. */
 void
 file_allow_write (struct file *file) {
-	ASSERT (file != NULL);
-	if (file->deny_write) {
-		file->deny_write = false;
-		inode_allow_write (file->inode);
-	}
+	lock_acquire (&filesys_lock);
+	file_allow_write_unlocked (file);
+	lock_release (&filesys_lock);
 }
 
 /* Returns the size of FILE in bytes. */
 /* FILE의 크기를 byte 단위로 리턴한다. */
 off_t
 file_length (struct file *file) {
-	ASSERT (file != NULL);
-	return inode_length (file->inode);
+	lock_acquire (&filesys_lock);
+	off_t result = file_length_unlocked (file);
+	lock_release (&filesys_lock);
+	return result;
 }
 
 /* Sets the current position in FILE to NEW_POS bytes from the
@@ -183,9 +283,9 @@ file_length (struct file *file) {
 /* FILE의 현재 위치를 파일 시작점에서 NEW_POS byte 떨어진 곳으로 설정한다. */
 void
 file_seek (struct file *file, off_t new_pos) {
-	ASSERT (file != NULL);
-	ASSERT (new_pos >= 0);
-	file->pos = new_pos;
+	lock_acquire (&filesys_lock);
+	file_seek_unlocked (file, new_pos);
+	lock_release (&filesys_lock);
 }
 
 /* Returns the current position in FILE as a byte offset from the
@@ -193,6 +293,8 @@ file_seek (struct file *file, off_t new_pos) {
 /* FILE의 현재 위치를 파일 시작점 기준 byte offset으로 리턴한다. */
 off_t
 file_tell (struct file *file) {
-	ASSERT (file != NULL);
-	return file->pos;
+	lock_acquire (&filesys_lock);
+	off_t result = file_tell_unlocked (file);
+	lock_release (&filesys_lock);
+	return result;
 }

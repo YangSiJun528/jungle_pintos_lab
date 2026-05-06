@@ -284,9 +284,7 @@ __do_fork (void *aux) {
 
 	/* 부모의 executable handle을 별도로 복제 — double close 방지 */
 	if (parent->executable != NULL) {
-		lock_acquire (&filesys_lock);
 		current->executable = file_duplicate (parent->executable);
-		lock_release (&filesys_lock);
 		if (current->executable == NULL)
 			goto error;
 		/* file_duplicate()가 deny_write 상태도 복제하므로 추가 호출 불필요 */
@@ -297,15 +295,11 @@ __do_fork (void *aux) {
 	while (e != list_end (&parent->file_descriptors)) {
 		struct file_descriptor *parent_fde =
 			list_entry (e, struct file_descriptor, elem);
-		lock_acquire (&filesys_lock);
 		struct file *dup_file = file_duplicate (parent_fde->file);
-		lock_release (&filesys_lock);
 		if (dup_file == NULL)
 			goto error;
 		if (fd_alloc (dup_file) == -1) {
-			lock_acquire (&filesys_lock);
 			file_close (dup_file);
-			lock_release (&filesys_lock);
 			goto error;
 		}
 		e = list_next (e);
@@ -352,9 +346,7 @@ process_exec (void *f_name) {
 	   따라서 fd table은 닫으면 안 되고, 기존 유저 주소공간(pml4)만 제거한다. */
 	struct thread *curr = thread_current ();
 	if (curr->executable != NULL) {
-		lock_acquire (&filesys_lock);
 		file_close (curr->executable);
-		lock_release (&filesys_lock);
 		curr->executable = NULL;
 	}
 	process_cleanup_user_memory ();
@@ -452,18 +444,14 @@ process_cleanup_files (void) {
 	struct thread *curr = thread_current ();
 
 	if (curr->executable != NULL) {
-		lock_acquire (&filesys_lock);
 		file_close (curr->executable);
-		lock_release (&filesys_lock);
 		curr->executable = NULL;
 	}
 
 	while (!list_empty (&curr->file_descriptors)) {
 		struct list_elem *e = list_pop_front (&curr->file_descriptors);
 		struct file_descriptor *fde = list_entry (e, struct file_descriptor, elem);
-		lock_acquire (&filesys_lock);
 		file_close (fde->file);
-		lock_release (&filesys_lock);
 		free (fde);
 	}
 }
@@ -615,12 +603,10 @@ load (const char *cmd, struct intr_frame *if_) {
 	process_activate (thread_current ());
 
 	/* Open executable file. */
-	/* executable 파일을 연다. deny_write와 함께 한 락 구간에서 처리한다. */
-	lock_acquire (&filesys_lock);
+	/* executable 파일을 연다. */
 	file = filesys_open (file_name);
 	if (file != NULL)
 		file_deny_write (file);
-	lock_release (&filesys_lock);
 	if (file == NULL) {
 		printf ("load: %s: open failed\n", file_name);
 		goto done;
@@ -628,10 +614,7 @@ load (const char *cmd, struct intr_frame *if_) {
 
 	/* Read and verify executable header. */
 	/* executable 헤더를 읽고 검증한다. */
-	lock_acquire (&filesys_lock);
-	off_t header_read = file_read (file, &ehdr, sizeof ehdr);
-	lock_release (&filesys_lock);
-	if (header_read != (off_t) sizeof ehdr
+	if (file_read (file, &ehdr, sizeof ehdr) != (off_t) sizeof ehdr
 			|| memcmp (ehdr.e_ident, "\177ELF\2\1\1", 7)
 			|| ehdr.e_type != 2
 			|| ehdr.e_machine != 0x3E // amd64
@@ -648,14 +631,11 @@ load (const char *cmd, struct intr_frame *if_) {
 	for (i = 0; i < ehdr.e_phnum; i++) {
 		struct Phdr phdr;
 
-		/* range check + seek + read를 한 락 구간으로 묶어 중간에 파일 상태 변경 방지. */
-		lock_acquire (&filesys_lock);
 		bool ok = (file_ofs >= 0 && file_ofs <= (off_t) file_length (file));
 		if (ok) {
 			file_seek (file, file_ofs);
 			ok = (file_read (file, &phdr, sizeof phdr) == (off_t) sizeof phdr);
 		}
-		lock_release (&filesys_lock);
 		if (!ok)
 			goto done;
 
@@ -674,10 +654,7 @@ load (const char *cmd, struct intr_frame *if_) {
 			case PT_SHLIB:
 				goto done;
 			case PT_LOAD:
-				lock_acquire (&filesys_lock);
-				bool valid = validate_segment (&phdr, file);
-				lock_release (&filesys_lock);
-				if (valid) {
+				if (validate_segment (&phdr, file)) {
 					bool writable = (phdr.p_flags & PF_W) != 0;
 					uint64_t file_page = phdr.p_offset & ~PGMASK;
 					uint64_t mem_page = phdr.p_vaddr & ~PGMASK;
@@ -699,11 +676,8 @@ load (const char *cmd, struct intr_frame *if_) {
 						read_bytes = 0;
 						zero_bytes = ROUND_UP (page_offset + phdr.p_memsz, PGSIZE);
 					}
-					lock_acquire (&filesys_lock);
-					bool seg_ok = load_segment (file, file_page, (void *) mem_page,
-								read_bytes, zero_bytes, writable);
-					lock_release (&filesys_lock);
-					if (!seg_ok)
+					if (!load_segment (file, file_page, (void *) mem_page,
+								read_bytes, zero_bytes, writable))
 						goto done;
 				} else {
 					goto done;
@@ -764,12 +738,7 @@ done:
 	if (success) {
 		t->executable = file; /* deny_write를 프로세스 수명 동안 유지 */
 	} else {
-		/* goto done 경로에 따라 락이 이미 잡혀있을 수도 없을 수도 있으므로
-		   lock_held_by_current_thread로 확인 후 없으면 획득한다. */
-		if (!lock_held_by_current_thread (&filesys_lock))
-			lock_acquire (&filesys_lock);
-		file_close (file);
-		lock_release (&filesys_lock);
+		file_close (file); /* file_close(NULL)은 no-op */
 	}
 	return success;
 }
