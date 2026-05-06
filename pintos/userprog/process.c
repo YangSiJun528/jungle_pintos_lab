@@ -39,6 +39,9 @@ struct fork_context {
 /* initd 스레드에게 child_state를 전달하기 위한 전역변수.
    process_create_initd()에서 thread_create() 호출 전에 쓰고,
    initd()에서 읽으므로 레이스 없음. */
+// initd는 리눅스의 systemd와 같은 포지션임. 그래서 부모가 없다고 봐도 되는데,
+// child_state가 필요한 이유는 process_wait()에서 child_state를 필요로 하기 때문.
+// 전역으로 관리하는게 그리 좋아보이진 않는데, 스택으로 넘겨주려면 불필요하게 코드가 많아서져서 뺌.
 static struct child_state *initd_child_state;
 
 static void process_cleanup (void);
@@ -120,7 +123,7 @@ process_create_initd (const char *file_name) {
 static void
 initd (void *f_name) {
 	thread_current ()->child_state = initd_child_state;
-	initd_child_state = NULL;
+	initd_child_state = NULL; // 설정 후 전역변수로 접근할 일 없으니까 제거
 
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
@@ -169,9 +172,10 @@ process_fork (const char *name, struct intr_frame *if_) {
 	sema_down(&fork_ctx.fork_done); // child가 parent에게 처리가 완료되었음을 알림
 
 	if (!fork_ctx.success) {
-		// 자식이 child_state를 참조한 채 thread_exit() 예정이므로 release로 처리
+		/* child가 이미 자기 참조를 해제했으므로 parent release → refcnt 0 → free */
 		list_remove(&child_state->elem);
-		child_state_release(child_state); // parent 측 참조 해제
+		child_state_release(child_state);
+		tid = TID_ERROR;
 		goto out;
 	}
 
@@ -278,6 +282,14 @@ __do_fork (void *aux) {
 		goto error;
 #endif
 
+	/* 부모의 executable handle을 별도로 복제 — double close 방지 */
+	if (parent->executable != NULL) {
+		current->executable = file_duplicate (parent->executable);
+		if (current->executable == NULL)
+			goto error;
+		/* file_duplicate()가 deny_write 상태도 복제하므로 추가 호출 불필요 */
+	}
+
 	/* 부모의 파일 디스크립터를 복제 */
 	struct list_elem *e = list_begin (&parent->file_descriptors);
 	while (e != list_end (&parent->file_descriptors)) {
@@ -302,6 +314,11 @@ __do_fork (void *aux) {
 	do_iret (&if_);
 error:
 	fork_ctx->success = false;
+	/* child 측 참조를 먼저 해제하고 포인터를 NULL로 만든다.
+	   이후 parent가 깨어나 마지막 참조를 해제(→ free)하며,
+	   process_exit()는 child_state == NULL이므로 exit 메시지를 출력하지 않는다. */
+	child_state_release (current->child_state);
+	current->child_state = NULL;
 	sema_up (&fork_ctx->fork_done);
 	thread_exit ();
 }
@@ -327,6 +344,11 @@ process_exec (void *f_name) {
 	/* exec는 현재 스레드/프로세스의 커널 상태는 유지하고,
        유저 프로그램 실행 이미지(code/data/stack)만 새 프로그램으로 교체한다.
 	   따라서 fd table은 닫으면 안 되고, 기존 유저 주소공간(pml4)만 제거한다. */
+	struct thread *curr = thread_current ();
+	if (curr->executable != NULL) {
+		file_close (curr->executable);
+		curr->executable = NULL;
+	}
 	process_cleanup_user_memory ();
 
 	/* And then load the binary */
@@ -387,10 +409,11 @@ process_wait (tid_t child_tid) {
 void
 process_exit (void) {
 	struct thread *curr = thread_current ();
-	printf ("%s: exit(%d)\n", curr->name, curr->exit_status);
 
-	/* 자식에게 exit status를 전달하고 대기 중인 부모를 깨운다. */
+	/* 에러 상황 발생 시 child_state를 NULL인 상태에서 호출될 수 있는데,
+	   정상적인 요청이 아니므로 출력하지 않는다. */
 	if (curr->child_state != NULL) {
+		printf ("%s: exit(%d)\n", curr->name, curr->exit_status);
 		curr->child_state->status = curr->exit_status;
 		curr->child_state->exited = true;
 		sema_up (&curr->child_state->wait_sema);
@@ -419,6 +442,11 @@ process_cleanup (void) {
 static void
 process_cleanup_files (void) {
 	struct thread *curr = thread_current ();
+
+	if (curr->executable != NULL) {
+		file_close (curr->executable);
+		curr->executable = NULL;
+	}
 
 	while (!list_empty (&curr->file_descriptors)) {
 		struct list_elem *e = list_pop_front (&curr->file_descriptors);
@@ -581,6 +609,7 @@ load (const char *cmd, struct intr_frame *if_) {
 		printf ("load: %s: open failed\n", file_name);
 		goto done;
 	}
+	file_deny_write (file);
 
 	/* Read and verify executable header. */
 	/* executable 헤더를 읽고 검증한다. */
@@ -659,7 +688,6 @@ load (const char *cmd, struct intr_frame *if_) {
 	if (!setup_stack (if_))
 		goto done;
 
-	// TODO: 이거 좀 별로인듯? 외부 함수로 적절하게 빼던가 하기.
 	/* Start address. */
 	/* 시작 주소. */
 	if_->rip = ehdr.e_entry;
@@ -703,7 +731,10 @@ load (const char *cmd, struct intr_frame *if_) {
 done:
 	/* We arrive here whether the load is successful or not. */
 	/* 로드 성공 여부와 관계없이 이 지점에 도달한다. */
-	file_close (file);
+	if (success)
+		t->executable = file; /* deny_write를 프로세스 수명 동안 유지 */
+	else
+		file_close (file);
 	return success;
 }
 

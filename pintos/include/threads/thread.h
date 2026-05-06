@@ -44,13 +44,13 @@ typedef int tid_t;
 
 struct child_state {
 	tid_t tid;
-	int status; // thread의 exit_status와 동일한 역할, 중복이지만 공유/전달 목적으로 사용
-	bool waited;
-	bool exited;
-	struct semaphore wait_sema; // 부모가 내가 종료되기를 대기하는 경우 사용
+	int status; /* thread의 exit_status와 동일한 역할, 중복이지만 공유/전달 목적으로 사용 */
+	bool waited; /* wait 생명주기 상태 관리용, 중복 wait 방지 */
+	bool exited; /* wait 생명주기 상태 관리용, child가 종료되어서 대기하지 않아도 되는가? 상태 플래그 등 파악 용이성 */
+	struct semaphore wait_sema; /* 부모가 내가 종료되기를 대기하는 경우 사용 */
 	struct list_elem elem;
-	int refcnt;       // 2(부모, 자식)로 시작, 0이 되면 free
-	struct lock lock; // refcnt 보호용
+	int refcnt;       /* 2(부모, 자식)로 시작, 0이 되면 free */
+	struct lock lock; /* refcnt 보호용 */
 };
 
 
@@ -168,9 +168,11 @@ struct thread {
 
 	struct list file_descriptors; /* fd 번호 오름차순으로 정렬 유지. 최대 128개. */
 
-	struct list children; // 내가 관리하는 자식들의 child_state 목록 (부모 입장)
+	struct list children; /* 내가 관리하는 자식들의 child_state 목록 (부모 입장) */
 
-	struct child_state *child_state; // 부모가 접근할 수 있는 내 상태, 공유 목적으로 사용 (자식 입장)
+	struct child_state *child_state; /* 부모가 접근할 수 있는 내 상태, 공유 목적으로 사용 (자식 입장) */
+
+	struct file *executable; /* 실행 중인 ELF 파일, deny_write를 프로세스 수명 동안 유지 */
 
 #endif
 #ifdef VM
