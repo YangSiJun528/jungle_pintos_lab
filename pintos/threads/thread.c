@@ -458,8 +458,15 @@ thread_yield (void) {
 // 굳이 정렬 안하고도 할 수 있는 경우에도 그냥 호출해서 써서 불필요한 처리가 들어가는 경우도 있다고 함.
 void
 thread_yield_if_needed (void) {
-	if (list_empty (&ready_list))
+	enum intr_level old_level;
+
+	// 인터럽트 끄기, 외부에서 끈 상황에서만 호출된다고 단정할 수 없음.
+	old_level = intr_disable ();
+
+	if (list_empty (&ready_list)) {
+		intr_set_level (old_level); // 인터럽트 복구 후 종료
 		return;
+	}
 
 	if (!thread_mlfqs) {
 		// Priority Donation 때문에 정렬 필요, list_pop_front를 해야하니까
@@ -476,6 +483,7 @@ thread_yield_if_needed (void) {
 		else
 			thread_yield ();
 	}
+	intr_set_level (old_level);
 }
 
 /* Puts the current thread to sleep until WAKEUP_TICK. */
@@ -964,9 +972,9 @@ thread_mlfqs_recalc_priorities (void) {
 
 		e = list_next(e);
 	}
+	intr_set_level (old_level);
 
 	thread_yield_if_needed(); // 선점을 위해서, 우선순위 바뀌었으니까
-	intr_set_level (old_level);
 }
 
 static void

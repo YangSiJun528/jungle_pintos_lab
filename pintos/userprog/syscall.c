@@ -264,7 +264,9 @@ handle_create (struct syscall_entry *entry) {
 		_exit (-1);
 	}
 
+	lock_acquire (&filesys_lock);
 	entry->return_value = filesys_create (filename, initial_size);
+	lock_release (&filesys_lock);
 }
 
 // bool remove (const char *file);
@@ -279,7 +281,9 @@ handle_remove (struct syscall_entry *entry) {
 		_exit (-1);
 	}
 
+	lock_acquire (&filesys_lock);
 	entry->return_value = filesys_remove (filename);
+	lock_release (&filesys_lock);
 }
 
 // int open (const char *file);
@@ -295,7 +299,9 @@ handle_open (struct syscall_entry *entry) {
 	}
 
 	// 파일 열기, 실패하면 -1을 리턴값으로 설정하고 종료
+	lock_acquire (&filesys_lock);
 	struct file *file = filesys_open (filename);
+	lock_release (&filesys_lock);
 	if (file == NULL) {
 		entry->return_value = -1;
 		return;
@@ -304,7 +310,9 @@ handle_open (struct syscall_entry *entry) {
 	// thread의 fds에 새로운 fd 할당, 실패하면 -1을 리턴값으로 설정하고 종료
 	int fd = fd_alloc (file);
 	if (fd == -1) {
+		lock_acquire (&filesys_lock);
 		file_close (file);
+		lock_release (&filesys_lock);
 		entry->return_value = -1;
 		return;
 	}
@@ -327,7 +335,9 @@ handle_filesize (struct syscall_entry *entry) {
 	if (file == NULL)
 		_exit (-1);
 
+	lock_acquire (&filesys_lock);
 	entry->return_value = file_length (file);
+	lock_release (&filesys_lock);
 }
 
 // int read (int fd, void *buffer, unsigned size);
@@ -369,7 +379,9 @@ handle_read (struct syscall_entry *entry) {
 		_exit (-1);
 
 	// TODO: 이게 커서가 end면 0 반환해야하는데, 테스트 실패하면 추가 분기처리 필요
+	lock_acquire (&filesys_lock);
 	entry->return_value = file_read (file, buffer, size);
+	lock_release (&filesys_lock);
 }
 
 // int write (int fd, const void *buffer, unsigned size);
@@ -404,7 +416,9 @@ handle_write (struct syscall_entry *entry) {
 	if (file == NULL)
 		_exit (-1);
 
+	lock_acquire (&filesys_lock);
 	entry->return_value = file_write (file, buffer, size);
+	lock_release (&filesys_lock);
 }
 
 // void seek (int fd, unsigned position);
@@ -422,7 +436,9 @@ handle_seek (struct syscall_entry *entry) {
 	if (file == NULL)
 		_exit (-1);
 
+	lock_acquire (&filesys_lock);
 	file_seek (file, position);
+	lock_release (&filesys_lock);
 }
 
 // unsigned tell (int fd);
@@ -440,7 +456,9 @@ handle_tell (struct syscall_entry *entry) {
 	if (file == NULL)
 		_exit (-1);
 
+	lock_acquire (&filesys_lock);
 	entry->return_value = file_tell (file);
+	lock_release (&filesys_lock);
 }
 
 // void close (int fd);
@@ -450,7 +468,12 @@ static void
 handle_close (struct syscall_entry *entry) {
 	int fd = (int) entry->args[0];
 
-	if (!is_valid_file_fd (fd) || !fd_close (fd))
+	if (!is_valid_file_fd (fd))
+		_exit (-1);
+	lock_acquire (&filesys_lock);
+	bool ok = fd_close (fd);
+	lock_release (&filesys_lock);
+	if (!ok)
 		_exit (-1);
 }
 
