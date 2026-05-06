@@ -172,6 +172,8 @@ struct thread {
 
 	struct child_state *child_state; // 부모가 접근할 수 있는 내 상태, 공유 목적으로 사용 (자식 입장)
 
+	struct file *executable; /* 실행 중인 ELF 파일 handle — deny_write를 프로세스 수명 동안 유지 */
+
 #endif
 #ifdef VM
 	/* Table for whole virtual memory owned by thread. */

@@ -672,6 +672,7 @@ init_thread (struct thread *t, const char *name, int priority) {
 	list_init (&t->file_descriptors);
 	list_init (&t->children);
 	t->child_state = NULL;
+	t->executable = NULL;
 #endif
 }
 

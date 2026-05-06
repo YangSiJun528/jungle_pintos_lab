@@ -196,7 +196,6 @@ page_fault (struct intr_frame *f) {
 	if (user == true) {
 		struct thread* curr = thread_current ();
 		curr->exit_status = -1;
-		curr->child_state->status = -1;
 		thread_exit ();
 	}
 

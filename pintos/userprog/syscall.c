@@ -61,6 +61,7 @@ static void _exit (int status);
 static void *get_next_page_if_valid (void *);
 static bool is_valid_user_buffer (void *, size_t);
 static bool is_valid_user_string (char *);
+static bool is_valid_file_fd (int);
 
 /* System call.
  *
@@ -319,15 +320,12 @@ handle_filesize (struct syscall_entry *entry) {
 	entry->should_return_value = true;
 	int fd = (int) entry->args[0];
 
-	// STD OUT/IN은 잘못된 요청임
-	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
+	if (!is_valid_file_fd (fd))
 		_exit (-1);
-	}
 
 	struct file *file = fd_lookup (fd);
-	if (file == NULL) {
+	if (file == NULL)
 		_exit (-1);
-	}
 
 	entry->return_value = file_length (file);
 }
@@ -347,9 +345,8 @@ handle_read (struct syscall_entry *entry) {
 	}
 
 	// STDOUT_FILENO은 지원하지 않음, 종료
-	if (fd == STDOUT_FILENO) {
+	if (fd == STDOUT_FILENO)
 		_exit (-1);
-	}
 
 	// STDIN_FILENO이면 키보드의 입력을 받기
 	if (fd == STDIN_FILENO) {
@@ -364,10 +361,12 @@ handle_read (struct syscall_entry *entry) {
 		return;
 	}
 
-	struct file *file = fd_lookup (fd);
-	if (file == NULL) {
+	if (!is_valid_file_fd (fd))
 		_exit (-1);
-	}
+
+	struct file *file = fd_lookup (fd);
+	if (file == NULL)
+		_exit (-1);
 
 	// TODO: 이게 커서가 end면 0 반환해야하는데, 테스트 실패하면 추가 분기처리 필요
 	entry->return_value = file_read (file, buffer, size);
@@ -395,14 +394,15 @@ handle_write (struct syscall_entry *entry) {
 	}
 
 	// STDIN_FILENO은 지원하지 않음, 종료
-	if (fd == STDIN_FILENO) {
+	if (fd == STDIN_FILENO)
 		_exit (-1);
-	}
+
+	if (!is_valid_file_fd (fd))
+		_exit (-1);
 
 	struct file *file = fd_lookup (fd);
-	if (file == NULL) {
+	if (file == NULL)
 		_exit (-1);
-	}
 
 	entry->return_value = file_write (file, buffer, size);
 }
@@ -415,15 +415,12 @@ handle_seek (struct syscall_entry *entry) {
 	int fd = (int) entry->args[0];
 	off_t position = (off_t) entry->args[1];
 
-	// STD OUT/IN은 잘못된 요청임
-	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
+	if (!is_valid_file_fd (fd))
 		_exit (-1);
-	}
 
 	struct file *file = fd_lookup (fd);
-	if (file == NULL) {
+	if (file == NULL)
 		_exit (-1);
-	}
 
 	file_seek (file, position);
 }
@@ -436,15 +433,12 @@ handle_tell (struct syscall_entry *entry) {
 	entry->should_return_value = true;
 	int fd = (int) entry->args[0];
 
-	// STD OUT/IN은 잘못된 요청임
-	if (fd == STDOUT_FILENO || fd == STDIN_FILENO) {
+	if (!is_valid_file_fd (fd))
 		_exit (-1);
-	}
 
 	struct file *file = fd_lookup (fd);
-	if (file == NULL) {
+	if (file == NULL)
 		_exit (-1);
-	}
 
 	entry->return_value = file_tell (file);
 }
@@ -456,9 +450,8 @@ static void
 handle_close (struct syscall_entry *entry) {
 	int fd = (int) entry->args[0];
 
-	if (fd == STDIN_FILENO || fd == STDOUT_FILENO || !fd_close (fd)) {
+	if (!is_valid_file_fd (fd) || !fd_close (fd))
 		_exit (-1);
-	}
 }
 
 // 프로세스 종료 시 사용
@@ -466,6 +459,11 @@ static void
 _exit (int status) {
 	thread_current ()->exit_status = status;
 	thread_exit (); // 내부적으로 process_exit() 호출
+}
+
+static bool
+is_valid_file_fd (int fd) {
+	return fd >= FD_MIN && fd <= FD_MAX;
 }
 
 static bool
