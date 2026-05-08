@@ -8,7 +8,7 @@
 
 팀 레포지토리:
 - 1~2주차: https://github.com/NearthYou/pintos_lab
-- 3~4주차: 추가 예정
+- 3~4주차: https://github.com/giteunyeol/PIntos_VM_Week11_12
 
 CLion은 로컬 IDE로 사용하고, 빌드와 실행은 Docker 컨테이너 내부 CLI에서 Pintos 기존 Makefile로 수행합니다.
 루트 `CMakeLists.txt`와 `pintos/CMakeLists.txt`는 코드 색인 전용입니다.
