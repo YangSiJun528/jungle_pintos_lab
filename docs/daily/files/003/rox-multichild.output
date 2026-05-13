@@ -1,0 +1,732 @@
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+0138B4A0+012CB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..Kernel command line: -q -f put rox-multichild put child-rox run rox-multichild
+0 ~ 9fc00 1
+100000 ~ 13e0000 1
+Pintos booting with: 
+	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
+	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
+Calibrating timer...  157,081,600 loops/s.
+hd0: unexpected interrupt
+hd0:0: detected 385 sector (192 kB) disk, model "QEMU HARDDISK", serial "QM00001"
+hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
+hd1: unexpected interrupt
+hd1:0: detected 254 sector (127 kB) disk, model "QEMU HARDDISK", serial "QM00003"
+hd1:1: detected 8,064 sector (3 MB) disk, model "QEMU HARDDISK", serial "QM00004"
+Formatting file system...============ INODE: inode->deny_write_cnt=0
+============ INODE: inode->deny_write_cnt=0
+done.
+Boot complete.
+Putting 'rox-multichild' into the file system...
+============ INODE: inode->deny_write_cnt=0
+============ INODE: inode->deny_write_cnt=0
+============ INODE: inode->deny_write_cnt=0
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=0 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=512 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=1024 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=1536 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=2048 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=2560 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=3072 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=3584 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=4096 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=4608 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=5120 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=5632 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=6144 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=6656 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=7168 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=7680 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=8192 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=8704 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=9216 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=9728 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=10240 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=10752 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=11264 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=11776 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=12288 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=12800 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=13312 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=13824 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=14336 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=14848 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=15360 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=15872 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=16384 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=16896 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=17408 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=17920 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=18432 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=18944 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=19456 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=19968 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=20480 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=20992 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=21504 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=22016 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=22528 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=23040 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=23552 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=24064 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=24576 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=25088 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=25600 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=26112 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=26624 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=27136 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=27648 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=28160 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=28672 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=29184 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=29696 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=30208 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=30720 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=31232 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=31744 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=32256 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=32768 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=33280 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=33792 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=34304 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=34816 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=35328 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=35840 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=36352 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=36864 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=37376 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=37888 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=38400 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=38912 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=39424 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=39936 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=40448 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=40960 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=41472 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=41984 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=42496 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=43008 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=43520 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=44032 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=44544 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=45056 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=45568 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=46080 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=46592 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=47104 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=47616 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=48128 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=48640 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=49152 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=49664 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=50176 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=50688 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=51200 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=51712 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=52224 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=52736 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=53248 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=53760 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=54272 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=54784 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=55296 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=55808 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=56320 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=56832 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=57344 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=57856 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=58368 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=58880 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=59392 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=59904 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=60416 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=60928 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=61440 bytes_written=240
+Putting 'child-rox' into the file system...
+============ INODE: inode->deny_write_cnt=0
+============ INODE: inode->deny_write_cnt=0
+============ INODE: inode->deny_write_cnt=0
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=0 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=512 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=1024 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=1536 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=2048 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=2560 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=3072 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=3584 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=4096 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=4608 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=5120 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=5632 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=6144 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=6656 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=7168 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=7680 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=8192 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=8704 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=9216 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=9728 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=10240 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=10752 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=11264 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=11776 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=12288 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=12800 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=13312 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=13824 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=14336 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=14848 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=15360 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=15872 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=16384 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=16896 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=17408 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=17920 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=18432 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=18944 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=19456 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=19968 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=20480 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=20992 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=21504 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=22016 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=22528 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=23040 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=23552 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=24064 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=24576 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=25088 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=25600 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=26112 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=26624 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=27136 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=27648 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=28160 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=28672 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=29184 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=29696 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=30208 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=30720 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=31232 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=31744 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=32256 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=32768 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=33280 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=33792 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=34304 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=34816 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=35328 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=35840 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=36352 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=36864 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=37376 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=37888 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=38400 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=38912 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=39424 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=39936 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=40448 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=40960 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=41472 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=41984 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=42496 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=43008 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=43520 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=44032 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=44544 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=45056 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=45568 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=46080 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=46592 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=47104 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=47616 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=48128 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=48640 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=49152 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=49664 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=50176 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=50688 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=51200 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=51712 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=52224 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=52736 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=53248 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=53760 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=54272 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=54784 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=55296 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=55808 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=56320 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=56832 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=57344 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=57856 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=58368 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=58880 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=59392 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=59904 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=60416 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=60928 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=61440 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=61952 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=62464 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=62976 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=63488 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=64000 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=64512 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=65024 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=65536 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=66048 bytes_written=512
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=66560 bytes_written=304
+Executing 'rox-multichild':
+WRITE CALL fd=1, buf=0x406140 sz=23 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(rox-multichild) begin
+WRITE CALL fd=1, buf=0x406140 sz=34 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(rox-multichild) open "child-rox"
+WRITE CALL fd=1, buf=0x406140 sz=34 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(rox-multichild) read "child-rox"
+SYS_SEEK fd=2, file=0x8004244048 position=0
+WRITE CALL fd=1, buf=0x406140 sz=35 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(rox-multichild) write "child-rox"
+WRITE CALL fd=2, buf=0x4747ff6c sz=16 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=0
+============ FILE: file->pos=0 bytes_written=16
+WRITE TEMP bytes_written=16 size=16
+WRITE CALL fd=1, buf=0x406140 sz=36 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(rox-multichild) exec "child-rox 5"
+WRITE CALL fd=1, buf=0x4068a0 sz=18 exec_file=0x8004244098 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) begin
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x8004244098 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=3, buf=0x4747fee1 sz=19 exec_file=0x8004244098 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=1
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=3
+sys.close   fd=3, file=0x8004244088
+WRITE CALL fd=1, buf=0x4068a0 sz=31 exec_file=0x8004244098 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) exec "child-rox 4"
+WRITE CALL fd=1, buf=0x4068a0 sz=18 exec_file=0x80042440c8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) begin
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x80042440c8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=4, buf=0x4747fee1 sz=19 exec_file=0x80042440c8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=3
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=4
+sys.close   fd=4, file=0x80042440b8
+WRITE CALL fd=1, buf=0x4068a0 sz=31 exec_file=0x80042440c8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) exec "child-rox 3"
+WRITE CALL fd=1, buf=0x4068a0 sz=18 exec_file=0x80042440f8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) begin
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x80042440f8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=5, buf=0x4747fee1 sz=19 exec_file=0x80042440f8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=5
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=5
+sys.close   fd=5, file=0x80042440e8
+WRITE CALL fd=1, buf=0x4068a0 sz=31 exec_file=0x80042440f8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) exec "child-rox 2"
+WRITE CALL fd=1, buf=0x4068a0 sz=18 exec_file=0x8004244128 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) begin
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x8004244128 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=6, buf=0x4747fee1 sz=19 exec_file=0x8004244128 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=7
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=6
+sys.close   fd=6, file=0x8004244118
+WRITE CALL fd=1, buf=0x4068a0 sz=31 exec_file=0x8004244128 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) exec "child-rox 1"
+WRITE CALL fd=1, buf=0x4068a0 sz=18 exec_file=0x8004244158 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) begin
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x8004244158 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=7, buf=0x4747fee1 sz=19 exec_file=0x8004244158 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=9
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=7
+sys.close   fd=7, file=0x8004244148
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x8004244158 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=8, buf=0x4747fee1 sz=19 exec_file=0x8004244158 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=9
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=8
+sys.close   fd=8, file=0x8004244148
+WRITE CALL fd=1, buf=0x4068a0 sz=16 exec_file=0x8004244158 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) end
+child-rox: exit(12)
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x8004244128 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=7, buf=0x4747fee1 sz=19 exec_file=0x8004244128 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=8
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=7
+sys.close   fd=7, file=0x8004244158
+WRITE CALL fd=1, buf=0x4068a0 sz=16 exec_file=0x8004244128 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) end
+child-rox: exit(12)
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x80042440f8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=6, buf=0x4747fee1 sz=19 exec_file=0x80042440f8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=7
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=6
+sys.close   fd=6, file=0x8004244128
+WRITE CALL fd=1, buf=0x4068a0 sz=16 exec_file=0x80042440f8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) end
+child-rox: exit(12)
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x80042440c8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=5, buf=0x4747fee1 sz=19 exec_file=0x80042440c8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=6
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=5
+sys.close   fd=5, file=0x80042440f8
+WRITE CALL fd=1, buf=0x4068a0 sz=16 exec_file=0x80042440c8 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) end
+child-rox: exit(12)
+WRITE CALL fd=1, buf=0x4068a0 sz=37 exec_file=0x8004244098 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) try to write "child-rox"
+WRITE CALL fd=4, buf=0x4747fee1 sz=19 exec_file=0x8004244098 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=5
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=19
+sys.close START fd=4
+sys.close   fd=4, file=0x80042440c8
+WRITE CALL fd=1, buf=0x4068a0 sz=16 exec_file=0x8004244098 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(child-rox) end
+child-rox: exit(12)
+SYS_SEEK fd=2, file=0x8004244048 position=0
+WRITE CALL fd=2, buf=0x4747ff6c sz=16 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+============ INODE: inode->deny_write_cnt=4
+============ FILE: file->pos=0 bytes_written=0
+WRITE TEMP bytes_written=0 size=16
+WRITE CALL fd=1, buf=0x406140 sz=46 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(rox-multichild) ----rs 0  sizeof buffer={16}
+WRITE CALL fd=1, buf=0x406140 sz=35 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(rox-multichild) write "child-rox"
+WRITE CALL fd=1, buf=0x406140 sz=43 exec_file=0x8004244038 exec_file=0x80042167d7
+WRITE child_status ref_cnt=2
+(rox-multichild) write "child-rox": FAILED
+rox-multichild: exit(1)
+Execution of 'rox-multichild' complete.
+Timer: 351 ticks
+Thread: 59 idle ticks, 200 kernel ticks, 93 user ticks
+hd0:0: 0 reads, 0 writes
+hd0:1: 422 reads, 547 writes
+hd1:0: 254 reads, 0 writes
+hd1:1: 0 reads, 0 writes
+Console: 33936 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
