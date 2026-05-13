@@ -824,6 +824,74 @@
       font-size: 15px;
     }
 
+    .thought-flow {
+      display: grid;
+      gap: 12px;
+      margin: 24px 0;
+      counter-reset: thought;
+    }
+
+    .thought-flow[hidden] {
+      display: none;
+    }
+
+    .thought-toggle-row {
+      display: grid;
+      gap: 8px;
+      margin: 24px 0 16px;
+    }
+
+    .thought-toggle-row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .thought-toggle-row .pill-button {
+      justify-self: start;
+    }
+
+    .thought-step {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 14px;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+    }
+
+    .thought-step::before {
+      counter-increment: thought;
+      content: counter(thought, decimal-leading-zero);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--surface-strong);
+      color: var(--body-strong);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .thought-step strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .thought-step p {
+      margin: 0;
+      color: var(--body);
+      font-size: 15px;
+      line-height: 1.62;
+    }
+
     .spoiler-body,
     .faq-body {
       padding: 0 22px 22px;
@@ -1156,20 +1224,52 @@ parse (const char *input) {
           <div class="section-kicker">06. 실제 사례</div>
           <div class="prose">
             <h2>2026-05-12 fork-multiple</h2>
-            <p class="section-purpose">실제로 막혔던 로그를 넣었다. 처음부터 원인을 안다고 쓴 게 아니라, 어디부터 이상했는지 따라가던 기록에 가깝다.</p>
-            <p class="lead">이 사례는 Pintos VM 작업 중 <code>fork-once</code>는 통과하지만 <code>fork-multiple</code>에서 실패하던 상황을 로그로 좁힌 기록이다.</p>
+            <p class="section-purpose">이건 깔끔하게 정리된 디버깅 성공담이라기보다, 그날 로그 보면서 “아 뭐지?” 하다가 조금씩 좁혀간 기록에 가깝다.</p>
+            <p class="lead">상황은 단순했다. <code>fork-once</code>는 되는데 <code>fork-multiple</code>만 터졌다. 그래서 처음엔 fork 전체가 문제인지, 아니면 여러 번 반복될 때만 터지는 cleanup 문제인지부터 갈랐다.</p>
             <div class="callout warning"><strong>스포일러 주의</strong><p>VM fork/copy/kill 쪽 얘기가 나온다. 원인 쪽은 접어뒀다.</p></div>
           </div>
         </div>
 
-        <div class="clue-grid" aria-label="사례 흐름">
-          <article class="card clue"><strong>성공 기준선</strong><span><code>fork-once</code>는 child 하나를 만들고, child 종료 뒤 child SPT cleanup까지 끝난다.</span></article>
-          <article class="card clue"><strong>실패 위치</strong><span><code>fork-multiple</code>의 두 번째 child는 copy와 실행까지 끝나지만 cleanup 진입 직후 깨진다.</span></article>
-          <article class="card clue"><strong>읽을 단서</strong><span><code>#GP</code>, <code>rax cccc...</code>, <code>vm_try_handl value=0</code>, <code>Kernel PANIC recursion</code>을 같은 흐름에서 본다.</span></article>
+        <div class="thought-toggle-row">
+          <p>생각 흐름은 기본으로 접어둔다. 필요한 사람만 켜서 “어디서 의심이 바뀌었는지” 보면 된다.</p>
+          <button class="pill-button" id="thought-toggle" type="button" aria-pressed="false" aria-controls="thought-flow">생각 흐름 켜기</button>
+        </div>
+
+        <div class="thought-flow" id="thought-flow" aria-label="fork-multiple 디버깅 생각 흐름" hidden>
+          <div class="thought-step">
+            <div>
+              <strong>처음엔 주소가 너무 이상했다</strong>
+              <p>스택도 아니고 커널도 아닌 애매한 주소로 접근하는 것처럼 보여서, “이거 물리 주소를 가상 주소로 보고 있나?” 같은 생각부터 했다. 근데 그 말만으로는 어디를 봐야 할지 너무 넓었다.</p>
+            </div>
+          </div>
+          <div class="thought-step">
+            <div>
+              <strong>그래서 일단 되는 케이스부터 봤다</strong>
+              <p><code>fork-once</code> 로그를 보니까 copy, child 실행, child exit, SPT kill까지 한 번짜리 흐름은 끝까지 간다. 그러면 “fork가 아예 안 된다”는 쪽은 일단 내려놓을 수 있었다.</p>
+            </div>
+          </div>
+          <div class="thought-step">
+            <div>
+              <strong>fork-multiple도 첫 번째 child는 괜찮았다</strong>
+              <p>여기서 좀 좁혀졌다. 첫 번째 child는 통과하고, 두 번째 child도 copy랑 실행까지는 끝난다. 진짜로 깨지는 건 <code>child: exit(5)</code> 다음, <code>supplemental ... kill</code> 들어간 직후였다.</p>
+            </div>
+          </div>
+          <div class="thought-step">
+            <div>
+              <strong>panic 줄만 보면 오히려 헷갈렸다</strong>
+              <p><code>#GP</code>, <code>rax ccccc...</code>, page fault, panic recursion이 섞여서 한 번에 보면 정신없다. 그래도 <code>vm_try_handl value=0</code>이랑 <code>spt_find_pag</code> 실패가 cleanup 근처에서 이어진다는 건 보였다.</p>
+            </div>
+          </div>
+          <div class="thought-step">
+            <div>
+              <strong>그때부터 copy/kill 사이 공유 자원을 의심했다</strong>
+              <p>두 번째에서만 터진다면 한 번 해제된 걸 또 보거나, parent/child가 같이 보면 안 되는 걸 같이 보고 있을 가능성이 커진다. 그래서 SPT, page, aux 같은 “누가 소유하고 누가 free하나” 쪽으로 시야가 좁혀졌다.</p>
+            </div>
+          </div>
         </div>
 
         <div class="case-toolbar" id="logs">
-          <p>아래 두 로그는 발췌가 아니라 원본 파일 전체를 포함한다. 기본 상태에서는 문제 라인을 강조하지 않고, 토글을 켜면 <code>fork-multiple</code> 로그에서 단서 줄만 조용히 표시한다.</p>
+          <p>아래는 그때 본 로그 전체다. 접어둔 상태로 두고, 필요하면 <code>fork-multiple</code> 쪽 하이라이트만 켜서 어디를 봤는지 확인하면 된다.</p>
           <button class="pill-button" id="hint-toggle" type="button" aria-pressed="false">문제 단서 하이라이트</button>
         </div>
 
@@ -1190,20 +1290,20 @@ parse (const char *input) {
         </details>
 
         <details class="spoiler">
-          <summary class="spoiler-summary"><span>읽을 단서</span><span class="summary-icon" aria-hidden="true">+</span></summary>
+          <summary class="spoiler-summary"><span>로그에서 봤던 단서</span><span class="summary-icon" aria-hidden="true">+</span></summary>
           <div class="spoiler-body">
-            <p>바로 볼 수 있는 사실은 <code>fork-once</code>가 성공하고, <code>fork-multiple</code>의 첫 번째 child도 성공한다는 점이다. 두 번째 child 역시 copy와 child 실행까지는 끝난다.</p>
-            <p>깨지는 지점은 두 번째 child가 종료된 뒤 <code>supplemental args={kill spt=0x80042520f0}</code>에 들어간 직후다. 그 다음 <code>Interrupt 0x0d</code>, <code>rax cccccccccccccccc</code>, <code>Kernel PANIC</code>, <code>vm_try_handl value=0</code>, <code>Interrupt 0x0e</code>, <code>Kernel PANIC recursion</code>이 이어진다.</p>
-            <p>따라서 “fork 자체가 안 된다”가 아니라 반복 fork에서 cleanup 또는 소유권 문제가 터진다고 범위를 좁힌다.</p>
+            <p>일단 <code>fork-once</code>는 성공한다. <code>fork-multiple</code>도 첫 번째 child는 성공한다. 그러면 로더나 fork 진입 자체가 전부 망가졌다고 보기에는 애매하다.</p>
+            <p>두 번째 child도 copy랑 실행은 끝난다. 문제는 <code>child: exit(5)</code> 다음, <code>supplemental args={kill spt=0x80042520f0}</code>에 들어가자마자 나온다.</p>
+            <p>그 뒤에 <code>Interrupt 0x0d</code>, <code>rax cccccccccccccccc</code>, <code>vm_try_handl value=0</code>, <code>Kernel PANIC recursion</code>이 이어진다. 그래서 “실행 중에 터짐”보다는 “정리하다가 뭔가 잘못 만짐” 쪽으로 생각이 기울었다.</p>
           </div>
         </details>
 
         <details class="spoiler">
           <summary class="spoiler-summary"><span>원인 해설(스포일러)</span><span class="summary-icon" aria-hidden="true">+</span></summary>
           <div class="spoiler-body">
-            <p class="quote-line">구현 관점의 결론은 <code>copy</code>와 <code>kill</code> 사이에서 공유되면 안 되는 자원, 특히 <code>aux</code>의 소유권과 해제 시점을 의심해야 한다는 것이었다.</p>
-            <p>당시 기록은 “부모와 자식이 같이 보는 공유 자원, 특히 parent 쪽 <code>aux</code>를 child가 같이 보고, destroy에서 free한 뒤 두 번째 child가 다시 접근하거나 free하려는 흐름”으로 정리했다.</p>
-            <p>이 사례에서 로그가 한 일은 정답을 출력한 것이 아니다. 실패가 같은 child와 cleanup 근처에서 나는지, 첫 번째 child와 두 번째 child의 차이가 무엇인지, copy와 kill 중 누가 공유 자원을 건드리는지를 묻게 만들었다.</p>
+            <p class="quote-line">결국 의심한 건 <code>copy</code>와 <code>kill</code> 사이에서 공유되면 안 되는 자원이었다. 특히 <code>aux</code>를 누가 소유하고 언제 free하는지가 핵심이었다.</p>
+            <p>그때 메모로는 parent 쪽 <code>aux</code>를 child가 같이 보고 있었고, destroy에서 한 번 free된 뒤 두 번째 child가 다시 만지거나 free하려는 흐름으로 정리했다.</p>
+            <p>중요한 건 로그가 답을 바로 말해준 건 아니라는 점이다. 대신 “첫 번째는 되는데 두 번째 cleanup에서 터진다”까지 좁혀줘서, 전체 VM을 다시 보는 대신 copy/kill, aux 소유권, destroy 흐름만 볼 수 있게 해줬다.</p>
           </div>
         </details>
       </div>
@@ -2417,6 +2517,8 @@ Key</script>
     (function () {
       var hintToggle = document.getElementById('hint-toggle');
       var multiplePanel = document.getElementById('fork-multiple-render');
+      var thoughtToggle = document.getElementById('thought-toggle');
+      var thoughtFlow = document.getElementById('thought-flow');
 
       function sanitizeLog(raw) {
         return raw
@@ -2592,7 +2694,21 @@ Key</script>
         multiplePanel.classList.toggle('show-hints', next);
       });
 
+      function setThoughtFlow(open) {
+        thoughtToggle.setAttribute('aria-pressed', open ? 'true' : 'false');
+        thoughtToggle.textContent = open ? '생각 흐름 끄기' : '생각 흐름 켜기';
+        thoughtFlow.hidden = !open;
+      }
+
+      thoughtToggle.addEventListener('click', function () {
+        setThoughtFlow(thoughtToggle.getAttribute('aria-pressed') !== 'true');
+      });
+
       function applyHashState() {
+        if (window.location.hash === '#case-thought-open') {
+          setThoughtFlow(true);
+          thoughtFlow.scrollIntoView({ block: 'start' });
+        }
         if (window.location.hash === '#logs-open-highlight') {
           document.querySelectorAll('details.log-shell').forEach(function (details) {
             details.open = true;
