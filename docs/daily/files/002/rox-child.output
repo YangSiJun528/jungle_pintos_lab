@@ -1,0 +1,1889 @@
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+0138B4A0+012CB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..Kernel command line: -q -f put rox-child put child-rox run rox-child
+0 ~ 9fc00 1
+100000 ~ 13e0000 1
+Pintos booting with: 
+	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
+	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
+Calibrating timer...  117,760,000 loops/s.
+hd0: unexpected interrupt
+hd0:0: detected 377 sector (188 kB) disk, model "QEMU HARDDISK", serial "QM00001"
+hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
+hd1: unexpected interrupt
+hd1:0: detected 254 sector (127 kB) disk, model "QEMU HARDDISK", serial "QM00003"
+hd1:1: detected 8,064 sector (3 MB) disk, model "QEMU HARDDISK", serial "QM00004"
+Formatting file system...done.
+[DEG] r=thrd tid= 1 p4=           0 k=call   fn=vm_init      args={void}
+[DEG] r=thrd tid= 1 p4=           0 k=call   fn=init_frame_t args={frame_table=0x8004231920}
+[DEG] r=thrd tid= 1 p4=           0 k=return fn=init_frame_t void
+[DEG] r=thrd tid= 1 p4=           0 k=return fn=vm_init      void
+Boot complete.
+Putting 'rox-child' into the file system...
+Putting 'child-rox' into the file system...
+Executing 'rox-child':
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=initd        args={file_name="rox-child" status=0x8004248018}
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=supplemental args={init spt=0x80042490f0}
+[DEG] r=thrd tid= 3 p4=           0 k=return fn=supplemental void
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=process_exec args={f_name=0x8004246000 file_name="rox-child"}
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=supplemental args={init spt=0x80042490f0}
+[DEG] r=thrd tid= 3 p4=           0 k=return fn=supplemental void
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=load         args={file_name="rox-child" if_=0x8004249e58}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=seg    fn=load         vals={file_page=0 mem_page=4190208 read_bytes=400 zero_bytes=3696 writable=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=load_segment args={file=0x8004243038 ofs=0 upage=0x3ff000 read_bytes=400 zero_bytes=3696 writable=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.s fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=1 read_bytes=400 zero_bytes=3696
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x3ff000 read_bytes=400 zero_bytes=3696, ofs=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x3ff000 writable=0 init=0x800421f09c aux=0x800424b018}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x3ff000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248198 va=0x3ff000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.e fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=0 upage=0x400000 read_bytes=0 zero_bytes=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=load_segment value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=load         expr="is_segment_load_failed" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=seg    fn=load         vals={file_page=4096 mem_page=4194304 read_bytes=20704 zero_bytes=3872 writable=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=load_segment args={file=0x8004243038 ofs=4096 upage=0x400000 read_bytes=20704 zero_bytes=3872 writable=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.s fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=1 read_bytes=20704 zero_bytes=3872
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x400000 read_bytes=20704 zero_bytes=3872, ofs=4096
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x400000 writable=0 init=0x800421f09c aux=0x800424b038}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248218 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x401000 read_bytes=16608 zero_bytes=3872, ofs=8192
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x401000 writable=0 init=0x800421f09c aux=0x800424b058}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248298 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x402000 read_bytes=12512 zero_bytes=3872, ofs=12288
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x402000 writable=0 init=0x800421f09c aux=0x800424b078}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248318 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x403000 read_bytes=8416 zero_bytes=3872, ofs=16384
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x403000 writable=0 init=0x800421f09c aux=0x800424b098}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248398 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x404000 read_bytes=4320 zero_bytes=3872, ofs=20480
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x404000 writable=0 init=0x800421f09c aux=0x800424b0b8}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248418 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x405000 read_bytes=224 zero_bytes=3872, ofs=24576
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x405000 writable=0 init=0x800421f09c aux=0x800424b0d8}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248498 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.e fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=0 upage=0x406000 read_bytes=0 zero_bytes=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=load_segment value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=load         expr="is_segment_load_failed" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=seg    fn=load         vals={file_page=0 mem_page=4218880 read_bytes=0 zero_bytes=4096 writable=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=load_segment args={file=0x8004243038 ofs=0 upage=0x406000 read_bytes=0 zero_bytes=4096 writable=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.s fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=1 read_bytes=0 zero_bytes=4096
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x406000 read_bytes=0 zero_bytes=4096, ofs=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x406000 writable=1 init=0x800421f09c aux=0x800424b0f8}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248518 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.e fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=0 upage=0x407000 read_bytes=0 zero_bytes=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=load_segment value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=load         expr="is_segment_load_failed" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=here   fn=load         vals={before setup_stack}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=setup_stack  args={if_=0x8004249e58}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=stat   fn=setup_stack  vals={USER_STACK=0x47480000 stack_bottom=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=9 upage=0x4747f000 writable=1 init=0 aux=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248598 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248598 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b118
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248598 frame=0x800424b118 kva=0x8004a21000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=here   fn=setup_stack  vals={before label - done}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=setup_stack  value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=here   fn=load         vals={before label done}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=load         value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=process_exec expr="is_load_failed" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x400df2 user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248218
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248218 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b138
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248218 aux=0x800424b038 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248218
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248218 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b158
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=72 page=0x8004248218 frame=0x800424b158 kva=0x8004a23000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248218
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248218 frame=0x800424b138 kva=0x8004a22000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x4060e0 user=1 write=1 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248518 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b038
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248518 aux=0x800424b0f8 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248518 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b178
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=72 page=0x8004248518 frame=0x800424b178 kva=0x8004a25000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248518 frame=0x800424b038 kva=0x8004a24000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x40120d user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248298
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248298 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b0f8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248298 aux=0x800424b058 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248298
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248298 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b198
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=200 page=0x8004248298 frame=0x800424b198 kva=0x8004a27000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248298
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248298 frame=0x800424b0f8 kva=0x8004a26000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x4047b0 user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248418 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b058
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248418 aux=0x800424b0b8 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248418 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b1b8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=72 page=0x8004248418 frame=0x800424b1b8 kva=0x8004a29000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248418 frame=0x800424b058 kva=0x8004a28000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x40311d user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248398
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248398 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b0b8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248398 aux=0x800424b098 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248398
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248398 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b1d8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=200 page=0x8004248398 frame=0x800424b1d8 kva=0x8004a2b000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248398
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248398 frame=0x800424b0b8 kva=0x8004a2a000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x402274 user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248318
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248318 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b098
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248318 aux=0x800424b078 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248318
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248318 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b1f8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=72 page=0x8004248318 frame=0x800424b1f8 kva=0x8004a2d000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248318
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248318 frame=0x800424b098 kva=0x8004a2c000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x406100 sz=18}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+(rox-child) begin
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x406100 sz=29}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+(rox-child) open "child-rox"
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x406100 sz=29}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+(rox-child) read "child-rox"
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x406100 sz=30}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+(rox-child) write "child-rox"
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=2, buf=0x4747ff70 sz=16}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x406100 sz=31}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+(rox-child) exec "child-rox 1"
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=supplemental args={init spt=0x80042520f0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=supplemental void
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=supplemental args={copy dst=0x80042520f0 src=0x80042490f0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x3ff000 writable=0 init=0x800421f09c aux=0x800424b218}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x3ff000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248718 va=0x3ff000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x406000 writable=1 init=0 aux=0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x406000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248798 va=0x406000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_claim_pag args={va=0x406000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x406000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248798
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_do_claim_ args={page=0x8004248798 va=0x406000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_get_frame value=0x800424b238
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248798 frame=0x800424b238 kva=0x8004a2e000
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_claim_pag value=1 page=0x8004248798
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x406000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248798
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x405000 writable=0 init=0x800421f09c aux=0x800424b258}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x405000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248818 va=0x405000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x404000 writable=0 init=0 aux=0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x404000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248898 va=0x404000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_claim_pag args={va=0x404000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x404000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248898
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_do_claim_ args={page=0x8004248898 va=0x404000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_get_frame value=0x800424b278
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248898 frame=0x800424b278 kva=0x8004a2f000
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_claim_pag value=1 page=0x8004248898
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x404000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248898
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x403000 writable=0 init=0 aux=0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x403000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248918 va=0x403000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_claim_pag args={va=0x403000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x403000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248918
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_do_claim_ args={page=0x8004248918 va=0x403000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_get_frame value=0x800424b298
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248918 frame=0x800424b298 kva=0x8004a30000
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_claim_pag value=1 page=0x8004248918
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x403000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248918
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x402000 writable=0 init=0 aux=0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x402000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248998 va=0x402000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_claim_pag args={va=0x402000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x402000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248998
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_do_claim_ args={page=0x8004248998 va=0x402000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_get_frame value=0x800424b2b8
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248998 frame=0x800424b2b8 kva=0x8004a31000
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_claim_pag value=1 page=0x8004248998
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x402000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248998
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x401000 writable=0 init=0 aux=0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x401000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248a18 va=0x401000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_claim_pag args={va=0x401000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x401000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248a18
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_do_claim_ args={page=0x8004248a18 va=0x401000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_get_frame value=0x800424b2d8
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248a18 frame=0x800424b2d8 kva=0x8004a32000
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_claim_pag value=1 page=0x8004248a18
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x401000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248a18
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x400000 writable=0 init=0 aux=0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x400000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248a98 va=0x400000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_claim_pag args={va=0x400000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x400000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248a98
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_do_claim_ args={page=0x8004248a98 va=0x400000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_get_frame value=0x800424b2f8
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248a98 frame=0x800424b2f8 kva=0x8004a33000
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_claim_pag value=1 page=0x8004248a98
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x400000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248a98
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_alloc_pag args={type=1 upage=0x4747f000 writable=1 init=0 aux=0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x4747f000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x80042520f0 page=0x8004248b18 va=0x4747f000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_claim_pag args={va=0x4747f000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x4747f000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248b18
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_do_claim_ args={page=0x8004248b18 va=0x4747f000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_get_frame value=0x800424b318
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248b18 frame=0x800424b318 kva=0x8004a34000
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=vm_claim_pag value=1 page=0x8004248b18
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x4747f000}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=spt_find_pag value=0x8004248b18
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=supplemental value=true
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=process_exec args={f_name=0x8004258000 file_name="child-rox 1"}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=supplemental args={init spt=0x80042520f0}
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=return fn=supplemental void
+[DEG] r=thrd tid= 4 p4=0x8004250000 k=call   fn=load         args={file_name="child-rox 1" if_=0x8004252cf8}
+[DEG] r=thrd tid= 4 p4=0x8004259000 k=seg    fn=load         vals={file_page=0 mem_page=4190208 read_bytes=400 zero_bytes=3696 writable=0}
+[DEG] r=thrd tid= 4 p4=0x8004259000 k=call   fn=load_segment args={file=0x8004243098 ofs=0 upage=0x3ff000 read_bytes=400 zero_bytes=3696 writable=0}
+[DEG] r=thrd tid= 4 p4=0x8004259000 k=loop.s fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=1 read_bytes=400 zero_bytes=3696
+[DEG] r=thrd tid= 4 p4=0x8004259000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x3ff000 read_bytes=400 zero_bytes=3696, ofs=0
+[DEG] r=thrd tid= Kernel PANIC at ../../threads/thread.c:381 in thread_current(): assertion `is_thread(t)' failed.
+Call stack: 0x80042194d9 0x80042075d6 0x800420af7d 0x800421cb8b 0x800421cd70 0x800421cd50 0x8004217757 0x8004216b86 0x800421cbef 0x800421682c 0x8004224bea 0x800421f848 0x800421e8e3 0x800421dacd 0x80042210bd 0x800422032dKernel PANIC recursion at ../../threads/thread.c:381 in thread_current().
+Interrupt 0x0d (#GP General Protection Exception) at rip=8004223d3d
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422809d rdx 000000000000003d
+rsp 0000008004251c60 rbp 0000008004251c70 rsi 00000000000000cb rdi cccccccccccccccc
+rip 0000008004223d3d r8 00000080042280ca  r9 00000080042193f7 r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000006
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000006
+rsp 0000008004251a50 rbp 0000008004251a60 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000f
+rsp 0000008004251840 rbp 0000008004251850 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000018
+rsp 0000008004251630 rbp 0000008004251640 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000021
+rsp 0000008004251420 rbp 0000008004251430 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002a
+rsp 0000008004251210 rbp 0000008004251220 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000033
+rsp 0000008004251000 rbp 0000008004251010 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003c
+rsp 0000008004250df0 rbp 0000008004250e00 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000005
+rsp 0000008004250be0 rbp 0000008004250bf0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000e
+rsp 00000080042509d0 rbp 00000080042509e0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000017
+rsp 00000080042507c0 rbp 00000080042507d0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000020
+rsp 00000080042505b0 rbp 00000080042505c0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000029
+rsp 00000080042503a0 rbp 00000080042503b0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000032
+rsp 0000008004250190 rbp 00000080042501a0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003b
+rsp 000000800424ff80 rbp 000000800424ff90 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000004
+rsp 000000800424fd70 rbp 000000800424fd80 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000d
+rsp 000000800424fb60 rbp 000000800424fb70 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000016
+rsp 000000800424f950 rbp 000000800424f960 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001f
+rsp 000000800424f740 rbp 000000800424f750 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000028
+rsp 000000800424f530 rbp 000000800424f540 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000031
+rsp 000000800424f320 rbp 000000800424f330 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003a
+rsp 000000800424f110 rbp 000000800424f120 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000003
+rsp 000000800424ef00 rbp 000000800424ef10 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000c
+rsp 000000800424ecf0 rbp 000000800424ed00 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000015
+rsp 000000800424eae0 rbp 000000800424eaf0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001e
+rsp 000000800424e8d0 rbp 000000800424e8e0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000027
+rsp 000000800424e6c0 rbp 000000800424e6d0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000030
+rsp 000000800424e4b0 rbp 000000800424e4c0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000039
+rsp 000000800424e2a0 rbp 000000800424e2b0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000002
+rsp 000000800424e090 rbp 000000800424e0a0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000b
+rsp 000000800424de80 rbp 000000800424de90 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000014
+rsp 000000800424dc70 rbp 000000800424dc80 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001d
+rsp 000000800424da60 rbp 000000800424da70 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000026
+rsp 000000800424d850 rbp 000000800424d860 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002f
+rsp 000000800424d640 rbp 000000800424d650 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000038
+rsp 000000800424d430 rbp 000000800424d440 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000001
+rsp 000000800424d220 rbp 000000800424d230 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000a
+rsp 000000800424d010 rbp 000000800424d020 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000013
+rsp 000000800424ce00 rbp 000000800424ce10 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001c
+rsp 000000800424cbf0 rbp 000000800424cc00 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000025
+rsp 000000800424c9e0 rbp 000000800424c9f0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002e
+rsp 000000800424c7d0 rbp 000000800424c7e0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000037
+rsp 000000800424c5c0 rbp 000000800424c5d0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000000
+rsp 000000800424c3b0 rbp 000000800424c3c0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000009
+rsp 000000800424c1a0 rbp 000000800424c1b0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000012
+rsp 000000800424bf90 rbp 000000800424bfa0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001b
+rsp 000000800424bd80 rbp 000000800424bd90 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000024
+rsp 000000800424bb70 rbp 000000800424bb80 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002d
+rsp 000000800424b960 rbp 000000800424b970 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000036
+rsp 000000800424b750 rbp 000000800424b760 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003f
+rsp 000000800424b540 rbp 000000800424b550 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000008
+rsp 000000800424b330 rbp 000000800424b340 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000011
+rsp 000000800424b120 rbp 000000800424b130 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001a
+rsp 000000800424af10 rbp 000000800424af20 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000023
+rsp 000000800424ad00 rbp 000000800424ad10 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002c
+rsp 000000800424aaf0 rbp 000000800424ab00 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000035
+rsp 000000800424a8e0 rbp 000000800424a8f0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003e
+rsp 000000800424a6d0 rbp 000000800424a6e0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000007
+rsp 000000800424a4c0 rbp 000000800424a4d0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000010
+rsp 000000800424a2b0 rbp 000000800424a2c0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000019
+rsp 000000800424a0a0 rbp 000000800424a0b0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000022
+rsp 0000008004249e90 rbp 0000008004249ea0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002b
+rsp 0000008004249c80 rbp 0000008004249c90 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000034
+rsp 0000008004249a70 rbp 0000008004249a80 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003d
+rsp 0000008004249860 rbp 0000008004249870 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000006
+rsp 0000008004249650 rbp 0000008004249660 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000f
+rsp 0000008004249440 rbp 0000008004249450 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000018
+rsp 0000008004249230 rbp 0000008004249240 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000021
+rsp 0000008004249020 rbp 0000008004249030 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002a
+rsp 0000008004248e10 rbp 0000008004248e20 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000033
+rsp 0000008004248c00 rbp 0000008004248c10 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003c
+rsp 00000080042489f0 rbp 0000008004248a00 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000005
+rsp 00000080042487e0 rbp 00000080042487f0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000e
+rsp 00000080042485d0 rbp 00000080042485e0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000017
+rsp 00000080042483c0 rbp 00000080042483d0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000020
+rsp 00000080042481b0 rbp 00000080042481c0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000029
+rsp 0000008004247fa0 rbp 0000008004247fb0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000032
+rsp 0000008004247d90 rbp 0000008004247da0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003b
+rsp 0000008004247b80 rbp 0000008004247b90 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000004
+rsp 0000008004247970 rbp 0000008004247980 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000d
+rsp 0000008004247760 rbp 0000008004247770 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000016
+rsp 0000008004247550 rbp 0000008004247560 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001f
+rsp 0000008004247340 rbp 0000008004247350 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000028
+rsp 0000008004247130 rbp 0000008004247140 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000031
+rsp 0000008004246f20 rbp 0000008004246f30 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000003a
+rsp 0000008004246d10 rbp 0000008004246d20 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000003
+rsp 0000008004246b00 rbp 0000008004246b10 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000c
+rsp 00000080042468f0 rbp 0000008004246900 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000015
+rsp 00000080042466e0 rbp 00000080042466f0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001e
+rsp 00000080042464d0 rbp 00000080042464e0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000027
+rsp 00000080042462c0 rbp 00000080042462d0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000030
+rsp 00000080042460b0 rbp 00000080042460c0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000039
+rsp 0000008004245ea0 rbp 0000008004245eb0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000002
+rsp 0000008004245c90 rbp 0000008004245ca0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000b
+rsp 0000008004245a80 rbp 0000008004245a90 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000014
+rsp 0000008004245870 rbp 0000008004245880 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001d
+rsp 0000008004245660 rbp 0000008004245670 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000026
+rsp 0000008004245450 rbp 0000008004245460 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002f
+rsp 0000008004245240 rbp 0000008004245250 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000038
+rsp 0000008004245030 rbp 0000008004245040 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000001
+rsp 0000008004244e20 rbp 0000008004244e30 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000000a
+rsp 0000008004244c10 rbp 0000008004244c20 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000013
+rsp 0000008004244a00 rbp 0000008004244a10 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001c
+rsp 00000080042447f0 rbp 0000008004244800 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000025
+rsp 00000080042445e0 rbp 00000080042445f0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002e
+rsp 00000080042443d0 rbp 00000080042443e0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000037
+rsp 00000080042441c0 rbp 00000080042441d0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000000
+rsp 0000008004243fb0 rbp 0000008004243fc0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000009
+rsp 0000008004243da0 rbp 0000008004243db0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000012
+rsp 0000008004243b90 rbp 0000008004243ba0 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000001b
+rsp 0000008004243980 rbp 0000008004243990 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000024
+rsp 0000008004243770 rbp 0000008004243780 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 000000000000002d
+rsp 0000008004243560 rbp 0000008004243570 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010
+Interrupt 0x0d (#GP General Protection Exception) at rip=80042237f9
+ cr2=000000004747ff60 error=               0
+rax cccccccccccccccc rbx 0000008004252000 rcx 000000800422c920 rdx 0000000000000036
+rsp 0000008004243350 rbp 0000008004243360 rsi 000000000000000a rdi cccccccccccccccc
+rip 00000080042237f9 r8 00000080042193f7  r9 000000800421cd0f r10 00000080042167d7
+r11 0000000000000216 r12 0000000000000000 r13 0000008004259000 r14 0000008004259000
+r15 0000008004249000 rflags 00000086
+es: 0010 ds: 0010 cs: 0008 ss: 0010

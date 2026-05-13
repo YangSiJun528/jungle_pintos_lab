@@ -1,0 +1,853 @@
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+0138B4A0+012CB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..Kernel command line: -q -f put rox-simple run rox-simple
+0 ~ 9fc00 1
+100000 ~ 13e0000 1
+Pintos booting with: 
+	base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
+	ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
+Calibrating timer...  157,081,600 loops/s.
+hd0: unexpected interrupt
+hd0:0: detected 377 sector (188 kB) disk, model "QEMU HARDDISK", serial "QM00001"
+hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
+hd1: unexpected interrupt
+hd1:0: detected 120 sector (60 kB) disk, model "QEMU HARDDISK", serial "QM00003"
+hd1:1: detected 8,064 sector (3 MB) disk, model "QEMU HARDDISK", serial "QM00004"
+Formatting file system...done.
+[DEG] r=thrd tid= 1 p4=           0 k=call   fn=vm_init      args={void}
+[DEG] r=thrd tid= 1 p4=           0 k=call   fn=init_frame_t args={frame_table=0x8004231920}
+[DEG] r=thrd tid= 1 p4=           0 k=return fn=init_frame_t void
+[DEG] r=thrd tid= 1 p4=           0 k=return fn=vm_init      void
+Boot complete.
+Putting 'rox-simple' into the file system...
+Executing 'rox-simple':
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=initd        args={file_name="rox-simple" status=0x8004248018}
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=supplemental args={init spt=0x80042490f0}
+[DEG] r=thrd tid= 3 p4=           0 k=return fn=supplemental void
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=process_exec args={f_name=0x8004246000 file_name="rox-simple"}
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=supplemental args={init spt=0x80042490f0}
+[DEG] r=thrd tid= 3 p4=           0 k=return fn=supplemental void
+[DEG] r=thrd tid= 3 p4=           0 k=call   fn=load         args={file_name="rox-simple" if_=0x8004249e58}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=seg    fn=load         vals={file_page=0 mem_page=4190208 read_bytes=400 zero_bytes=3696 writable=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=load_segment args={file=0x8004243038 ofs=0 upage=0x3ff000 read_bytes=400 zero_bytes=3696 writable=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.s fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=1 read_bytes=400 zero_bytes=3696
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x3ff000 read_bytes=400 zero_bytes=3696, ofs=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x3ff000 writable=0 init=0x800421f09c aux=0x800424b018}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x3ff000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248198 va=0x3ff000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.e fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=0 upage=0x400000 read_bytes=0 zero_bytes=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=load_segment value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=load         expr="is_segment_load_failed" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=seg    fn=load         vals={file_page=4096 mem_page=4194304 read_bytes=20272 zero_bytes=208 writable=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=load_segment args={file=0x8004243038 ofs=4096 upage=0x400000 read_bytes=20272 zero_bytes=208 writable=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.s fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=1 read_bytes=20272 zero_bytes=208
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x400000 read_bytes=20272 zero_bytes=208, ofs=4096
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x400000 writable=0 init=0x800421f09c aux=0x800424b038}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248218 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x401000 read_bytes=16176 zero_bytes=208, ofs=8192
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x401000 writable=0 init=0x800421f09c aux=0x800424b058}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248298 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x402000 read_bytes=12080 zero_bytes=208, ofs=12288
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x402000 writable=0 init=0x800421f09c aux=0x800424b078}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248318 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x403000 read_bytes=7984 zero_bytes=208, ofs=16384
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x403000 writable=0 init=0x800421f09c aux=0x800424b098}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248398 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x404000 read_bytes=3888 zero_bytes=208, ofs=20480
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x404000 writable=0 init=0x800421f09c aux=0x800424b0b8}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248418 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.e fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=0 upage=0x405000 read_bytes=0 zero_bytes=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=load_segment value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=load         expr="is_segment_load_failed" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=seg    fn=load         vals={file_page=0 mem_page=4214784 read_bytes=0 zero_bytes=8192 writable=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=load_segment args={file=0x8004243038 ofs=0 upage=0x405000 read_bytes=0 zero_bytes=8192 writable=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.s fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=1 read_bytes=0 zero_bytes=8192
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x405000 read_bytes=0 zero_bytes=8192, ofs=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x405000 writable=1 init=0x800421f09c aux=0x800424b0d8}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248498 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop   fn=load_segment expr="has_page_now" value=1 upage=0x406000 read_bytes=0 zero_bytes=4096, ofs=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=1 upage=0x406000 writable=1 init=0x800421f09c aux=0x800424b0f8}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248518 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=loop.e fn=load_segment expr="read_bytes > 0 || zero_bytes > 0" value=0 upage=0x407000 read_bytes=0 zero_bytes=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=load_segment value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=load         expr="is_segment_load_failed" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=here   fn=load         vals={before setup_stack}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=setup_stack  args={if_=0x8004249e58}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=stat   fn=setup_stack  vals={USER_STACK=0x47480000 stack_bottom=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_alloc_pag args={type=9 upage=0x4747f000 writable=1 init=0 aux=0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_insert_p args={spt=0x80042490f0 page=0x8004248598 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_insert_p value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_alloc_pag value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248598 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b118
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248598 frame=0x800424b118 kva=0x8004a21000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=here   fn=setup_stack  vals={before label - done}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=setup_stack  value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=here   fn=load         vals={before label done}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=load         value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=process_exec expr="is_load_failed" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x400c6a user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248218
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248218 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b138
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248218 aux=0x800424b038 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248218
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248218 va=0x400000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b158
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=72 page=0x8004248218 frame=0x800424b158 kva=0x8004a23000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248218
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248218 frame=0x800424b138 kva=0x8004a22000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x405f40 user=1 write=1 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248498 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b038
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248498 aux=0x800424b0d8 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248498 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b178
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=200 page=0x8004248498 frame=0x800424b178 kva=0x8004a25000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248498 frame=0x800424b038 kva=0x8004a24000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x401085 user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248298
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248298 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b0d8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248298 aux=0x800424b058 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248298
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248298 va=0x401000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b198
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=200 page=0x8004248298 frame=0x800424b198 kva=0x8004a27000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248298
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248298 frame=0x800424b0d8 kva=0x8004a26000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x4045f8 user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248418 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b058
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248418 aux=0x800424b0b8 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248418 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b1b8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=72 page=0x8004248418 frame=0x800424b1b8 kva=0x8004a29000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248418 frame=0x800424b058 kva=0x8004a28000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x402f95 user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248318
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248318 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b0b8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248318 aux=0x800424b078 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248318
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248318 va=0x402000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b1d8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=72 page=0x8004248318 frame=0x800424b1d8 kva=0x8004a2b000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248318
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248318 frame=0x800424b0b8 kva=0x8004a2a000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x403042 user=1 write=0 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248398
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248398 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b078
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248398 aux=0x800424b098 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248398
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248398 va=0x403000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b1f8
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=200 page=0x8004248398 frame=0x800424b1f8 kva=0x8004a2d000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248398
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248398 frame=0x800424b078 kva=0x8004a2c000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x405f60 sz=19}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+(rox-simple) begin
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_try_handl args={f=0x8004249f40 addr=0x406360 user=1 write=1 not_present=1}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=vm_try_handl expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248518 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b098
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=lazy_load_se args={page=0x8004248518 aux=0x800424b0f8 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_claim_pag args={va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x80042490f0 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_do_claim_ args={page=0x8004248518 va=0x406000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=vm_get_frame args={void}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_get_frame value=0x800424b218
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=72 page=0x8004248518 frame=0x800424b218 kva=0x8004a2f000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_claim_pag value=1 page=0x8004248518
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=lazy_load_se value=true
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_do_claim_ value=0 result=1 page=0x8004248518 frame=0x800424b098 kva=0x8004a2e000
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=vm_try_handl value=1
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x405f60 sz=31}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+(rox-simple) open "rox-simple"
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x404000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248418
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x405f60 sz=31}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+(rox-simple) read "rox-simple"
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249d70 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x405f60 sz=39}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+(rox-simple) try to write "rox-simple"
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=2, buf=0x4747ff7c sz=16}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x4747f000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248598
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=WRITE  fn=syscall_hand vals={CALL fd=1, buf=0x405f60 sz=17}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=spt_find_pag args={spt=0x8004249db0 va=0x405000}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=branch fn=spt_find_pag expr="is_not_found" value=0
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=spt_find_pag value=0x8004248498
+(rox-simple) end
+rox-simple: exit(0)
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=supplemental args={kill spt=0x80042490f0}
+[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=supplemental void
+Execution of 'rox-simple' complete.
+Timer: 519 ticks
+Thread: 38 idle ticks, 42 kernel ticks, 439 user ticks
+hd0:0: 0 reads, 0 writes
+hd0:1: 87 reads, 268 writes
+hd1:0: 120 reads, 0 writes
+hd1:1: 0 reads, 0 writes
+Console: 75024 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
