@@ -556,8 +556,8 @@
       min-width: max-content;
     }
 
-    .source-line span:first-child,
-    .console-line span:first-child {
+    .source-line > span:first-child,
+    .console-line > span:first-child {
       color: var(--muted-soft);
       text-align: right;
       padding: 0 12px;
@@ -565,22 +565,22 @@
       user-select: none;
     }
 
-    .source-line span:last-child,
-    .console-line span:last-child {
+    .source-line > span:last-child,
+    .console-line > span:last-child {
       padding: 0 16px;
       white-space: pre;
       color: var(--code-ink);
     }
 
-    .source-line span:last-child.indent-1 {
+    .source-line > span:last-child.indent-1 {
       padding-left: calc(16px + 2ch);
     }
 
-    .source-line span:last-child.indent-2 {
+    .source-line > span:last-child.indent-2 {
       padding-left: calc(16px + 4ch);
     }
 
-    .source-line span:last-child.indent-3 {
+    .source-line > span:last-child.indent-3 {
       padding-left: calc(16px + 6ch);
     }
 
@@ -589,10 +589,35 @@
       background: #fff7ed;
     }
 
-    .source-line.active span:first-child,
-    .console-line.active span:first-child {
+    .source-line.active > span:first-child,
+    .console-line.active > span:first-child {
       color: var(--error);
       background: #fff7ed;
+    }
+
+    .c-keyword,
+    .c-type {
+      color: #7c2d12;
+      font-weight: 650;
+    }
+
+    .c-call {
+      color: #1f4f46;
+      font-weight: 600;
+    }
+
+    .c-string,
+    .c-char {
+      color: #7f1d1d;
+    }
+
+    .c-number {
+      color: #4c3d8f;
+    }
+
+    .c-operator {
+      color: #57534e;
+      font-weight: 600;
     }
 
     .plain-key {
@@ -957,7 +982,7 @@
           <p class="lead">로그 분석의 기본 질문은 세 가지다. 마지막으로 정상인 줄은 어디인가, 처음으로 이상해진 줄은 어디인가, 그 사이에서 어떤 값이 바뀌었는가.</p>
           <figure class="code-card">
             <figcaption><span>실제 예시 코드</span><span class="mono">parse("12x")</span></figcaption>
-            <pre><code>int
+            <pre><code class="language-c">int
 parse (const char *input) {
   printf ("[DBG] fn=parse k=call args={input=\"%s\"}\n", input);
 
@@ -2515,6 +2540,49 @@ Key</script>
         target.appendChild(fragment);
       }
 
+      function appendCHighlight(parent, text) {
+        var pattern = /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:int|char|const|bool|if|for|return|true|false)\b|\b[A-Za-z_]\w*(?=\s*\()|\b\d+\b|&&|\|\||==|!=|<=|>=|[-+*/%=!<>])/g;
+        var cursor = 0;
+        var match;
+        while ((match = pattern.exec(text)) !== null) {
+          if (match.index > cursor) {
+            parent.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+          }
+          var token = match[0];
+          var span = document.createElement('span');
+          if (token[0] === '"') {
+            span.className = 'c-string';
+          } else if (token[0] === "'") {
+            span.className = 'c-char';
+          } else if (/^(int|char|const|bool)$/.test(token)) {
+            span.className = 'c-type';
+          } else if (/^(if|for|return|true|false)$/.test(token)) {
+            span.className = 'c-keyword';
+          } else if (/^\d+$/.test(token)) {
+            span.className = 'c-number';
+          } else if (/^(?:&&|\|\||==|!=|<=|>=|[-+*/%=!<>])$/.test(token)) {
+            span.className = 'c-operator';
+          } else {
+            span.className = 'c-call';
+          }
+          span.textContent = token;
+          parent.appendChild(span);
+          cursor = match.index + token.length;
+        }
+        if (cursor < text.length) {
+          parent.appendChild(document.createTextNode(text.slice(cursor)));
+        }
+      }
+
+      function highlightCCode() {
+        document.querySelectorAll('code.language-c, .source-line span:last-child').forEach(function (node) {
+          var text = node.textContent;
+          node.textContent = '';
+          appendCHighlight(node, text);
+        });
+      }
+
+      highlightCCode();
       renderLog('fork-once-log', 'fork-once-render', false);
       renderLog('fork-multiple-log', 'fork-multiple-render', true);
 
