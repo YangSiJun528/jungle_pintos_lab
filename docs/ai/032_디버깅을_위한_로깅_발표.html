@@ -800,6 +800,11 @@
     }
 
     @media (max-width: 680px) {
+      body {
+        word-break: normal;
+        overflow-wrap: anywhere;
+      }
+
       .utility-inner {
         justify-content: center;
       }
@@ -818,10 +823,34 @@
       .top-nav nav {
         width: 100%;
         justify-content: flex-start;
+        flex-wrap: wrap;
+        overflow-x: visible;
       }
 
       section.section {
         padding: 48px 0;
+      }
+
+      .hero h1 {
+        font-size: 38px;
+        line-height: 1.08;
+      }
+
+      h2 {
+        font-size: 30px;
+        line-height: 1.08;
+      }
+
+      h3 {
+        font-size: 22px;
+      }
+
+      .lead {
+        font-size: 18px;
+      }
+
+      .section-copy {
+        font-size: 16px;
       }
 
       .card,
