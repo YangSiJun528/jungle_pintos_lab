@@ -1152,7 +1152,7 @@ parse (const char *input) {
           <div class="section-kicker">6. 실제 사례</div>
           <div>
             <h2>2026-05-12 fork-multiple</h2>
-            <p class="section-copy">이 사례는 Pintos VM 작업 중 <span class="inline-code">fork-once</span>는 통과하지만 <span class="inline-code">fork-multiple</span>에서 실패하던 상황을 로그로 좁힌 기록이다. 로그는 접힌 상태로 두고 직접 열어볼 수 있게 했다.</p>
+            <p class="section-copy">이 사례는 Pintos VM 작업 중 <span class="inline-code">fork-once</span>는 통과하지만 <span class="inline-code">fork-multiple</span>에서 실패하던 상황을 로그로 좁힌 기록이다. 실제 출력의 핵심 구간을 접어 두고, 먼저 직접 읽은 뒤 하이라이트를 켤 수 있게 했다.</p>
           </div>
         </div>
 
@@ -1174,126 +1174,105 @@ parse (const char *input) {
 
           <div class="case-body">
             <details>
-              <summary>fork-once 성공 로그 열기</summary>
+              <summary>fork-once 기준 로그 열기</summary>
               <div class="details-inner">
                 <div class="code-block">
-                  <div class="code-caption"><strong>docs/daily/files/001/fork-once.output</strong><span>성공 기준</span></div>
-                  <pre>SeaBIOS (version 1.15.0-1)
-
-iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+0138B4A0+012CB4A0 CA00
-Press Ctrl-B to configure iPXE (PCI 00:03.0)...
-
-Booting from Hard Disk..Kernel command line: -q -f put fork-once run fork-once
-0 ~ 9fc00 1
-100000 ~ 13e0000 1
-Pintos booting with:
-  base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
-  ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  157,081,600 loops/s.
-hd0: unexpected interrupt
-hd0:0: detected 345 sector (172 kB) disk, model "QEMU HARDDISK", serial "QM00001"
-hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
-hd1: unexpected interrupt
-hd1:0: detected 120 sector (60 kB) disk, model "QEMU HARDDISK", serial "QM00003"
-Formatting file system...done.
-Boot complete.
+                  <div class="code-caption"><strong>docs/daily/files/001/fork-once.output</strong><span>성공 기준, 핵심 구간 발췌</span></div>
+                  <pre>Booting from Hard Disk..Kernel command line: -q -f put fork-once run fork-once
+...
 Putting 'fork-once' into the file system...
 Executing 'fork-once':
-(fork-once) begin
-(fork-once) child run
-child: exit(81)
-(fork-once) Parent: child exit status is 81
-(fork-once) end
-fork-once: exit(0)
+<span class="log-line">[DEG] r=thrd tid= 3 p4=           0 k=call   fn=initd        args={file_name="fork-once" status=0x8004248018}</span>
+<span class="log-line">[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=supplemental args={init spt=0x80042490f0}</span>
+<span class="log-line">[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=supplemental void</span>
+...
+<span class="log-line">(fork-once) begin</span>
+<span class="log-line">[DEG] r=thrd tid= 4 p4=0x800424f000 k=call   fn=supplemental args={init spt=0x80042510f0}</span>
+<span class="log-line">[DEG] r=thrd tid= 4 p4=0x800424f000 k=return fn=supplemental void</span>
+<span class="log-line log-call">[DEG] r=thrd tid= 4 p4=0x800424f000 k=call   fn=supplemental args={copy dst=0x80042510f0 src=0x80042490f0}</span>
+...
+<span class="log-line log-return">[DEG] r=thrd tid= 4 p4=0x800424f000 k=return fn=supplemental value=true</span>
+<span class="log-line">(fork-once) child run</span>
+<span class="log-line">child: exit(81)</span>
+<span class="log-line log-call">[DEG] r=thrd tid= 4 p4=0x800424f000 k=call   fn=supplemental args={kill spt=0x80042510f0}</span>
+<span class="log-line log-return">[DEG] r=thrd tid= 4 p4=0x800424f000 k=return fn=supplemental void</span>
+<span class="log-line">(fork-once) Parent: child exit status is 81</span>
+<span class="log-line">(fork-once) end</span>
+<span class="log-line">fork-once: exit(0)</span>
+<span class="log-line log-call">[DEG] r=thrd tid= 3 p4=0x800424a000 k=call   fn=supplemental args={kill spt=0x80042490f0}</span>
+<span class="log-line log-return">[DEG] r=thrd tid= 3 p4=0x800424a000 k=return fn=supplemental void</span>
 Execution of 'fork-once' complete.
-Timer: 82 ticks
-Thread: 38 idle ticks, 39 kernel ticks, 5 user ticks
-hd0:0: 0 reads, 0 writes
-hd0:1: 85 reads, 268 writes
-hd1:0: 120 reads, 0 writes
-Console: 974 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...</pre>
+Exception: 0 page faults</pre>
                 </div>
               </div>
             </details>
 
             <details>
-              <summary>fork-multiple 성공 로그 열기</summary>
+              <summary>fork-multiple 실패 로그 열기</summary>
               <div class="details-inner">
                 <div class="code-block">
-                  <div class="code-caption"><strong>docs/daily/files/001/fork-multiple.output</strong><span>수정 후 결과</span></div>
-                  <pre>SeaBIOS (version 1.15.0-1)
-
-iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+0138B4A0+012CB4A0 CA00
-Press Ctrl-B to configure iPXE (PCI 00:03.0)...
-
-Booting from Hard Disk..Kernel command line: -q -f put fork-multiple run fork-multiple
-0 ~ 9fc00 1
-100000 ~ 13e0000 1
-Pintos booting with:
-  base_mem: 0x0 ~ 0x9fc00 (Usable: 639 kB)
-  ext_mem: 0x100000 ~ 0x13e0000 (Usable: 19,328 kB)
-Calibrating timer...  157,081,600 loops/s.
-hd0: unexpected interrupt
-hd0:0: detected 345 sector (172 kB) disk, model "QEMU HARDDISK", serial "QM00001"
-hd0:1: detected 20,160 sector (9 MB) disk, model "QEMU HARDDISK", serial "QM00002"
-hd1: unexpected interrupt
-hd1:0: detected 120 sector (60 kB) disk, model "QEMU HARDDISK", serial "QM00003"
-Formatting file system...done.
-Boot complete.
+                  <div class="code-caption"><strong>docs/daily/files/001/fork-multiple.output</strong><span>실패 출력, 핵심 구간 발췌</span></div>
+                  <pre>Booting from Hard Disk..Kernel command line: -q -f put fork-multiple run fork-multiple
+...
 Putting 'fork-multiple' into the file system...
 Executing 'fork-multiple':
-(fork-multiple) begin
-<span class="log-line mark-target">(fork-multiple) child run</span>
-<span class="log-line mark-target">child: exit(4)</span>
-<span class="log-line mark-target">(fork-multiple) Parent: child exit status is 4</span>
+<span class="log-line">(fork-multiple) begin</span>
+<span class="log-line">[DEG] r=thrd tid= 4 p4=0x800424f000 k=call   fn=supplemental args={init spt=0x80042510f0}</span>
+<span class="log-line log-call">[DEG] r=thrd tid= 4 p4=0x800424f000 k=call   fn=supplemental args={copy dst=0x80042510f0 src=0x80042490f0}</span>
+...
+<span class="log-line log-return">[DEG] r=thrd tid= 4 p4=0x800424f000 k=return fn=supplemental value=true</span>
+<span class="log-line">(fork-multiple) child run</span>
+<span class="log-line">child: exit(4)</span>
+<span class="log-line log-call">[DEG] r=thrd tid= 4 p4=0x800424f000 k=call   fn=supplemental args={kill spt=0x80042510f0}</span>
+<span class="log-line log-return">[DEG] r=thrd tid= 4 p4=0x800424f000 k=return fn=supplemental void</span>
+<span class="log-line">(fork-multiple) Parent: child exit status is 4</span>
+
+<span class="log-line">[DEG] r=thrd tid= 5 p4=0x800424f000 k=call   fn=supplemental args={init spt=0x80042520f0}</span>
+<span class="log-line log-call">[DEG] r=thrd tid= 5 p4=0x800424f000 k=call   fn=supplemental args={copy dst=0x80042520f0 src=0x80042490f0}</span>
+<span class="log-line mark-target">[DEG] r=thrd tid= 5 p4=0x800424f000 k=call   fn=vm_alloc_pag args={type=1 upage=0x3ff000 writable=0 init=0x800421f083 aux=0x800424b018}</span>
+...
+<span class="log-line log-return">[DEG] r=thrd tid= 5 p4=0x800424f000 k=return fn=supplemental value=true</span>
 <span class="log-line mark-target">(fork-multiple) child run</span>
 <span class="log-line mark-target">child: exit(5)</span>
-<span class="log-line mark-target">(fork-multiple) Parent: child exit status is 5</span>
-<span class="log-line mark-target">(fork-multiple) child run</span>
-<span class="log-line mark-target">child: exit(6)</span>
-(fork-multiple) Parent: child exit status is 6
-(fork-multiple) child run
-child: exit(7)
-(fork-multiple) Parent: child exit status is 7
-(fork-multiple) end
-fork-multiple: exit(0)
-Execution of 'fork-multiple' complete.
-Timer: 90 ticks
-Thread: 37 idle ticks, 42 kernel ticks, 11 user ticks
-hd0:0: 0 reads, 0 writes
-hd0:1: 93 reads, 268 writes
-hd1:0: 120 reads, 0 writes
-Console: 1277 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...</pre>
+<span class="log-line log-call mark-target">[DEG] r=thrd tid= 5 p4=0x800424f000 k=call   fn=supplemental args={kill spt=0x80042520f0}</span>
+<span class="log-line log-branch mark-target">Interrupt 0x0d (#GP General Protection Exception) at rip=8004219b27</span>
+<span class="log-line mark-target"> cr2=0000000000406320 error=               0</span>
+<span class="log-line mark-target">rax cccccccccccccccc rbx 0000000000000005 rcx 0000000000000020 rdx 000000800424b018</span>
+<span class="log-line">rsp 0000008004252c30 rbp 0000008004252c40 rsi 000000800424b018 rdi 000000800424b018</span>
+<span class="log-line log-branch mark-target">Kernel PANIC at ../../userprog/exception.c:89 in kill(): Kernel bug - unexpected interrupt in kernel</span>
+<span class="log-line mark-target">Call stack: ... 0x400c64 0[DEG] r=thrd tid= 5 p4=0x800424f000 k=call   fn=vm_try_handl args={f=0x80042529b0 addr=0x421a04a user=0 write=0 not_present=1}</span>
+<span class="log-line log-call mark-target">[DEG] r=thrd tid= 5 p4=0x800424f000 k=call   fn=spt_find_pag args={spt=0x80042520f0 va=0x421a000}</span>
+<span class="log-line log-branch mark-target">[DEG] r=thrd tid= 5 p4=0x800424f000 k=branch fn=spt_find_pag expr="is_not_found" value=1</span>
+<span class="log-line mark-target">[DEG] r=thrd tid= 5 p4=0x800424f000 k=return fn=spt_find_p(fork-multiple) Parent: child exit status is 5</span>
+<span class="log-line mark-target">ag value=0</span>
+<span class="log-line log-branch mark-target">[DEG] r=thrd tid= 5 p4=0x800424f000 k=branch fn=vm_try_handl expr="is_not_found" value=1</span>
+<span class="log-line log-return mark-target">[DEG] r=thrd tid= 5 p4=0x800424f000 k=return fn=vm_try_handl value=0</span>
+<span class="log-line log-branch mark-target">Interrupt 0x0e (#PF Page-Fault Exception) at rip=8004216335</span>
+<span class="log-line mark-target"> cr2=000000000421a04a error=               0</span>
+<span class="log-line mark-target">rip 0000008004216335 r8 0000008004252988  r9 000000800421cd0f r10 000[DEG] r=thrd tid= 6 p4=0x8004250000 k=call   fn=supplemental args={init spt=0x80042580f0}</span>
+<span class="log-line">[DEG] r=thrd tid= 6 p4=0x8004250000 k=return fn=supplemental void</span>
+<span class="log-line">[DEG] r=thrd tid= 6 p4=0x8004250000 k=call   fn=supplemental args={copy dst=0x80042580f0 src=0x80042490f0}</span>
+<span class="log-line log-branch mark-target">Kernel PANIC recursion at ../../userprog/exception.c:89 in kill().</span>
+Timer: 424 ticks
+Exception output continues after panic.</pre>
                 </div>
               </div>
             </details>
 
             <details>
-              <summary>디버깅 당시 남은 핵심 단서 열기</summary>
+              <summary>로그에서 읽을 핵심 단서 열기</summary>
               <div class="details-inner">
-                <p style="color: var(--graphite);">실패 당시 DEG 로그 전체 파일은 남아 있지 않고, 2026-05-12 daily에 핵심 단서가 기록되어 있다.</p>
+                <p style="color: var(--graphite);">하이라이트를 켜기 전에는 아래 순서만 생각하면서 읽는다. “어느 child까지 정상인가?”, “정상 구간과 깨지는 구간의 함수 이름이 어디서 갈리는가?”, “패닉 직전 값이 말이 되는가?”</p>
                 <div class="code-block">
-                  <div class="code-caption"><strong>daily excerpt</strong><span>highlight 토글 대상</span></div>
-                  <pre><span class="log-line">fork-once은 성공하고 fork-multiple은 실패함.</span>
-<span class="log-line">001 번 파일에 저장해둠</span>
-<span class="log-line mark-target">k=return fn=vm_try_handl... 으로 검사하니까 0으로 실패하고 패닉남.</span>
-
-<span class="log-line">그리고 그 이후에 다음 로그로 좀 이상하게 나옴.</span>
-<span class="log-line log-call mark-target">[DEG] r=thrd tid= 6 p4=0x8004250000 k=call   fn=spt_insert_p args={spt=0x8: 0010 ds: 0010 cs: 0008 ss: 0010</span>
-
-<span class="log-line">1. fork mul에서 1번 자식 생성 시 문제 없이 성공 후 종료 완료</span>
-<span class="log-line mark-target">2. fork mul에서 2번 자식 생성 시 문제 없이 성공 후 종료 시 패닉</span>
-<span class="log-line mark-target">3. fork mul에서 3번 자식 생성 시 커널 패닉</span>
-
-<span class="log-line mark-target">패닉 나기 전 코드가 supplemental_page_table_copy, supplemental_page_table_kill</span>
-<span class="log-line mark-target">여기서 보는 공유 자원이 문제일 것. 부모와 자식이 같이 보는 spt 등</span>
-<span class="log-line mark-target">aux 를 부모거만 보고, uninit destroy에서 free 해줘서 2번째 자식이 free 하려고 하거나 aux 접근할 때 에러나는거임.</span></pre>
+                  <div class="code-caption"><strong>reading notes</strong><span>highlight 토글 대상</span></div>
+                  <pre><span class="log-line">1. fork-once는 child 하나를 만들고 copy - child exit - kill - parent wait 순서로 정상 종료한다.</span>
+<span class="log-line">2. fork-multiple에서도 첫 번째 child(tid=4)는 같은 순서로 정상 종료한다.</span>
+<span class="log-line mark-target">3. 두 번째 child(tid=5)는 copy가 끝난 뒤 child: exit(5)까지 출력된다.</span>
+<span class="log-line mark-target">4. 깨지는 위치는 child 실행 중이 아니라 tid=5의 supplemental kill 진입 직후다.</span>
+<span class="log-line mark-target">5. #GP에서 rax=cccccccccccccccc, rdx/rsi/rdi=0x800424b018이 같이 보인다.</span>
+<span class="log-line mark-target">6. 이어서 vm_try_handle_fault가 addr=0x421a04a를 처리하려고 하지만 spt_find_page가 va=0x421a000을 못 찾는다.</span>
+<span class="log-line mark-target">7. vm_try_handle_fault value=0 이후 #PF와 Kernel PANIC recursion이 이어진다.</span>
+<span class="log-line">8. 그래서 처음부터 “fork 자체가 실패했다”가 아니라, 반복 fork에서 cleanup/소유권 문제가 터졌다고 좁힌다.</span></pre>
                 </div>
               </div>
             </details>
@@ -1304,15 +1283,15 @@ Powering off...</pre>
                 <div class="hint-grid">
                   <div class="hint">
                     <strong>1. 비교 기준</strong>
-                    <p><span class="inline-code">fork-once</span>는 성공하고 <span class="inline-code">fork-multiple</span>에서 여러 child를 만들 때 문제가 커졌다.</p>
+                    <p><span class="inline-code">fork-once</span>와 <span class="inline-code">fork-multiple</span>의 첫 child는 같은 흐름으로 종료된다. 기준선은 깨지지 않았다.</p>
                   </div>
                   <div class="hint target">
                     <strong>2. 이상 신호</strong>
-                    <p><span class="spoil-word">spt=0x8</span>처럼 말이 안 되는 값과 <span class="spoil-word">2번째/3번째 child</span>에서의 패닉이 보였다.</p>
+                    <p><span class="spoil-word">tid=5 kill 직후</span> #GP가 나고, <span class="spoil-word">rax=cccc...</span>와 같은 비정상 값이 보인다.</p>
                   </div>
                   <div class="hint target">
                     <strong>3. 좁힌 위치</strong>
-                    <p><span class="spoil-word">supplemental_page_table_copy</span>, <span class="spoil-word">supplemental_page_table_kill</span> 주변의 공유 자원과 cleanup을 봤다.</p>
+                    <p><span class="spoil-word">supplemental_page_table_copy</span>와 <span class="spoil-word">supplemental_page_table_kill</span> 사이의 aux/소유권과 cleanup 순서를 봤다.</p>
                   </div>
                 </div>
                 <div class="callout warning">
