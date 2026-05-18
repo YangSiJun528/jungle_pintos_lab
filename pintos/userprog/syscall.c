@@ -70,6 +70,7 @@ static void *get_next_page_if_valid (void *);
 static bool is_valid_user_buffer (void *, size_t);
 static bool is_valid_user_string (char *);
 static bool is_valid_file_fd (int);
+static void touch_user_buffer (void *, size_t, bool);
 
 /* System call.
  *
@@ -397,6 +398,8 @@ handle_read (struct syscall_entry *entry) {
 	if (file == NULL)
 		_exit (-1);
 
+	touch_user_buffer (buffer, size, true);
+
 	// TODO: 이게 커서가 end면 0 반환해야하는데, 테스트 실패하면 추가 분기처리 필요
 	lock_acquire (&filesys_lock);
 	entry->return_value = file_read (file, buffer, size);
@@ -434,6 +437,8 @@ handle_write (struct syscall_entry *entry) {
 	struct file *file = fd_lookup (fd);
 	if (file == NULL)
 		_exit (-1);
+
+	touch_user_buffer ((void *) buffer, size, false);
 
 	lock_acquire (&filesys_lock);
 	entry->return_value = file_write (file, buffer, size);
@@ -570,6 +575,33 @@ _exit (int status) {
 static bool
 is_valid_file_fd (int fd) {
 	return fd >= FD_MIN && fd <= FD_MAX;
+}
+
+// 시스템 콜 도중에 페이지 폴트가 발생하는 것을 고려하여 미리 접근하도록 한다.
+// 근데 이랬으면 스택 growth에서도 크게 고려할 필요 없을거 같기도 하고?
+static void
+touch_user_buffer (void *buf, size_t size, bool write) {
+	uint8_t *p = buf;
+	uint8_t *end;
+
+	if (size == 0) {
+		return;
+	}
+
+	end = p + size - 1;
+	while (true) {
+		// 메모리 최적화를 막고 실제로 접근해서 값을 읽도록 하기 위해 volatile을 쓴다
+		// 뭐 그렇다고 함.
+		uint8_t value = *(volatile uint8_t *) p;
+
+		if (write) {
+			*p = value;
+		}
+		if (pg_round_down (p) == pg_round_down (end)) {
+			break;
+		}
+		p = pg_next (p);
+	}
 }
 
 static bool
