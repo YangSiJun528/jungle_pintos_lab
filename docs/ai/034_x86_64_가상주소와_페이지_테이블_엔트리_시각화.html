@@ -1,0 +1,1882 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>x86-64 가상주소와 페이지 테이블 엔트리 시각화</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --paper: #ffffff;
+      --ink: #18212f;
+      --muted: #657083;
+      --line: #d8dee8;
+      --soft-line: #edf0f5;
+      --nav: #101720;
+      --blue: #2563eb;
+      --cyan: #0891b2;
+      --green: #16803c;
+      --amber: #b45309;
+      --rose: #be123c;
+      --violet: #6d28d9;
+      --slate: #475569;
+      --shadow: 0 18px 45px rgba(17, 24, 39, 0.08);
+      font-family:
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.62;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    code,
+    input,
+    output,
+    .mono {
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        "Liberation Mono",
+        monospace;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #eef2f7;
+      color: #1f2937;
+      font-size: 0.92em;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(246, 247, 249, 0.92);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .topbar-inner {
+      width: min(1180px, calc(100% - 32px));
+      min-height: 64px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      color: var(--nav);
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #475569;
+      font-size: 13px;
+      padding: 7px 10px;
+      border-radius: 6px;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible {
+      background: #e9edf4;
+      color: #111827;
+      outline: none;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 72px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(420px, 1.05fr);
+      gap: 24px;
+      align-items: stretch;
+      padding: 14px 0 18px;
+    }
+
+    .hero-copy,
+    .hero-visual,
+    .section-panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-copy {
+      padding: clamp(24px, 4vw, 44px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 520px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      letter-spacing: 0;
+      line-height: 1.16;
+      color: #101827;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 5.4vw, 58px);
+      max-width: 11ch;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(25px, 3.4vw, 36px);
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .lead {
+      margin-top: 18px;
+      color: #3f4c5f;
+      font-size: 18px;
+      max-width: 62ch;
+    }
+
+    .claim {
+      margin-top: 26px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .claim-row {
+      display: grid;
+      grid-template-columns: 94px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--soft-line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+
+    .claim-row strong {
+      font-size: 13px;
+      color: #ffffff;
+      text-align: center;
+      padding: 6px 8px;
+      border-radius: 6px;
+    }
+
+    .claim-row.va strong {
+      background: var(--blue);
+    }
+
+    .claim-row.entry strong {
+      background: var(--green);
+    }
+
+    .claim-row span {
+      color: #334155;
+      font-weight: 650;
+    }
+
+    .hero-visual {
+      padding: 18px;
+      min-height: 520px;
+      overflow: hidden;
+    }
+
+    .hero-visual-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 2px 4px 14px;
+      border-bottom: 1px solid var(--soft-line);
+    }
+
+    .hero-visual-head p {
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 50ch;
+    }
+
+    .summary-viz {
+      min-height: 430px;
+    }
+
+    .section-panel {
+      margin-top: 26px;
+      padding: clamp(20px, 3vw, 32px);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+      gap: 28px;
+      align-items: start;
+      margin-bottom: 22px;
+    }
+
+    .section-head p:not(.eyebrow) {
+      margin-top: 10px;
+      color: #4b5563;
+      max-width: 76ch;
+    }
+
+    .section-note {
+      border-left: 4px solid var(--cyan);
+      background: #f0f9fc;
+      padding: 13px 14px;
+      border-radius: 6px;
+      color: #335466;
+      font-size: 14px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.62fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .grid-equal {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 18px;
+      min-width: 0;
+    }
+
+    .panel h3 + p,
+    .panel h3 + ul,
+    .panel .soft-text {
+      margin-top: 10px;
+    }
+
+    .soft-text,
+    .panel p,
+    .panel li {
+      color: #4b5563;
+    }
+
+    .panel ul {
+      padding-left: 20px;
+      margin-bottom: 0;
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: min(100%, 260px);
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 750;
+      color: #334155;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      height: 40px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0 11px;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 14px;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.13);
+      outline: none;
+    }
+
+    .segmented {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .segmented button,
+    .action-button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 12px;
+      background: transparent;
+      color: #475569;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .segmented button.active {
+      background: #102033;
+      color: #ffffff;
+    }
+
+    .action-button {
+      background: var(--blue);
+      color: #ffffff;
+      padding: 0 14px;
+    }
+
+    .viz-box {
+      width: 100%;
+      min-height: 280px;
+      border: 1px solid var(--soft-line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      overflow: hidden;
+    }
+
+    .viz-box svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      font-family:
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    .d3-fallback {
+      padding: 22px;
+      color: var(--rose);
+      font-weight: 750;
+    }
+
+    .metric-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--soft-line);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .metric span {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .metric output,
+    .metric code {
+      min-width: 0;
+      background: transparent;
+      padding: 0;
+      color: #111827;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .walk-output {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .chip {
+      border: 1px solid var(--soft-line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #f8fafc;
+      min-width: 0;
+    }
+
+    .chip span {
+      display: block;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .chip strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .flag-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .toggle {
+      min-height: 82px;
+      border: 1px solid var(--soft-line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfe;
+    }
+
+    .toggle label {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: #1f2937;
+      font-weight: 800;
+    }
+
+    .toggle span {
+      display: block;
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .entry-result {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .hex-output {
+      display: block;
+      padding: 14px;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      background: #eff6ff;
+      color: #102033;
+      font-size: clamp(15px, 2.2vw, 20px);
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .explain-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .explain-item {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--soft-line);
+      background: #ffffff;
+    }
+
+    .explain-item strong:first-child {
+      align-self: start;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: #eef2ff;
+      color: var(--violet);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--soft-line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #334155;
+      background: #f8fafc;
+      font-size: 13px;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 10px;
+      padding-left: 20px;
+      color: #475569;
+    }
+
+    footer {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto 42px;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .legend-text {
+      fill: #475569;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .small-text {
+      fill: #64748b;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .svg-title {
+      fill: #101827;
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .svg-mono {
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        "Liberation Mono",
+        monospace;
+    }
+
+    .error-text {
+      color: var(--rose);
+      font-weight: 750;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grid-2,
+      .grid-equal,
+      .section-head {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy,
+      .hero-visual {
+        min-height: auto;
+      }
+
+      .walk-output {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        position: static;
+      }
+
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px 0;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+
+      .walk-output,
+      .flag-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .claim-row,
+      .metric,
+      .explain-item {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        min-width: 640px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">x86-64 Paging Entry</a>
+      <nav class="nav" aria-label="문서 목차">
+        <a href="#va">VA 분해</a>
+        <a href="#walk">Page Walk</a>
+        <a href="#entry">Entry</a>
+        <a href="#flags">Flags</a>
+        <a href="#huge">Huge Page</a>
+        <a href="#sparse">Sparse</a>
+        <a href="#sources">근거</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="title">
+      <div class="hero-copy">
+        <p class="eyebrow">Intel x86-64 4-level paging, 4KB page 기준</p>
+        <h1 id="title">가상 주소는 저장값이 아니라 길 찾기 입력이다</h1>
+        <p class="lead">
+          48-bit 가상 주소를 64-bit page table entry 안에 저장하는 구조가 아니다.
+          CPU는 가상 주소를 인덱스 묶음으로 쪼개고, 각 64-bit 엔트리에서는 다음 table page 또는 최종 physical frame의 base 주소와 flags를 읽는다.
+        </p>
+        <div class="claim" aria-label="핵심 구분">
+          <div class="claim-row va">
+            <strong>Virtual Address</strong>
+            <span><code>9/9/9/9/12</code> 비트로 분해되어 각 table의 512칸 중 하나를 고르는 입력값</span>
+          </div>
+          <div class="claim-row entry">
+            <strong>64-bit Entry</strong>
+            <span>물리 주소의 정렬된 base 부분과 <code>Present</code>, <code>R/W</code>, <code>U/S</code>, <code>NX</code> 같은 flags</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-labelledby="summary-viz-title">
+        <div class="hero-visual-head">
+          <div>
+            <h2 id="summary-viz-title">한 장으로 보는 핵심</h2>
+            <p>왼쪽은 CPU가 가상 주소를 잘라 쓰는 방식이고, 오른쪽은 엔트리 하나가 담는 값이다.</p>
+          </div>
+        </div>
+        <div id="summary-viz" class="summary-viz viz-box" role="img" aria-label="가상 주소와 엔트리의 역할 차이 D3 시각화"></div>
+      </div>
+    </section>
+
+    <section id="va" class="section-panel" aria-labelledby="va-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Virtual Address Split</p>
+          <h2 id="va-title">48-bit 가상 주소는 4개의 index와 offset으로 쪼개진다</h2>
+          <p>
+            Pintos KAIST reference와 로컬 <code>pintos/include/threads/pte.h</code>의 매크로는 같은 분해를 사용한다.
+            <code>PML4SHIFT=39</code>, <code>PDPESHIFT=30</code>, <code>PDXSHIFT=21</code>, <code>PTXSHIFT=12</code>다.
+          </p>
+        </div>
+        <div class="section-note">
+          각 9-bit index는 0부터 511까지다. 그래서 table page 하나는 <code>uint64_t[512]</code>처럼 볼 수 있고, 크기는 <code>512 * 8 = 4096</code> bytes다.
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="control-row">
+            <div class="field">
+              <label for="va-input">가상 주소 예시</label>
+              <input id="va-input" type="text" value="0x00007fff12345678" spellcheck="false" autocomplete="off">
+            </div>
+            <button id="va-reset" class="action-button" type="button">예시로 복원</button>
+          </div>
+          <div id="va-error" class="error-text" aria-live="polite"></div>
+          <div id="va-viz" class="viz-box" role="img" aria-label="가상 주소 비트 분해"></div>
+        </div>
+
+        <div class="panel">
+          <h3>계산 결과</h3>
+          <p class="soft-text">입력 주소를 각 shift와 mask로 잘랐을 때의 값이다.</p>
+          <div class="metric-grid" style="margin-top: 14px;">
+            <div class="metric"><span>PML4 index</span><output id="out-pml4">-</output></div>
+            <div class="metric"><span>PDPT index</span><output id="out-pdpt">-</output></div>
+            <div class="metric"><span>PD index</span><output id="out-pd">-</output></div>
+            <div class="metric"><span>PT index</span><output id="out-pt">-</output></div>
+            <div class="metric"><span>offset</span><output id="out-offset">-</output></div>
+            <div class="metric"><span>page base</span><output id="out-page-base">-</output></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="walk" class="section-panel" aria-labelledby="walk-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Page Walk</p>
+          <h2 id="walk-title">CR3부터 4KB 배열들을 따라간다</h2>
+          <p>
+            각 단계의 엔트리는 가상 주소를 저장하지 않는다.
+            선택된 엔트리의 주소 부분이 다음 table page의 물리 base를 알려 주고, 마지막 PTE의 주소 부분이 실제 data frame base가 된다.
+          </p>
+        </div>
+        <div class="section-note">
+          아래 strip 하나가 table page 하나다. 노란 marker가 현재 가상 주소 index로 선택된 8-byte entry다.
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="walk-output" aria-label="현재 page walk index">
+          <div class="chip"><span>PML4</span><strong id="chip-pml4">-</strong></div>
+          <div class="chip"><span>PDPT</span><strong id="chip-pdpt">-</strong></div>
+          <div class="chip"><span>PD</span><strong id="chip-pd">-</strong></div>
+          <div class="chip"><span>PT</span><strong id="chip-pt">-</strong></div>
+          <div class="chip"><span>offset</span><strong id="chip-offset">-</strong></div>
+        </div>
+        <div id="walk-viz" class="viz-box" role="img" aria-label="4-level page walk D3 시각화"></div>
+      </div>
+    </section>
+
+    <section id="entry" class="section-panel" aria-labelledby="entry-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">64-bit Entry Decoder</p>
+          <h2 id="entry-title">엔트리는 physical base와 flags를 한 정수에 합친 값이다</h2>
+          <p>
+            4KB 정렬된 page table page와 page frame의 하위 12비트는 항상 0이다.
+            그래서 하위 12비트 공간을 주소 대신 flags로 쓴다.
+          </p>
+        </div>
+        <div class="section-note">
+          로컬 Pintos는 <code>PTE_ADDR(pte) = pte &amp; ~0xFFF</code> 형태로 주소 부분을 얻고, <code>PTE_P</code>, <code>PTE_W</code>, <code>PTE_U</code>, <code>PTE_A</code>, <code>PTE_D</code> 같은 flag 상수를 쓴다.
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="control-row">
+            <div class="field">
+              <label for="base-input">Physical base</label>
+              <input id="base-input" type="text" value="0x0000000012345000" spellcheck="false" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="maxphy-input">MAXPHYADDR</label>
+              <input id="maxphy-input" type="number" value="52" min="36" max="52">
+            </div>
+          </div>
+          <div id="entry-error" class="error-text" aria-live="polite"></div>
+          <div id="entry-viz" class="viz-box" role="img" aria-label="64-bit entry bit layout"></div>
+          <div class="flag-grid" aria-label="PTE flag toggles">
+            <div class="toggle">
+              <label><input id="flag-p" type="checkbox" checked> P, Present</label>
+              <span>0이면 유효한 변환이 아니며 접근 시 page fault가 난다.</span>
+            </div>
+            <div class="toggle">
+              <label><input id="flag-rw" type="checkbox" checked> R/W</label>
+              <span>1이면 쓰기 가능, 0이면 read-only 성격이다.</span>
+            </div>
+            <div class="toggle">
+              <label><input id="flag-us" type="checkbox" checked> U/S</label>
+              <span>1이면 user mode 접근 가능, 0이면 supervisor 전용이다.</span>
+            </div>
+            <div class="toggle">
+              <label><input id="flag-a" type="checkbox" checked> A, Accessed</label>
+              <span>하드웨어가 접근 시 1로 세울 수 있다.</span>
+            </div>
+            <div class="toggle">
+              <label><input id="flag-d" type="checkbox" checked> D, Dirty</label>
+              <span>쓰기 발생 시 1로 세울 수 있다. 주로 leaf entry에서 의미가 크다.</span>
+            </div>
+            <div class="toggle">
+              <label><input id="flag-nx" type="checkbox"> XD/NX</label>
+              <span>1이면 instruction fetch를 금지한다.</span>
+            </div>
+          </div>
+          <div class="entry-result">
+            <output id="entry-raw" class="hex-output">-</output>
+            <div class="metric-grid">
+              <div class="metric"><span>주소 부분</span><output id="entry-address">-</output></div>
+              <div class="metric"><span>flags</span><output id="entry-flags">-</output></div>
+              <div class="metric"><span>해석</span><output id="entry-meaning">-</output></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>왜 하위 12비트를 비워 둘 수 있나</h3>
+          <div class="explain-list" style="margin-top: 14px;">
+            <div class="explain-item">
+              <strong>4KB</strong>
+              <p><code>4096 = 2^12</code>이므로 4KB 정렬 주소는 하위 12비트가 모두 0이다.</p>
+            </div>
+            <div class="explain-item">
+              <strong>Base</strong>
+              <p>엔트리에는 frame 또는 다음 table의 base 주소 상위 비트만 실질적으로 저장하면 된다.</p>
+            </div>
+            <div class="explain-item">
+              <strong>Flags</strong>
+              <p>비어 있는 하위 자리에는 Present, Writable, User, Accessed, Dirty 같은 속성이 들어간다.</p>
+            </div>
+            <div class="explain-item">
+              <strong>Example</strong>
+              <p><code>0x12345000 | 0x067 = 0x12345067</code>이며, CPU는 다시 주소와 flags를 분리한다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="flags" class="section-panel" aria-labelledby="flags-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Flag Bits</p>
+          <h2 id="flags-title">하위 비트는 주소가 아니라 권한과 상태다</h2>
+          <p>아래 표는 사용자가 제공한 정리와 x86-64 paging 설명을 학습용으로 압축한 것이다.</p>
+        </div>
+        <div class="section-note">
+          실제 reserved/available bit의 세부 의미는 CPU 기능과 paging mode에 따라 달라진다. Pintos 과제 코드에서 직접 쓰는 핵심 flag는 <code>PTE_P</code>, <code>PTE_W</code>, <code>PTE_U</code>, <code>PTE_A</code>, <code>PTE_D</code>다.
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table aria-label="주요 페이지 테이블 엔트리 flag">
+          <thead>
+            <tr>
+              <th>Bit</th>
+              <th>이름</th>
+              <th>핵심 의미</th>
+              <th>주의점</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0</td>
+              <td>P, Present</td>
+              <td>엔트리가 유효한 변환을 제공하는지 표시한다.</td>
+              <td>0이면 page walk는 유효한 physical address 대신 page fault를 만든다.</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>R/W</td>
+              <td>쓰기 가능 여부를 나타낸다.</td>
+              <td>상위 레벨의 더 엄격한 제한과 함께 적용된다.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>U/S</td>
+              <td>user mode 접근 허용 여부를 나타낸다.</td>
+              <td>0이면 supervisor 영역 성격이다.</td>
+            </tr>
+            <tr>
+              <td>3, 4</td>
+              <td>PWT, PCD</td>
+              <td>캐시 정책 관련 비트다.</td>
+              <td>PAT와 함께 메모리 타입 선택에 쓰일 수 있다.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>A, Accessed</td>
+              <td>읽기, 쓰기, 실행 접근이 있었는지 하드웨어가 표시할 수 있다.</td>
+              <td>OS는 page replacement 근사에 활용할 수 있고, 직접 0으로 지울 수 있다.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>D, Dirty</td>
+              <td>쓰기 발생 여부를 나타낸다.</td>
+              <td>PTE와 large-page leaf entry에서 특히 중요하다.</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>PS 또는 PAT</td>
+              <td>PDPTE/PDE에서는 huge page 여부, PTE에서는 PAT 비트로 쓰인다.</td>
+              <td>PDPTE의 PS=1은 1GB page, PDE의 PS=1은 2MB page를 뜻한다.</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>G, Global</td>
+              <td>특정 조건에서 TLB 항목을 주소 공간 전환 후에도 유지할 수 있다.</td>
+              <td>커널 공통 mapping에 쓰이는 개념이다.</td>
+            </tr>
+            <tr>
+              <td>9..11</td>
+              <td>AVL</td>
+              <td>OS가 사용할 수 있는 available bit 영역이다.</td>
+              <td>Pintos의 <code>PTE_AVL</code>도 이 범위를 가리킨다.</td>
+            </tr>
+            <tr>
+              <td>63</td>
+              <td>XD/NX</td>
+              <td>1이면 해당 page에서 instruction fetch를 금지한다.</td>
+              <td>CPU 설정에 따라 활성화되어야 의미가 있다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="huge" class="section-panel" aria-labelledby="huge-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">4KB, 2MB, 1GB Pages</p>
+          <h2 id="huge-title">페이지가 커지면 주소 필드 시작 bit도 올라간다</h2>
+          <p>
+            4KB page는 offset이 12비트라서 physical address field가 bit 12부터 시작한다.
+            2MB page는 offset이 21비트, 1GB page는 offset이 30비트이므로 leaf entry의 주소 필드도 각각 bit 21, bit 30부터 시작한다.
+          </p>
+        </div>
+        <div class="section-note">
+          PDPTE/PDE에서 <code>PS=0</code>이면 다음 table로 내려간다. <code>PS=1</code>이면 그 엔트리가 leaf처럼 동작해 huge page frame을 직접 가리킨다.
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="control-row">
+            <div class="field">
+              <label>표시 모드</label>
+              <div class="segmented" role="group" aria-label="huge page mode">
+                <button type="button" class="active" data-page-mode="4k">4KB PTE</button>
+                <button type="button" data-page-mode="2m">2MB PDE, PS=1</button>
+                <button type="button" data-page-mode="1g">1GB PDPTE, PS=1</button>
+              </div>
+            </div>
+          </div>
+          <div id="huge-viz" class="viz-box" role="img" aria-label="page size별 엔트리 주소 필드 차이"></div>
+        </div>
+        <div class="panel">
+          <h3>레벨별 엔트리 이름</h3>
+          <div class="table-wrap" style="margin-top: 12px;">
+            <table aria-label="레벨별 테이블과 엔트리">
+              <thead>
+                <tr>
+                  <th>흐름</th>
+                  <th>테이블</th>
+                  <th>엔트리</th>
+                  <th>엔트리에 저장되는 것</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>CR3 다음</td>
+                  <td>PML4 table</td>
+                  <td>PML4E</td>
+                  <td>PDPT physical base + flags</td>
+                </tr>
+                <tr>
+                  <td>2단계</td>
+                  <td>PDPT</td>
+                  <td>PDPTE</td>
+                  <td>PD physical base + flags 또는 1GB frame base + flags</td>
+                </tr>
+                <tr>
+                  <td>3단계</td>
+                  <td>Page Directory</td>
+                  <td>PDE</td>
+                  <td>PT physical base + flags 또는 2MB frame base + flags</td>
+                </tr>
+                <tr>
+                  <td>4단계</td>
+                  <td>Page Table</td>
+                  <td>PTE</td>
+                  <td>4KB physical frame base + flags</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sparse" class="section-panel" aria-labelledby="sparse-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Sparse Address Space</p>
+          <h2 id="sparse-title">상위 엔트리 하나가 비어 있으면 하위 512갈래를 만들 필요가 없다</h2>
+          <p>
+            48-bit 가상 주소 공간은 256TB로 크다. 모든 page에 대해 PTE를 미리 만들면 낭비가 크므로,
+            계층 구조는 실제로 쓰는 영역의 하위 table page만 할당하게 해 준다.
+          </p>
+        </div>
+        <div class="section-note">
+          Pintos reference도 page table은 CPU가 page를 frame으로 변환하는 자료구조이며, project 3에서는 fault 시 supplemental page table을 함께 확인한다고 설명한다.
+        </div>
+      </div>
+
+      <div class="grid-equal">
+        <div class="panel">
+          <h3>Present=0에서 멈추는 흐름</h3>
+          <div id="sparse-viz" class="viz-box" role="img" aria-label="sparse page table D3 시각화"></div>
+        </div>
+        <div class="panel">
+          <h3>압축 정리</h3>
+          <ul>
+            <li>가상 주소는 page table entry에 저장되는 값이 아니다.</li>
+            <li>가상 주소의 index들이 각 table page의 512개 entry 중 하나를 선택한다.</li>
+            <li>중간 entry는 다음 table page의 physical base를 저장한다.</li>
+            <li>최종 PTE는 4KB physical frame base와 flags를 저장한다.</li>
+            <li>4KB 정렬 때문에 하위 12비트는 flags로 재활용할 수 있다.</li>
+            <li>Present=0인 상위 entry는 큰 미사용 영역을 한 번에 표현한다.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources" class="section-panel" aria-labelledby="sources-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Local References</p>
+          <h2 id="sources-title">근거와 범위</h2>
+          <p>이 문서는 과제 구현 코드를 대신 작성하지 않고, page table entry 형식을 이해하기 위한 시각화 문서다.</p>
+        </div>
+        <div class="section-note">
+          5-level paging은 위에 PML5 단계가 하나 더 붙는 형태로만 언급했다. 이 문서의 D3 시각화는 4-level paging 기준이다.
+        </div>
+      </div>
+      <ul class="source-list">
+        <li><code>docs/reference/pintos-kaist-original/3_project3/0_introduction.md</code>: pages, frames, page tables, accessed/dirty bits 설명</li>
+        <li><code>docs/reference/pintos-kaist-original/5_appendix/3_virtual_address.md</code>: virtual address bit layout, <code>PGSIZE</code>, <code>PGMASK</code>, <code>KERN_BASE</code> 설명</li>
+        <li><code>docs/reference/pintos-kaist-original/5_appendix/4_page_table.md</code>: Pintos <code>pml4</code> 인터페이스와 accessed/dirty bit 설명</li>
+        <li><code>pintos/include/threads/pte.h</code>: <code>PML4</code>, <code>PDPE</code>, <code>PDX</code>, <code>PTX</code>, <code>PTE_ADDR</code>, 주요 <code>PTE_*</code> flag 정의</li>
+        <li>사용자 제공 정리: x86-64 4-level paging entry, huge page, flag bit 해설</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    단일 HTML 문서. D3.js는 CDN으로 로드하고, 나머지 CSS와 JavaScript는 이 파일 안에 포함했다.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script>
+    (() => {
+      "use strict";
+
+      const COLORS = {
+        sign: "#94a3b8",
+        pml4: "#2563eb",
+        pdpt: "#0891b2",
+        pd: "#16803c",
+        pt: "#b45309",
+        offset: "#be123c",
+        base: "#6d28d9",
+        flags: "#f59e0b",
+        reserved: "#cbd5e1",
+        paper: "#ffffff",
+        ink: "#101827",
+        muted: "#64748b",
+        line: "#d8dee8"
+      };
+
+      const demoMemory = {
+        pml4Base: 0x0000000000100000n,
+        pdptBase: 0x0000000000200000n,
+        pdBase: 0x0000000000300000n,
+        ptBase: 0x0000000000400000n,
+        frameBase: 0x00000000abcdf000n,
+        flags: 0x067n
+      };
+
+      const $ = (id) => document.getElementById(id);
+
+      const hasD3 = () => Boolean(window.d3);
+
+      const clear = (node) => {
+        while (node.firstChild) {
+          node.removeChild(node.firstChild);
+        }
+      };
+
+      const fallback = (node) => {
+        clear(node);
+        const div = document.createElement("div");
+        div.className = "d3-fallback";
+        div.textContent = "D3.js를 로드하지 못했습니다. 네트워크가 가능한 환경에서 다시 열어 주세요.";
+        node.appendChild(div);
+      };
+
+      const hex = (value, digits = 0) => {
+        let text = BigInt(value).toString(16);
+        if (digits > 0) {
+          text = text.padStart(digits, "0");
+        }
+        return "0x" + text;
+      };
+
+      const decHex = (value, digits = 0) => `${value.toString(10)} / ${hex(value, digits)}`;
+
+      const parseHex = (text) => {
+        const normalized = String(text).trim().replace(/_/g, "");
+        if (!/^(0x)?[0-9a-fA-F]+$/.test(normalized)) {
+          throw new Error("16진수 주소 형식으로 입력해 주세요.");
+        }
+        return BigInt(normalized.startsWith("0x") || normalized.startsWith("0X") ? normalized : "0x" + normalized);
+      };
+
+      const decomposeVA = (value) => ({
+        sign: Number((value >> 48n) & 0xffffn),
+        pml4: Number((value >> 39n) & 0x1ffn),
+        pdpt: Number((value >> 30n) & 0x1ffn),
+        pd: Number((value >> 21n) & 0x1ffn),
+        pt: Number((value >> 12n) & 0x1ffn),
+        offset: Number(value & 0xfffn),
+        pageBase: value & ~0xfffn
+      });
+
+      const addText = (svg, x, y, text, options = {}) => {
+        const t = svg.append("text")
+          .attr("x", x)
+          .attr("y", y)
+          .attr("fill", options.fill || COLORS.ink)
+          .attr("font-size", options.size || 12)
+          .attr("font-weight", options.weight || 700);
+        if (options.anchor) {
+          t.attr("text-anchor", options.anchor);
+        }
+        if (options.className) {
+          t.attr("class", options.className);
+        }
+        t.text(text);
+        return t;
+      };
+
+      const makeSvg = (root, width, height, viewBoxWidth = width) => {
+        clear(root);
+        return d3.select(root)
+          .append("svg")
+          .attr("viewBox", `0 0 ${viewBoxWidth} ${height}`)
+          .attr("role", "presentation");
+      };
+
+      const drawArrowDef = (svg, id, color = "#475569") => {
+        const defs = svg.append("defs");
+        defs.append("marker")
+          .attr("id", id)
+          .attr("viewBox", "0 0 10 10")
+          .attr("refX", 9)
+          .attr("refY", 5)
+          .attr("markerWidth", 7)
+          .attr("markerHeight", 7)
+          .attr("orient", "auto-start-reverse")
+          .append("path")
+          .attr("d", "M 0 0 L 10 5 L 0 10 z")
+          .attr("fill", color);
+      };
+
+      const roundedRect = (svg, x, y, w, h, fill, stroke = "none", radius = 7) => {
+        return svg.append("rect")
+          .attr("x", x)
+          .attr("y", y)
+          .attr("width", w)
+          .attr("height", h)
+          .attr("rx", radius)
+          .attr("fill", fill)
+          .attr("stroke", stroke);
+      };
+
+      const renderSummary = () => {
+        const root = $("summary-viz");
+        if (!hasD3()) {
+          fallback(root);
+          return;
+        }
+        const svg = makeSvg(root, 760, 430);
+        drawArrowDef(svg, "summary-arrow", "#475569");
+
+        roundedRect(svg, 34, 34, 300, 82, "#eff6ff", "#bfdbfe");
+        addText(svg, 54, 64, "Virtual Address", { size: 17, weight: 850, fill: "#1e3a8a" });
+        addText(svg, 54, 88, "CPU가 index와 offset으로 분해하는 입력", { size: 12, fill: "#475569" });
+
+        const fields = [
+          ["PML4", 9, COLORS.pml4],
+          ["PDPT", 9, COLORS.pdpt],
+          ["PD", 9, COLORS.pd],
+          ["PT", 9, COLORS.pt],
+          ["offset", 12, COLORS.offset]
+        ];
+        const x0 = 44;
+        const y0 = 154;
+        const total = 48;
+        let cursor = x0;
+        fields.forEach(([label, bits, color]) => {
+          const w = bits / total * 292;
+          svg.append("rect")
+            .attr("x", cursor)
+            .attr("y", y0)
+            .attr("width", w)
+            .attr("height", 58)
+            .attr("fill", color)
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", 2);
+          addText(svg, cursor + w / 2, y0 + 26, label, { fill: "#ffffff", size: 12, weight: 850, anchor: "middle" });
+          addText(svg, cursor + w / 2, y0 + 45, `${bits}b`, { fill: "#eaf2ff", size: 11, weight: 700, anchor: "middle" });
+          cursor += w;
+        });
+        addText(svg, 44, 238, "9 + 9 + 9 + 9 + 12 = 48", { size: 13, fill: "#334155" });
+
+        roundedRect(svg, 426, 34, 300, 82, "#f0fdf4", "#bbf7d0");
+        addText(svg, 446, 64, "64-bit Entry", { size: 17, weight: 850, fill: "#166534" });
+        addText(svg, 446, 88, "다음 목적지의 physical base + flags", { size: 12, fill: "#475569" });
+
+        roundedRect(svg, 426, 154, 300, 58, "#ffffff", "#cbd5e1", 6);
+        svg.append("rect").attr("x", 426).attr("y", 154).attr("width", 54).attr("height", 58).attr("fill", "#e2e8f0");
+        svg.append("rect").attr("x", 480).attr("y", 154).attr("width", 190).attr("height", 58).attr("fill", COLORS.base);
+        svg.append("rect").attr("x", 670).attr("y", 154).attr("width", 56).attr("height", 58).attr("fill", COLORS.flags);
+        addText(svg, 453, 181, "63..52", { fill: "#475569", size: 10, anchor: "middle" });
+        addText(svg, 575, 179, "physical base", { fill: "#ffffff", size: 13, weight: 850, anchor: "middle" });
+        addText(svg, 698, 179, "flags", { fill: "#ffffff", size: 12, weight: 850, anchor: "middle" });
+        addText(svg, 575, 198, "bits 51..12", { fill: "#efe7ff", size: 11, anchor: "middle" });
+        addText(svg, 698, 198, "11..0", { fill: "#fff7ed", size: 11, anchor: "middle" });
+
+        const steps = [
+          ["CR3", "PML4 base", 84, 308],
+          ["PML4E", "PDPT base", 204, 308],
+          ["PDPTE", "PD base", 324, 308],
+          ["PDE", "PT base", 444, 308],
+          ["PTE", "frame base", 564, 308]
+        ];
+        steps.forEach(([a, b, x, y], i) => {
+          roundedRect(svg, x, y, 96, 64, "#ffffff", "#cbd5e1");
+          addText(svg, x + 48, y + 25, a, { anchor: "middle", size: 14, weight: 850 });
+          addText(svg, x + 48, y + 45, b, { anchor: "middle", size: 11, fill: COLORS.muted });
+          if (i < steps.length - 1) {
+            svg.append("line")
+              .attr("x1", x + 96)
+              .attr("y1", y + 32)
+              .attr("x2", steps[i + 1][2] - 10)
+              .attr("y2", y + 32)
+              .attr("stroke", "#475569")
+              .attr("stroke-width", 2)
+              .attr("marker-end", "url(#summary-arrow)");
+          }
+        });
+        addText(svg, 84, 402, "entry chain은 가상 주소를 저장하지 않고 physical target을 이어 준다", {
+          size: 13,
+          fill: "#334155"
+        });
+      };
+
+      const renderVA = () => {
+        const root = $("va-viz");
+        const error = $("va-error");
+        let value;
+        try {
+          value = parseHex($("va-input").value);
+          if (value < 0n || value > 0xffffffffffffffffn) {
+            throw new Error("64-bit 범위 안의 값을 입력해 주세요.");
+          }
+          error.textContent = "";
+        } catch (err) {
+          error.textContent = err.message;
+          return;
+        }
+
+        const parts = decomposeVA(value);
+        $("out-pml4").textContent = decHex(BigInt(parts.pml4), 3);
+        $("out-pdpt").textContent = decHex(BigInt(parts.pdpt), 3);
+        $("out-pd").textContent = decHex(BigInt(parts.pd), 3);
+        $("out-pt").textContent = decHex(BigInt(parts.pt), 3);
+        $("out-offset").textContent = decHex(BigInt(parts.offset), 3);
+        $("out-page-base").textContent = hex(parts.pageBase, 16);
+
+        $("chip-pml4").textContent = parts.pml4;
+        $("chip-pdpt").textContent = parts.pdpt;
+        $("chip-pd").textContent = parts.pd;
+        $("chip-pt").textContent = parts.pt;
+        $("chip-offset").textContent = hex(parts.offset, 3);
+
+        if (!hasD3()) {
+          fallback(root);
+          return;
+        }
+
+        const svg = makeSvg(root, 820, 306);
+        const margin = { left: 34, right: 34 };
+        const x = d3.scaleLinear().domain([64, 0]).range([margin.left, 820 - margin.right]);
+        const rows = [
+          { label: "sign extend", from: 63, to: 48, color: COLORS.sign, value: hex(BigInt(parts.sign), 4) },
+          { label: "PML4 index", from: 47, to: 39, color: COLORS.pml4, value: String(parts.pml4) },
+          { label: "PDPT index", from: 38, to: 30, color: COLORS.pdpt, value: String(parts.pdpt) },
+          { label: "PD index", from: 29, to: 21, color: COLORS.pd, value: String(parts.pd) },
+          { label: "PT index", from: 20, to: 12, color: COLORS.pt, value: String(parts.pt) },
+          { label: "offset", from: 11, to: 0, color: COLORS.offset, value: hex(BigInt(parts.offset), 3) }
+        ];
+
+        addText(svg, 34, 34, `VA = ${hex(value, 16)}`, { size: 16, weight: 850 });
+        addText(svg, 34, 58, "bit 63에서 bit 0까지. 실제 4-level walk에는 bit 47..0이 index/offset으로 쓰인다.", {
+          size: 12,
+          fill: COLORS.muted
+        });
+
+        const y = 92;
+        rows.forEach((row) => {
+          const left = x(row.from + 1);
+          const right = x(row.to);
+          const w = Math.max(1, right - left);
+          svg.append("rect")
+            .attr("x", left)
+            .attr("y", y)
+            .attr("width", w)
+            .attr("height", 76)
+            .attr("fill", row.color)
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", 2);
+          addText(svg, left + w / 2, y + 28, row.label, { fill: "#ffffff", size: 12, weight: 850, anchor: "middle" });
+          addText(svg, left + w / 2, y + 50, row.value, { fill: "#f8fafc", size: 12, weight: 700, anchor: "middle", className: "svg-mono" });
+          addText(svg, left + 2, y - 8, String(row.from), { size: 10, fill: COLORS.muted });
+          addText(svg, right - 2, y + 92, String(row.to), { size: 10, fill: COLORS.muted, anchor: "end" });
+        });
+
+        const formulas = [
+          `PML4(va) = (va >> 39) & 0x1ff = ${parts.pml4}`,
+          `PDPE(va) = (va >> 30) & 0x1ff = ${parts.pdpt}`,
+          `PDX(va)  = (va >> 21) & 0x1ff = ${parts.pd}`,
+          `PTX(va)  = (va >> 12) & 0x1ff = ${parts.pt}`,
+          `pg_ofs(va) = va & 0xfff = ${hex(BigInt(parts.offset), 3)}`
+        ];
+        formulas.forEach((line, i) => {
+          addText(svg, 44, 214 + i * 17, line, { size: 12, fill: "#334155", className: "svg-mono" });
+        });
+
+        renderWalk(parts);
+      };
+
+      const entryValue = (base, flags, nx = false) => {
+        let value = (base & ~0xfffn) | (flags & 0xfffn);
+        if (nx) {
+          value |= (1n << 63n);
+        }
+        return value;
+      };
+
+      const renderWalk = (parts = null) => {
+        const root = $("walk-viz");
+        if (!hasD3()) {
+          fallback(root);
+          return;
+        }
+        const current = parts || decomposeVA(parseHex($("va-input").value));
+        const svg = makeSvg(root, 980, 552);
+        drawArrowDef(svg, "walk-arrow", "#475569");
+
+        const rows = [
+          {
+            level: "CR3",
+            table: "register",
+            index: null,
+            base: demoMemory.pml4Base,
+            entryAddr: null,
+            value: demoMemory.pml4Base,
+            target: demoMemory.pml4Base,
+            note: "PML4 table physical base"
+          },
+          {
+            level: "PML4",
+            table: "uint64_t[512]",
+            index: current.pml4,
+            base: demoMemory.pml4Base,
+            entryAddr: demoMemory.pml4Base + BigInt(current.pml4 * 8),
+            value: entryValue(demoMemory.pdptBase, demoMemory.flags),
+            target: demoMemory.pdptBase,
+            note: "PML4E -> PDPT base"
+          },
+          {
+            level: "PDPT",
+            table: "uint64_t[512]",
+            index: current.pdpt,
+            base: demoMemory.pdptBase,
+            entryAddr: demoMemory.pdptBase + BigInt(current.pdpt * 8),
+            value: entryValue(demoMemory.pdBase, demoMemory.flags),
+            target: demoMemory.pdBase,
+            note: "PDPTE -> PD base"
+          },
+          {
+            level: "PD",
+            table: "uint64_t[512]",
+            index: current.pd,
+            base: demoMemory.pdBase,
+            entryAddr: demoMemory.pdBase + BigInt(current.pd * 8),
+            value: entryValue(demoMemory.ptBase, demoMemory.flags),
+            target: demoMemory.ptBase,
+            note: "PDE -> PT base"
+          },
+          {
+            level: "PT",
+            table: "uint64_t[512]",
+            index: current.pt,
+            base: demoMemory.ptBase,
+            entryAddr: demoMemory.ptBase + BigInt(current.pt * 8),
+            value: entryValue(demoMemory.frameBase, demoMemory.flags),
+            target: demoMemory.frameBase,
+            note: "PTE -> frame base"
+          },
+          {
+            level: "Frame",
+            table: "4096 bytes",
+            index: current.offset,
+            base: demoMemory.frameBase,
+            entryAddr: demoMemory.frameBase + BigInt(current.offset),
+            value: demoMemory.frameBase + BigInt(current.offset),
+            target: demoMemory.frameBase + BigInt(current.offset),
+            note: "physical address = frame base + offset"
+          }
+        ];
+
+        addText(svg, 34, 36, "RAM에 놓인 table page를 index로 한 칸씩 선택한다", { size: 16, weight: 850 });
+        const x0 = 140;
+        const stripW = 600;
+        const rowH = 76;
+        const y0 = 70;
+        const scale = d3.scaleLinear().domain([0, 512]).range([x0, x0 + stripW]);
+
+        rows.forEach((row, i) => {
+          const y = y0 + i * rowH;
+          addText(svg, 34, y + 25, row.level, { size: 15, weight: 850, fill: row.level === "Frame" ? COLORS.rose : COLORS.ink });
+          addText(svg, 34, y + 45, row.table, { size: 11, fill: COLORS.muted });
+
+          if (row.level === "CR3") {
+            roundedRect(svg, x0, y + 5, stripW, 36, "#eef2ff", "#c4b5fd");
+            addText(svg, x0 + 16, y + 29, `CR3 = ${hex(row.value, 16)}`, { size: 13, fill: COLORS.base, className: "svg-mono" });
+          } else if (row.level === "Frame") {
+            roundedRect(svg, x0, y + 5, stripW, 36, "#fff1f2", "#fecdd3");
+            const pos = x0 + (row.index / 4096) * stripW;
+            svg.append("line")
+              .attr("x1", pos)
+              .attr("y1", y + 5)
+              .attr("x2", pos)
+              .attr("y2", y + 41)
+              .attr("stroke", COLORS.rose)
+              .attr("stroke-width", 4);
+            addText(svg, x0 + 16, y + 29, `frame base ${hex(row.base, 16)} + offset ${hex(BigInt(current.offset), 3)}`, {
+              size: 13,
+              fill: COLORS.rose,
+              className: "svg-mono"
+            });
+          } else {
+            roundedRect(svg, x0, y + 5, stripW, 36, "#f8fafc", "#cbd5e1");
+            for (let tick = 0; tick <= 512; tick += 32) {
+              svg.append("line")
+                .attr("x1", scale(tick))
+                .attr("y1", y + 5)
+                .attr("x2", scale(tick))
+                .attr("y2", y + 41)
+                .attr("stroke", tick % 128 === 0 ? "#94a3b8" : "#e2e8f0")
+                .attr("stroke-width", tick % 128 === 0 ? 1.2 : 1);
+            }
+            const pos = scale(row.index);
+            svg.append("rect")
+              .attr("x", Math.max(x0, pos - 3))
+              .attr("y", y + 2)
+              .attr("width", 7)
+              .attr("height", 42)
+              .attr("rx", 3)
+              .attr("fill", COLORS.flags);
+            addText(svg, pos, y - 2, `index ${row.index}`, { size: 10, fill: COLORS.amber, anchor: "middle" });
+          }
+
+          addText(svg, 770, y + 17, row.note, { size: 12, fill: COLORS.ink });
+          addText(svg, 770, y + 36, `base: ${hex(row.base, 16)}`, { size: 11, fill: COLORS.muted, className: "svg-mono" });
+          if (row.entryAddr !== null && row.level !== "Frame") {
+            addText(svg, 770, y + 53, `entry @ ${hex(row.entryAddr, 16)}`, { size: 11, fill: COLORS.muted, className: "svg-mono" });
+            addText(svg, 770, y + 70, `raw = ${hex(row.value, 16)}`, { size: 11, fill: COLORS.green, className: "svg-mono" });
+          }
+
+          if (i < rows.length - 1) {
+            svg.append("line")
+              .attr("x1", x0 + stripW / 2)
+              .attr("y1", y + 45)
+              .attr("x2", x0 + stripW / 2)
+              .attr("y2", y + rowH - 5)
+              .attr("stroke", "#475569")
+              .attr("stroke-width", 2)
+              .attr("marker-end", "url(#walk-arrow)");
+          }
+        });
+
+        addText(svg, 34, 535, `최종 physical address = ${hex(demoMemory.frameBase + BigInt(current.offset), 16)}`, {
+          size: 15,
+          weight: 850,
+          fill: COLORS.rose,
+          className: "svg-mono"
+        });
+      };
+
+      const getFlags = () => {
+        let flags = 0n;
+        if ($("flag-p").checked) flags |= 0x1n;
+        if ($("flag-rw").checked) flags |= 0x2n;
+        if ($("flag-us").checked) flags |= 0x4n;
+        if ($("flag-a").checked) flags |= 0x20n;
+        if ($("flag-d").checked) flags |= 0x40n;
+        return flags;
+      };
+
+      const renderEntry = () => {
+        const root = $("entry-viz");
+        const error = $("entry-error");
+        let base;
+        let maxphy;
+        try {
+          base = parseHex($("base-input").value);
+          maxphy = Number.parseInt($("maxphy-input").value, 10);
+          if (!Number.isFinite(maxphy) || maxphy < 36 || maxphy > 52) {
+            throw new Error("MAXPHYADDR는 36부터 52 사이로 입력해 주세요.");
+          }
+          if ((base & 0xfffn) !== 0n) {
+            throw new Error("Physical base는 4KB 정렬 주소여야 합니다. 하위 12비트가 0이어야 합니다.");
+          }
+          if (base >= (1n << BigInt(maxphy))) {
+            throw new Error("Physical base가 MAXPHYADDR 범위를 벗어났습니다.");
+          }
+          error.textContent = "";
+        } catch (err) {
+          error.textContent = err.message;
+          return;
+        }
+
+        const flags = getFlags();
+        const raw = entryValue(base, flags, $("flag-nx").checked);
+        $("entry-raw").textContent = `entry = ${hex(raw, 16)}`;
+        $("entry-address").textContent = hex(raw & ~0xfffn, 16);
+        $("entry-flags").textContent = hex(raw & 0xfffn, 3);
+        $("entry-meaning").textContent = $("flag-p").checked
+          ? `valid mapping to base ${hex(base, 16)}`
+          : "not present, access will fault";
+
+        if (!hasD3()) {
+          fallback(root);
+          return;
+        }
+
+        const svg = makeSvg(root, 900, 286);
+        const x = d3.scaleLinear().domain([64, 0]).range([34, 866]);
+        const y = 84;
+        const h = 76;
+
+        const regions = [
+          { label: "XD/NX", from: 63, to: 63, color: $("flag-nx").checked ? COLORS.rose : "#e2e8f0", text: $("flag-nx").checked ? "1" : "0" },
+          { label: "PK", from: 62, to: 59, color: "#e2e8f0", text: "feature bits" },
+          { label: "AVL", from: 58, to: 52, color: "#f1f5f9", text: "OS" },
+          { label: "reserved", from: 51, to: maxphy, color: COLORS.reserved, text: "0" },
+          { label: "physical base", from: maxphy - 1, to: 12, color: COLORS.base, text: hex(base >> 12n) },
+          { label: "flags", from: 11, to: 0, color: COLORS.flags, text: hex(flags, 3) }
+        ].filter((r) => r.from >= r.to);
+
+        addText(svg, 34, 36, `raw entry = ${hex(raw, 16)}`, { size: 16, weight: 850, className: "svg-mono" });
+        addText(svg, 34, 59, `address = entry & ~0xfff, flags = entry & 0xfff`, { size: 12, fill: COLORS.muted, className: "svg-mono" });
+
+        regions.forEach((region) => {
+          const left = x(region.from + 1);
+          const right = x(region.to);
+          const w = Math.max(1, right - left);
+          svg.append("rect")
+            .attr("x", left)
+            .attr("y", y)
+            .attr("width", w)
+            .attr("height", h)
+            .attr("fill", region.color)
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", 2);
+          addText(svg, left + w / 2, y + 28, region.label, {
+            fill: region.color === COLORS.reserved || region.color === "#e2e8f0" || region.color === "#f1f5f9" ? "#334155" : "#ffffff",
+            size: 12,
+            weight: 850,
+            anchor: "middle"
+          });
+          addText(svg, left + w / 2, y + 50, region.text, {
+            fill: region.color === COLORS.reserved || region.color === "#e2e8f0" || region.color === "#f1f5f9" ? "#475569" : "#f8fafc",
+            size: 10,
+            anchor: "middle",
+            className: "svg-mono"
+          });
+          addText(svg, left + 2, y - 8, String(region.from), { size: 10, fill: COLORS.muted });
+          addText(svg, right - 2, y + 92, String(region.to), { size: 10, fill: COLORS.muted, anchor: "end" });
+        });
+
+        const flagBits = [
+          ["P", 0, $("flag-p").checked],
+          ["RW", 1, $("flag-rw").checked],
+          ["US", 2, $("flag-us").checked],
+          ["A", 5, $("flag-a").checked],
+          ["D", 6, $("flag-d").checked],
+          ["NX", 63, $("flag-nx").checked]
+        ];
+        flagBits.forEach(([name, bit, on], i) => {
+          const bx = 42 + i * 132;
+          const by = 214;
+          roundedRect(svg, bx, by, 104, 36, on ? "#dcfce7" : "#f1f5f9", on ? "#86efac" : "#cbd5e1");
+          addText(svg, bx + 12, by + 23, `${name} bit ${bit} = ${on ? "1" : "0"}`, {
+            size: 12,
+            fill: on ? "#166534" : "#64748b",
+            weight: 850
+          });
+        });
+      };
+
+      const pageModes = {
+        "4k": {
+          title: "PTE, 4KB page",
+          start: 12,
+          offset: 12,
+          level: "PTE",
+          path: ["CR3", "PML4E", "PDPTE", "PDE", "PTE", "4KB frame"]
+        },
+        "2m": {
+          title: "PDE with PS=1, 2MB page",
+          start: 21,
+          offset: 21,
+          level: "PDE",
+          path: ["CR3", "PML4E", "PDPTE", "PDE leaf", "2MB frame"]
+        },
+        "1g": {
+          title: "PDPTE with PS=1, 1GB page",
+          start: 30,
+          offset: 30,
+          level: "PDPTE",
+          path: ["CR3", "PML4E", "PDPTE leaf", "1GB frame"]
+        }
+      };
+
+      const renderHuge = () => {
+        const root = $("huge-viz");
+        if (!hasD3()) {
+          fallback(root);
+          return;
+        }
+        const active = document.querySelector("[data-page-mode].active")?.dataset.pageMode || "4k";
+        const mode = pageModes[active];
+        const svg = makeSvg(root, 850, 380);
+        drawArrowDef(svg, "huge-arrow", "#475569");
+
+        addText(svg, 34, 36, mode.title, { size: 17, weight: 850 });
+        addText(svg, 34, 60, `physical address field starts at bit ${mode.start}, page offset is ${mode.offset} bits`, {
+          size: 12,
+          fill: COLORS.muted
+        });
+
+        const x = d3.scaleLinear().domain([64, 0]).range([34, 816]);
+        const regions = [
+          { label: "XD", from: 63, to: 63, color: "#e2e8f0" },
+          { label: "software / reserved", from: 62, to: 52, color: "#f1f5f9" },
+          { label: "physical frame base", from: 51, to: mode.start, color: COLORS.base },
+          { label: mode.start > 12 ? "alignment / PAT / reserved" : "", from: mode.start - 1, to: 12, color: mode.start > 12 ? COLORS.reserved : "#ffffff" },
+          { label: "flags", from: 11, to: 0, color: COLORS.flags }
+        ].filter((r) => r.from >= r.to && r.label);
+
+        const y = 92;
+        regions.forEach((region) => {
+          const left = x(region.from + 1);
+          const right = x(region.to);
+          const w = Math.max(1, right - left);
+          svg.append("rect")
+            .attr("x", left)
+            .attr("y", y)
+            .attr("width", w)
+            .attr("height", 66)
+            .attr("fill", region.color)
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", 2);
+          const dark = region.color === COLORS.base || region.color === COLORS.flags;
+          addText(svg, left + w / 2, y + 30, region.label, {
+            fill: dark ? "#ffffff" : "#334155",
+            size: 12,
+            weight: 850,
+            anchor: "middle"
+          });
+          addText(svg, left + 2, y - 8, String(region.from), { size: 10, fill: COLORS.muted });
+          addText(svg, right - 2, y + 82, String(region.to), { size: 10, fill: COLORS.muted, anchor: "end" });
+        });
+
+        const pathY = 252;
+        const gap = 18;
+        const boxW = Math.min(116, (780 - (mode.path.length - 1) * gap) / mode.path.length);
+        let cursor = 34;
+        mode.path.forEach((label, i) => {
+          const isLeaf = label.includes("leaf") || label.includes("frame");
+          roundedRect(svg, cursor, pathY, boxW, 54, isLeaf ? "#fff7ed" : "#ffffff", isLeaf ? "#fed7aa" : "#cbd5e1");
+          addText(svg, cursor + boxW / 2, pathY + 31, label, {
+            anchor: "middle",
+            size: 12,
+            weight: 850,
+            fill: isLeaf ? COLORS.amber : COLORS.ink
+          });
+          if (i < mode.path.length - 1) {
+            svg.append("line")
+              .attr("x1", cursor + boxW)
+              .attr("y1", pathY + 27)
+              .attr("x2", cursor + boxW + gap - 6)
+              .attr("y2", pathY + 27)
+              .attr("stroke", "#475569")
+              .attr("stroke-width", 2)
+              .attr("marker-end", "url(#huge-arrow)");
+          }
+          cursor += boxW + gap;
+        });
+
+        const coverage = active === "4k" ? "entry 하나가 4KB를 매핑한다" : active === "2m" ? "PDE 하나가 2MB를 직접 매핑한다" : "PDPTE 하나가 1GB를 직접 매핑한다";
+        addText(svg, 34, 346, coverage, { size: 14, weight: 850, fill: COLORS.green });
+      };
+
+      const renderSparse = () => {
+        const root = $("sparse-viz");
+        if (!hasD3()) {
+          fallback(root);
+          return;
+        }
+        const svg = makeSvg(root, 690, 320);
+        drawArrowDef(svg, "sparse-arrow", "#475569");
+        addText(svg, 30, 34, "Present bit가 계층을 잘라 낸다", { size: 16, weight: 850 });
+
+        const nodes = [
+          { label: "PML4E", x: 70, y: 90, present: true, note: "P=1" },
+          { label: "PDPTE", x: 260, y: 90, present: true, note: "P=1" },
+          { label: "PDE", x: 450, y: 72, present: false, note: "P=0, stop" },
+          { label: "PDE", x: 450, y: 168, present: true, note: "P=1" },
+          { label: "PT + PTE", x: 570, y: 168, present: true, note: "allocated" }
+        ];
+        nodes.forEach((node) => {
+          roundedRect(svg, node.x, node.y, 104, 54, node.present ? "#ecfdf5" : "#fff1f2", node.present ? "#86efac" : "#fecdd3");
+          addText(svg, node.x + 52, node.y + 24, node.label, { anchor: "middle", size: 13, weight: 850, fill: node.present ? "#166534" : "#be123c" });
+          addText(svg, node.x + 52, node.y + 42, node.note, { anchor: "middle", size: 11, fill: node.present ? "#15803d" : "#be123c" });
+        });
+        const line = (x1, y1, x2, y2, dashed = false) => {
+          const l = svg.append("line")
+            .attr("x1", x1)
+            .attr("y1", y1)
+            .attr("x2", x2)
+            .attr("y2", y2)
+            .attr("stroke", "#475569")
+            .attr("stroke-width", 2)
+            .attr("marker-end", "url(#sparse-arrow)");
+          if (dashed) {
+            l.attr("stroke-dasharray", "5 5");
+          }
+        };
+        line(174, 117, 252, 117);
+        line(364, 117, 442, 99);
+        line(364, 117, 442, 195);
+        line(554, 195, 562, 195);
+
+        roundedRect(svg, 42, 252, 590, 42, "#f8fafc", "#cbd5e1");
+        addText(svg, 60, 278, "상위 entry가 P=0이면 그 아래 512 x 512 x ... 영역은 table page를 만들지 않아도 표현된다.", {
+          size: 13,
+          fill: "#334155"
+        });
+      };
+
+      const init = () => {
+        renderSummary();
+        renderVA();
+        renderEntry();
+        renderHuge();
+        renderSparse();
+
+        $("va-input").addEventListener("input", renderVA);
+        $("va-reset").addEventListener("click", () => {
+          $("va-input").value = "0x00007fff12345678";
+          renderVA();
+        });
+        ["base-input", "maxphy-input", "flag-p", "flag-rw", "flag-us", "flag-a", "flag-d", "flag-nx"].forEach((id) => {
+          $(id).addEventListener("input", renderEntry);
+          $(id).addEventListener("change", renderEntry);
+        });
+        document.querySelectorAll("[data-page-mode]").forEach((button) => {
+          button.addEventListener("click", () => {
+            document.querySelectorAll("[data-page-mode]").forEach((other) => other.classList.remove("active"));
+            button.classList.add("active");
+            renderHuge();
+          });
+        });
+        window.addEventListener("resize", () => {
+          renderSummary();
+          renderVA();
+          renderEntry();
+          renderHuge();
+          renderSparse();
+        });
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+</html>
