@@ -272,6 +272,16 @@ __do_fork (void *aux) {
 	if (current->pml4 == NULL)
 		goto error;
 
+	/* 부모의 executable handle을 별도로 복제 — double close 방지 */
+	ASSERT (parent->executable != NULL);
+	lock_acquire (&filesys_lock);
+	current->executable = file_duplicate (parent->executable);
+	lock_release (&filesys_lock);
+	if (current->executable == NULL) {
+		goto error;
+	}
+	/* file_duplicate()가 deny_write 상태도 복제하므로 추가 호출 불필요 */
+
 	process_activate (current);
 #ifdef VM
 	supplemental_page_table_init (&current->spt);
@@ -281,16 +291,6 @@ __do_fork (void *aux) {
 	if (!pml4_for_each (parent->pml4, duplicate_pte, parent))
 		goto error;
 #endif
-
-	/* 부모의 executable handle을 별도로 복제 — double close 방지 */
-	if (parent->executable != NULL) {
-		lock_acquire (&filesys_lock);
-		current->executable = file_duplicate (parent->executable);
-		lock_release (&filesys_lock);
-		if (current->executable == NULL)
-			goto error;
-		/* file_duplicate()가 deny_write 상태도 복제하므로 추가 호출 불필요 */
-	}
 
 	/* 부모의 파일 디스크립터를 복제 */
 	struct list_elem *e = list_begin (&parent->file_descriptors);
@@ -581,15 +581,9 @@ struct ELF64_PHDR {
 
 static bool setup_stack (struct intr_frame *if_);
 static bool validate_segment (const struct Phdr *, struct file *);
-#ifdef VM
-bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
-		uint32_t read_bytes, uint32_t zero_bytes,
-		bool writable);
-#else
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		uint32_t read_bytes, uint32_t zero_bytes,
 		bool writable);
-#endif
 
 /* Loads an ELF executable from FILE_NAME into the current thread.
  * Stores the executable's entry point into *RIP
@@ -984,7 +978,7 @@ lazy_load_segment (struct page *page, void *aux) {
 	/* TODO: 파일에서 세그먼트를 적재한다. */
 	/* TODO: 이 함수는 VA 주소에서 첫 페이지 폴트가 발생했을 때 호출된다. */
 	/* TODO: VA는 이 함수가 호출될 때 사용할 수 있다. */
-	struct page_lazy_load_aux *load_aux = aux;
+	struct load_segment_aux *load_aux = aux;
 
 	struct file *file = load_aux->file;
 	off_t ofs = load_aux->ofs;
@@ -992,12 +986,14 @@ lazy_load_segment (struct page *page, void *aux) {
 	uint32_t page_read_bytes = load_aux->read_bytes;
 	uint32_t page_zero_bytes = load_aux->zero_bytes;
 
+	lock_acquire (&filesys_lock);
 	file_seek (file, ofs);
 	if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes) {
+		lock_release (&filesys_lock);
 		PANIC ("FAIL in file_read");
 	}
+	lock_release (&filesys_lock);
 
-	page->file.file = file;
 	memset (kpage + page_read_bytes, 0, page_zero_bytes);
 	free (load_aux);
 	return true;
@@ -1029,7 +1025,7 @@ lazy_load_segment (struct page *page, void *aux) {
  *
  * 성공하면 true를 리턴하고, 메모리 할당 에러나 디스크 read 에러가 발생하면
  * false를 리턴한다. */
-bool
+static bool
 load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		uint32_t read_bytes, uint32_t zero_bytes, bool writable) {
 	ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
@@ -1046,22 +1042,18 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
-		struct page_lazy_load_aux *aux = malloc (sizeof *aux);
-		if (aux == NULL)
-			return false;
-
-		aux->file = file_duplicate (file);
-		if (aux->file == NULL) {
-			free (aux);
+		struct load_segment_aux *aux = malloc (sizeof *aux);
+		if (aux == NULL) {
 			return false;
 		}
+
+		aux->file = file;
 		aux->ofs = ofs;
 		aux->read_bytes = page_read_bytes;
 		aux->zero_bytes = page_zero_bytes;
 
-		if (!vm_alloc_page_with_initializer (VM_FILE, upage,
+		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
 					writable, lazy_load_segment, aux)) {
-			file_close (aux->file);
 			free (aux);
 			return false;
 		}

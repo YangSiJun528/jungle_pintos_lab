@@ -19,9 +19,9 @@
 
 #include "vm/vm.h"
 #include "filesys/file.h"
+#include "filesys/filesys.h"
 #include "vm/uninit.h"
 #include "threads/malloc.h"
-#include "userprog/process.h"
 
 static bool uninit_initialize (struct page *page, void *kva);
 static void uninit_destroy (struct page *page);
@@ -90,9 +90,14 @@ uninit_destroy (struct page *page) {
 	/* TODO: 이 함수를 채운다.
 	 * TODO: 할 일이 없다면 그냥 리턴한다. */
 	if (uninit->aux != NULL) {
-		struct page_lazy_load_aux *aux = uninit->aux;
-		if (aux->file != NULL)
+		if (VM_TYPE (uninit->type) == VM_FILE) {
+			struct mmap_page_aux *aux = uninit->aux;
+
+			ASSERT (aux->file != NULL);
+			lock_acquire (&filesys_lock);
 			file_close (aux->file);
+			lock_release (&filesys_lock);
+		}
 		free (uninit->aux);
 	}
 }

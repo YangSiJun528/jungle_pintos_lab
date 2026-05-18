@@ -307,14 +307,23 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct page *src_page = hash_entry (hash_cur (&i), struct page, elem);
 		void *uva = src_page->va;
 
+		if (page_get_type (src_page) == VM_FILE) {
+			continue;
+		}
+
 		if (VM_TYPE (src_page->operations->type) == VM_UNINIT) {
-			struct page_lazy_load_aux *src_aux = src_page->uninit.aux;
-			struct page_lazy_load_aux *dst_aux = malloc (sizeof *dst_aux);
+			struct load_segment_aux *src_aux = src_page->uninit.aux;
+			struct load_segment_aux *dst_aux = malloc (sizeof *dst_aux);
 
 			ASSERT (dst_aux != NULL);
 
 			memcpy (dst_aux, src_aux, sizeof *src_aux);
 			ASSERT (dst_aux->file != NULL);
+			dst_aux->file = src_aux->file;
+			if (dst_aux->file == NULL) {
+				free (dst_aux);
+				return false;
+			}
 
 			vm_alloc_page_with_initializer (page_get_type (src_page), uva,
 					src_page->writeable, src_page->uninit.init, dst_aux);
@@ -385,6 +394,8 @@ static void
 spt_hash_destroy (struct hash_elem *e, void *aux UNUSED) {
 	struct page *page = hash_entry (e, struct page, elem);
 
+	// destroy가 먼저 호출, 각 타입별 destroy 구현체에서 적절한 처리를 위해서
+	destroy (page);
 	destroy_frame_if_exists (page);
-	vm_dealloc_page (page);
+	free (page);
 }
