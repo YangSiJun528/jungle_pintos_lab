@@ -358,6 +358,9 @@ process_exec (void *f_name) {
 		curr->executable = NULL;
 	}
 	process_cleanup_user_memory ();
+#ifdef VM
+	supplemental_page_table_init (&curr->spt);
+#endif
 
 	/* And then load the binary */
 	/* 그 다음 바이너리를 로드한다. */
@@ -578,9 +581,15 @@ struct ELF64_PHDR {
 
 static bool setup_stack (struct intr_frame *if_);
 static bool validate_segment (const struct Phdr *, struct file *);
+#ifdef VM
+bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
+		uint32_t read_bytes, uint32_t zero_bytes,
+		bool writable);
+#else
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		uint32_t read_bytes, uint32_t zero_bytes,
 		bool writable);
+#endif
 
 /* Loads an ELF executable from FILE_NAME into the current thread.
  * Stores the executable's entry point into *RIP
@@ -972,12 +981,26 @@ install_page (void *upage, void *kpage, bool writable) {
 
 static bool
 lazy_load_segment (struct page *page, void *aux) {
-	/* TODO: Load the segment from the file */
-	/* TODO: 파일에서 세그먼트를 로드한다. */
-	/* TODO: This called when the first page fault occurs on address VA. */
-	/* TODO: 주소 VA에서 첫 page fault가 발생했을 때 호출된다. */
-	/* TODO: VA is available when calling this function. */
-	/* TODO: 이 함수를 호출할 때 VA를 사용할 수 있다. */
+	/* TODO: 파일에서 세그먼트를 적재한다. */
+	/* TODO: 이 함수는 VA 주소에서 첫 페이지 폴트가 발생했을 때 호출된다. */
+	/* TODO: VA는 이 함수가 호출될 때 사용할 수 있다. */
+	struct page_lazy_load_aux *load_aux = aux;
+
+	struct file *file = load_aux->file;
+	off_t ofs = load_aux->ofs;
+	uint8_t *kpage = page->frame->kva;
+	uint32_t page_read_bytes = load_aux->read_bytes;
+	uint32_t page_zero_bytes = load_aux->zero_bytes;
+
+	file_seek (file, ofs);
+	if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes) {
+		PANIC ("FAIL in file_read");
+	}
+
+	page->file.file = file;
+	memset (kpage + page_read_bytes, 0, page_zero_bytes);
+	free (load_aux);
+	return true;
 }
 
 /* Loads a segment starting at offset OFS in FILE at address
@@ -1006,7 +1029,7 @@ lazy_load_segment (struct page *page, void *aux) {
  *
  * 성공하면 true를 리턴하고, 메모리 할당 에러나 디스크 read 에러가 발생하면
  * false를 리턴한다. */
-static bool
+bool
 load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		uint32_t read_bytes, uint32_t zero_bytes, bool writable) {
 	ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
@@ -1023,18 +1046,32 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
-		/* TODO: Set up aux to pass information to the lazy_load_segment. */
-		/* TODO: lazy_load_segment에 정보를 전달할 수 있도록 aux를 설정한다. */
-		void *aux = NULL;
-		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
-					writable, lazy_load_segment, aux))
+		struct page_lazy_load_aux *aux = malloc (sizeof *aux);
+		if (aux == NULL)
 			return false;
+
+		aux->file = file_duplicate (file);
+		if (aux->file == NULL) {
+			free (aux);
+			return false;
+		}
+		aux->ofs = ofs;
+		aux->read_bytes = page_read_bytes;
+		aux->zero_bytes = page_zero_bytes;
+
+		if (!vm_alloc_page_with_initializer (VM_FILE, upage,
+					writable, lazy_load_segment, aux)) {
+			file_close (aux->file);
+			free (aux);
+			return false;
+		}
 
 		/* Advance. */
 		/* 다음 페이지로 진행한다. */
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
 		upage += PGSIZE;
+		ofs += page_read_bytes;
 	}
 	return true;
 }
@@ -1052,8 +1089,11 @@ setup_stack (struct intr_frame *if_) {
 	/* TODO: stack_bottom에 스택을 맵핑하고 즉시 페이지를 claim한다.
 	 * TODO: 성공하면 그에 맞게 rsp를 설정한다.
 	 * TODO: 해당 페이지를 스택으로 표시해야 한다. */
-	/* TODO: Your code goes here */
-	/* TODO: 여기에 코드를 작성한다. */
+	if (vm_alloc_page (VM_ANON | VM_MARKER_0, stack_bottom, true)
+			&& vm_claim_page (stack_bottom)) {
+		if_->rsp = USER_STACK;
+		success = true;
+	}
 
 	return success;
 }

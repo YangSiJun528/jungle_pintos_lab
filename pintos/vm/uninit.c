@@ -18,7 +18,10 @@
  * */
 
 #include "vm/vm.h"
+#include "filesys/file.h"
 #include "vm/uninit.h"
+#include "threads/malloc.h"
+#include "userprog/process.h"
 
 static bool uninit_initialize (struct page *page, void *kva);
 static void uninit_destroy (struct page *page);
@@ -81,9 +84,15 @@ uninit_initialize (struct page *page, void *kva) {
  * PAGE는 호출자가 해제한다. */
 static void
 uninit_destroy (struct page *page) {
-	struct uninit_page *uninit UNUSED = &page->uninit;
+	struct uninit_page *uninit = &page->uninit;
 	/* TODO: Fill this function.
 	 * TODO: If you don't have anything to do, just return. */
 	/* TODO: 이 함수를 채운다.
 	 * TODO: 할 일이 없다면 그냥 리턴한다. */
+	if (uninit->aux != NULL) {
+		struct page_lazy_load_aux *aux = uninit->aux;
+		if (aux->file != NULL)
+			file_close (aux->file);
+		free (uninit->aux);
+	}
 }

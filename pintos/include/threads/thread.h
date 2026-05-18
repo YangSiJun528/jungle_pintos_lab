@@ -179,6 +179,7 @@ struct thread {
 	/* Table for whole virtual memory owned by thread. */
 	/* 스레드가 소유한 전체 가상 메모리용 테이블. */
 	struct supplemental_page_table spt;
+	uintptr_t rsp_at_syscall;
 #endif
 
 	/* Owned by thread.c. */

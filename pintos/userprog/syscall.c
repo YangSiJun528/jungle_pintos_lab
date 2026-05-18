@@ -17,6 +17,10 @@
 #include "filesys/file.h"
 #include "threads/init.h"
 #include "userprog/process.h"
+#ifdef VM
+#include "vm/vm.h"
+#include "vm/file.h"
+#endif
 
 typedef tid_t pid_t;
 
@@ -57,6 +61,10 @@ static void handle_write (struct syscall_entry *);
 static void handle_seek (struct syscall_entry *);
 static void handle_tell (struct syscall_entry *);
 static void handle_close (struct syscall_entry *);
+#ifdef VM
+static void handle_mmap (struct syscall_entry *);
+static void handle_munmap (struct syscall_entry *);
+#endif
 static void _exit (int status);
 static void *get_next_page_if_valid (void *);
 static bool is_valid_user_buffer (void *, size_t);
@@ -109,6 +117,9 @@ void
 syscall_handler (struct intr_frame *f) {
 	struct syscall_entry entry;
 
+#ifdef VM
+	thread_current ()->rsp_at_syscall = f->rsp;
+#endif
 	init_syscall_entry (f, &entry);
 	dispatch_syscall (f, &entry);
 
@@ -175,6 +186,14 @@ dispatch_syscall (struct intr_frame *f, struct syscall_entry *entry) {
 		case SYS_CLOSE:
 			handle_close (entry);
 			break;
+#ifdef VM
+		case SYS_MMAP:
+			handle_mmap (entry);
+			break;
+		case SYS_MUNMAP:
+			handle_munmap (entry);
+			break;
+#endif
 		default:
 			ASSERT (false); /* 현재 처리할 수 없는 syscall */
 	}
@@ -477,6 +496,70 @@ handle_close (struct syscall_entry *entry) {
 		_exit (-1);
 }
 
+#ifdef VM
+// void *mmap (void *addr, size_t length, int writable, int fd, off_t offset);
+// 인자 5개
+// 리턴값 void * - 성공 시 매핑 시작 주소, 실패 시 NULL
+static void
+handle_mmap (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	void *addr = (void *) entry->args[0];
+	size_t length = (size_t) entry->args[1];
+	int writable = (int) entry->args[2];
+	int fd = (int) entry->args[3];
+	off_t offset = (off_t) entry->args[4];
+	struct supplemental_page_table *spt = &thread_current ()->spt;
+	struct file *file;
+	uint64_t start;
+	uint64_t end;
+
+	entry->return_value = 0;
+
+	if (addr == NULL || length == 0 || pg_ofs (addr) != 0
+			|| offset % PGSIZE != 0 || fd < FD_MIN)
+		return;
+
+	start = (uint64_t) addr;
+	if (length > (uint64_t) -1 - start)
+		return;
+	end = start + length;
+
+	// 오버플로우 검사
+	if (start >= KERN_BASE || end > KERN_BASE)
+		return;
+
+	for (uint64_t p = start; p < end; p += PGSIZE) {
+		if (spt_find_page (spt, (void *) p) != NULL)
+			return;
+	}
+
+	if (!is_valid_file_fd (fd))
+		return;
+	file = fd_lookup (fd);
+	if (file == NULL)
+		return;
+
+	lock_acquire (&filesys_lock);
+	if (file_length (file) > 0)
+		entry->return_value = (intptr_t) do_mmap (addr, length, writable,
+				file, offset);
+	lock_release (&filesys_lock);
+}
+
+// void munmap (void *addr);
+// 인자 1개
+// 리턴값 없음
+static void
+handle_munmap (struct syscall_entry *entry) {
+	void *addr = (void *) entry->args[0];
+
+	if (addr == NULL || pg_ofs (addr) != 0)
+		return;
+
+	do_munmap (addr);
+}
+#endif
+
 // 프로세스 종료 시 사용
 static void
 _exit (int status) {
@@ -549,11 +632,21 @@ get_next_page_if_valid (void *ptr) {
 		return NULL;
 	}
 
+#ifdef VM
+	void *va = pg_round_down (ptr);
+	struct supplemental_page_table *spt = &thread_current ()->spt;
+	if (spt_find_page (spt, va) != NULL
+			|| pml4_get_page (thread_current ()->pml4, ptr) != NULL
+			|| validate_stack_area (thread_current ()->rsp_at_syscall, ptr)) {
+		return pg_next (ptr);
+	}
+	return NULL;
+#else
 	/* thread가 가지는 유저 가상 주소(pml4 필드)가 unmapped 상태인가? */
 	if (pml4_get_page (thread_current ()->pml4, ptr) == NULL) {
 		return NULL;
 	}
 
 	return pg_next (ptr);
+#endif
 }
-

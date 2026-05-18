@@ -37,26 +37,29 @@ anon_initializer (struct page *page, enum vm_type type, void *kva) {
 	/* 핸들러를 설정한다. */
 	page->operations = &anon_ops;
 
-	struct anon_page *anon_page = &page->anon;
+	struct anon_page *anon_page UNUSED = &page->anon;
+	return true;
 }
 
 /* Swap in the page by read contents from the swap disk. */
 /* swap disk에서 내용을 읽어 페이지를 swap in한다. */
 static bool
 anon_swap_in (struct page *page, void *kva) {
-	struct anon_page *anon_page = &page->anon;
+	struct anon_page *anon_page UNUSED = &page->anon;
+	return true;
 }
 
 /* Swap out the page by writing contents to the swap disk. */
 /* 내용을 swap disk에 써서 페이지를 swap out한다. */
 static bool
 anon_swap_out (struct page *page) {
-	struct anon_page *anon_page = &page->anon;
+	struct anon_page *anon_page UNUSED = &page->anon;
+	return false;
 }
 
 /* Destroy the anonymous page. PAGE will be freed by the caller. */
 /* anonymous page를 파괴한다. PAGE는 호출자가 해제한다. */
 static void
 anon_destroy (struct page *page) {
-	struct anon_page *anon_page = &page->anon;
+	struct anon_page *anon_page UNUSED = &page->anon;
 }

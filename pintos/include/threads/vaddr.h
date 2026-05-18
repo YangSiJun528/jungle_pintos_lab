@@ -52,6 +52,7 @@
 /* User stack start */
 /* 유저 스택 시작 지점. */
 #define USER_STACK 0x47480000
+#define MIN_USER_STACK (USER_STACK - (1 << 20)) /* USER_STACK - 1MB. */
 
 /* Returns true if VADDR is a user virtual address. */
 /* VADDR이 유저 가상 주소이면 true를 리턴한다. */

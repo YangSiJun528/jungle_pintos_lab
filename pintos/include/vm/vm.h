@@ -1,6 +1,10 @@
 #ifndef VM_VM_H
 #define VM_VM_H
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include "hash.h"
+#include "list.h"
 #include "threads/palloc.h"
 
 enum vm_type {
@@ -61,6 +65,9 @@ struct page {
 
 	/* Your implementation */
 	/* 직접 구현할 부분. */
+	struct hash_elem elem;
+	bool writeable;
+	uint64_t mmaped_size;
 
 	/* Per-type data are binded into the union.
 	 * Each function automatically detects the current union */
@@ -81,6 +88,7 @@ struct page {
 struct frame {
 	void *kva;
 	struct page *page;
+	struct list_elem elem;
 };
 
 /* The function table for page operations.
@@ -109,6 +117,7 @@ struct page_operations {
  * 이 struct에 대해 특정 design을 강제하지 않는다.
  * 여기서는 모든 design을 직접 정하면 된다. */
 struct supplemental_page_table {
+	struct hash table;
 };
 
 #include "threads/thread.h"
@@ -132,5 +141,7 @@ bool vm_alloc_page_with_initializer (enum vm_type type, void *upage,
 void vm_dealloc_page (struct page *page);
 bool vm_claim_page (void *va);
 enum vm_type page_get_type (struct page *page);
+bool validate_stack_area (uintptr_t rsp, void *addr);
+void destroy_frame_if_exists (struct page *page);
 
 #endif  /* VM_VM_H */
