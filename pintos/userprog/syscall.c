@@ -73,8 +73,8 @@ static void handle_mmap (struct syscall_entry *);
 static void handle_munmap (struct syscall_entry *);
 #endif
 static void _exit (int status);
-static void *get_next_page_if_valid (void *);
-static bool is_valid_user_buffer (void *, size_t);
+static void *get_next_page_if_valid (void *, bool);
+static bool is_valid_user_buffer (void *, size_t, bool);
 static bool is_valid_user_string (char *);
 static bool is_valid_file_fd (int);
 static void touch_user_buffer (void *, size_t, bool);
@@ -395,7 +395,7 @@ handle_read (struct syscall_entry *entry) {
 	uint8_t *buffer = (void *) entry->args[1];
 	size_t size = entry->args[2];
 
-	if (!is_valid_user_buffer (buffer, size)) {
+	if (!is_valid_user_buffer (buffer, size, true)) {
 		_exit (-1);
 	}
 
@@ -441,7 +441,7 @@ handle_write (struct syscall_entry *entry) {
 	const void *buffer = (const void *) entry->args[1];
 	size_t size = entry->args[2];
 
-	if (!is_valid_user_buffer ((void *) buffer, size)) {
+	if (!is_valid_user_buffer ((void *) buffer, size, false)) {
 		_exit (-1);
 	}
 
@@ -558,7 +558,7 @@ handle_readdir (struct syscall_entry *entry) {
 	int fd = (int) entry->args[0];
 	char *name = (char *) entry->args[1];
 
-	if (!is_valid_user_buffer (name, NAME_MAX + 1))
+	if (!is_valid_user_buffer (name, NAME_MAX + 1, true))
 		_exit (-1);
 	if (!is_valid_file_fd (fd))
 		_exit (-1);
@@ -717,18 +717,18 @@ touch_user_buffer (void *buf, size_t size, bool write) {
 }
 
 static bool
-is_valid_user_buffer (void *buf, size_t size) {
+is_valid_user_buffer (void *buf, size_t size, bool write) {
 	void *p = buf;
 	/* 산술 연산 시에는 uintptr_t 변환이 안전해보임. */
 	void *buf_end = (void *) ((uintptr_t) p + size);
 
 	if (size <= 0) {
-		return get_next_page_if_valid (p) != NULL;
+		return get_next_page_if_valid (p, write) != NULL;
 	}
 
 	while (p < buf_end) {
 		/* 페이지가 유효하면 다음 페이지, 아니면 NULL 반환. */
-		p = get_next_page_if_valid (p);
+		p = get_next_page_if_valid (p, write);
 		if (p == NULL) {
 			return false;
 		}
@@ -742,7 +742,7 @@ is_valid_user_string (char *str) {
 
 	while (true) {
 		/* 페이지가 유효하면 다음 페이지, 아니면 NULL 반환. */
-		char *next_p = get_next_page_if_valid (p);
+		char *next_p = get_next_page_if_valid (p, false);
 		if (next_p == NULL) {
 			return false;
 		}
@@ -766,7 +766,7 @@ is_valid_user_string (char *str) {
    리턴하는 다음 페이지 주소가 유효하지 않을 수 있음을 주의하기
    */
 static void *
-get_next_page_if_valid (void *ptr) {
+get_next_page_if_valid (void *ptr, bool write) {
 	if (ptr == NULL) {
 		return NULL;
 	}
@@ -779,9 +779,17 @@ get_next_page_if_valid (void *ptr) {
 #ifdef VM
 	void *va = pg_round_down (ptr);
 	struct supplemental_page_table *spt = &thread_current ()->spt;
-	if (spt_find_page (spt, va) != NULL
-			|| pml4_get_page (thread_current ()->pml4, ptr) != NULL
-			|| validate_stack_area (thread_current ()->rsp_at_syscall, ptr)) {
+	struct page *page = spt_find_page (spt, va);
+	if (page != NULL) {
+		return !write || page->writeable ? pg_next (ptr) : NULL;
+	}
+	if (pml4_get_page (thread_current ()->pml4, ptr) != NULL) {
+		uint64_t *pte = pml4e_walk (thread_current ()->pml4,
+				(uint64_t) va, false);
+		return !write || (pte != NULL && is_writable (pte))
+				? pg_next (ptr) : NULL;
+	}
+	if (validate_stack_area (thread_current ()->rsp_at_syscall, ptr)) {
 		return pg_next (ptr);
 	}
 	return NULL;
