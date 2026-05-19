@@ -148,10 +148,15 @@ spt_remove_page (struct supplemental_page_table *spt, struct page *page) {
 /* evict될 struct frame을 얻는다. */
 static struct frame *
 vm_get_victim (void) {
-	struct frame *victim = NULL;
+	struct frame *victim;
 	/* TODO: The policy for eviction is up to you. */
 	/* TODO: eviction 정책은 직접 정한다. */
 
+	if (list_empty (&frame_table)) {
+		PANIC ("no frame to evict");
+	}
+
+	victim = list_entry (list_pop_front (&frame_table), struct frame, elem);
 	return victim;
 }
 
@@ -161,11 +166,25 @@ vm_get_victim (void) {
  * 에러가 있으면 NULL을 리턴한다. */
 static struct frame *
 vm_evict_frame (void) {
-	struct frame *victim UNUSED = vm_get_victim ();
+	struct frame *victim = vm_get_victim ();
+	struct page *page = victim->page;
 	/* TODO: swap out the victim and return the evicted frame. */
 	/* TODO: victim을 swap out하고 evict된 프레임을 리턴한다. */
 
-	return NULL;
+	ASSERT (page != NULL);
+	ASSERT (victim->owner != NULL);
+
+	if (!swap_out (page)) {
+		PANIC ("failed to swap out page");
+	}
+
+	pml4_clear_page (victim->owner->pml4, page->va);
+	page->frame = NULL;
+	victim->page = NULL;
+	victim->owner = NULL;
+	memset (victim->kva, 0, PGSIZE);
+
+	return victim;
 }
 
 /* palloc() and get frame. If there is no available page, evict the page
@@ -181,7 +200,7 @@ vm_get_frame (void) {
 	void *kva = palloc_get_page (PAL_USER);
 
 	if (kva == NULL) {
-		PANIC ("todo - need_evict");
+		return vm_evict_frame ();
 	}
 
 	frame = malloc (sizeof *frame);
@@ -191,6 +210,7 @@ vm_get_frame (void) {
 
 	frame->kva = kva;
 	frame->page = NULL;
+	frame->owner = NULL;
 
 	memset (frame->kva, 0, PGSIZE);
 
@@ -276,16 +296,32 @@ vm_claim_page (void *va) {
 static bool
 vm_do_claim_page (struct page *page) {
 	struct frame *frame = vm_get_frame ();
-	list_push_back (&frame_table, &frame->elem);
 
 	frame->page = page;
+	frame->owner = thread_current ();
 	page->frame = frame;
 
-	pml4_set_page (thread_current ()->pml4, page->va, frame->kva,
-			page->writeable);
+	if (!pml4_set_page (thread_current ()->pml4, page->va, frame->kva,
+				page->writeable)) {
+		goto fail_frame;
+	}
 
-	swap_in (page, frame->kva);
+	if (!swap_in (page, frame->kva)) {
+		goto fail_mapping;
+	}
+
+	list_push_back (&frame_table, &frame->elem);
 	return true;
+
+fail_mapping:
+	pml4_clear_page (thread_current ()->pml4, page->va);
+fail_frame:
+	frame->page = NULL;
+	frame->owner = NULL;
+	page->frame = NULL;
+	palloc_free_page (frame->kva);
+	free (frame);
+	return false;
 }
 
 /* Initialize new supplemental page table */
@@ -357,7 +393,9 @@ destroy_frame_if_exists (struct page *page) {
 		return;
 
 	list_remove (&page->frame->elem);
-	pml4_clear_page (thread_current ()->pml4, page->va);
+	if (page->frame->owner != NULL) {
+		pml4_clear_page (page->frame->owner->pml4, page->va);
+	}
 	palloc_free_page (page->frame->kva);
 	free (page->frame);
 }

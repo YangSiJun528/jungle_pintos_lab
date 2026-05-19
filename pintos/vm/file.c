@@ -45,17 +45,43 @@ file_backed_initializer (struct page *page, enum vm_type type UNUSED,
 /* Swap in the page by read contents from the file. */
 /* 파일에서 내용을 읽어 페이지를 swap in한다. */
 static bool
-file_backed_swap_in (struct page *page, void *kva UNUSED) {
-	struct file_page *file_page UNUSED = &page->file;
-	return false;
+file_backed_swap_in (struct page *page, void *kva) {
+	struct file_page *file_page = &page->file;
+	off_t bytes_read;
+
+	lock_acquire (&filesys_lock);
+	bytes_read = file_read_at (file_page->file, kva, file_page->read_bytes,
+			file_page->ofs);
+	lock_release (&filesys_lock);
+
+	if (bytes_read != (off_t) file_page->read_bytes) {
+		return false;
+	}
+	memset ((uint8_t *) kva + file_page->read_bytes, 0,
+			file_page->zero_bytes);
+	return true;
 }
 
 /* Swap out the page by writeback contents to the file. */
 /* 내용을 파일에 writeback해서 페이지를 swap out한다. */
 static bool
 file_backed_swap_out (struct page *page) {
-	struct file_page *file_page UNUSED = &page->file;
-	return false;
+	struct file_page *file_page = &page->file;
+	uint64_t *pml4;
+
+	ASSERT (page->frame != NULL);
+	ASSERT (page->frame->owner != NULL);
+	ASSERT (file_page->file != NULL);
+
+	pml4 = page->frame->owner->pml4;
+	if (pml4_is_dirty (pml4, page->va)) {
+		lock_acquire (&filesys_lock);
+		file_write_at (file_page->file, page->frame->kva,
+				file_page->read_bytes, file_page->ofs);
+		lock_release (&filesys_lock);
+		pml4_set_dirty (pml4, page->va, false);
+	}
+	return true;
 }
 
 /* Destory the file backed page. PAGE will be freed by the caller. */
@@ -63,18 +89,27 @@ file_backed_swap_out (struct page *page) {
 static void
 file_backed_destroy (struct page *page) {
 	struct file_page *file_page = &page->file;
+	uint64_t *pml4;
 
-	ASSERT (page->frame != NULL);
 	ASSERT (file_page->file != NULL);
 
-	lock_acquire (&filesys_lock);
-	if (pml4_is_dirty (thread_current ()->pml4, page->va)) {
-		file_write_at (file_page->file, page->frame->kva,
-				file_page->read_bytes, file_page->ofs);
-		pml4_set_dirty (thread_current ()->pml4, page->va, false);
+	if (page->frame != NULL) {
+		pml4 = page->frame->owner != NULL
+				? page->frame->owner->pml4
+				: thread_current ()->pml4;
+		lock_acquire (&filesys_lock);
+		if (pml4_is_dirty (pml4, page->va)) {
+			file_write_at (file_page->file, page->frame->kva,
+					file_page->read_bytes, file_page->ofs);
+			pml4_set_dirty (pml4, page->va, false);
+		}
+		file_close (file_page->file);
+		lock_release (&filesys_lock);
+	} else {
+		lock_acquire (&filesys_lock);
+		file_close (file_page->file);
+		lock_release (&filesys_lock);
 	}
-	file_close (file_page->file);
-	lock_release (&filesys_lock);
 }
 
 /* Do the mmap */
