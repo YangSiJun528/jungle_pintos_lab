@@ -3,6 +3,7 @@
 #include <debug.h>
 #include <round.h>
 #include <string.h>
+#include "filesys/fat.h"
 #include "filesys/filesys.h"
 #include "filesys/free-map.h"
 #include "threads/malloc.h"
@@ -16,13 +17,15 @@
 /* 디스크에 저장되는 inode.
  * 정확히 DISK_SECTOR_SIZE byte 길이여야 한다. */
 struct inode_disk {
-	disk_sector_t start;                /* First data sector. */
-	/* 첫 data sector. */
+	cluster_t start;                    /* First data cluster. */
+	/* 첫 data cluster. */
 	off_t length;                       /* File size in bytes. */
 	/* byte 단위 파일 크기. */
 	unsigned magic;                     /* Magic number. */
 	/* magic number 값. */
-	uint32_t unused[125];               /* Not used. */
+	uint32_t type;                      /* enum inode_type. */
+	/* enum inode_type 값. */
+	uint32_t unused[124];               /* Not used. */
 	/* 사용하지 않는다. */
 };
 
@@ -60,11 +63,90 @@ struct inode {
 static disk_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) {
 	ASSERT (inode != NULL);
-	if (pos < inode->data.length)
-		return inode->data.start + pos / DISK_SECTOR_SIZE;
-	else
+	if (pos >= inode->data.length)
 		return -1;
+
+#ifdef EFILESYS
+	cluster_t clst = inode->data.start;
+	size_t skip = pos / DISK_SECTOR_SIZE;
+
+	if (clst == 0)
+		return -1;
+
+	while (skip-- > 0) {
+		clst = fat_get (clst);
+		if (clst == 0 || clst == EOChain)
+			return -1;
+	}
+	return cluster_to_sector (clst);
+#else
+	return inode->data.start + pos / DISK_SECTOR_SIZE;
+#endif
 }
+
+#ifdef EFILESYS
+static cluster_t inode_last_cluster (const struct inode_disk *);
+static bool inode_extend (struct inode *, off_t);
+static void zero_cluster (cluster_t);
+
+static cluster_t
+inode_last_cluster (const struct inode_disk *disk_inode) {
+	cluster_t clst = disk_inode->start;
+
+	if (clst == 0)
+		return 0;
+
+	while (fat_get (clst) != EOChain)
+		clst = fat_get (clst);
+	return clst;
+}
+
+static void
+zero_cluster (cluster_t clst) {
+	static char zeros[DISK_SECTOR_SIZE];
+	disk_write (filesys_disk, cluster_to_sector (clst), zeros);
+}
+
+static bool
+inode_extend (struct inode *inode, off_t length) {
+	size_t old_sectors = bytes_to_sectors (inode->data.length);
+	size_t new_sectors = bytes_to_sectors (length);
+	cluster_t last_clst;
+	cluster_t first_new = 0;
+	cluster_t before_new;
+
+	ASSERT (length >= inode->data.length);
+	if (new_sectors == old_sectors) {
+		inode->data.length = length;
+		disk_write (filesys_disk, inode->sector, &inode->data);
+		return true;
+	}
+
+	last_clst = inode_last_cluster (&inode->data);
+	before_new = last_clst;
+	for (size_t i = old_sectors; i < new_sectors; i++) {
+		cluster_t new_clst = fat_create_chain (last_clst);
+		if (new_clst == 0) {
+			if (first_new != 0) {
+				fat_remove_chain (first_new, before_new);
+				if (before_new == 0)
+					inode->data.start = 0;
+			}
+			return false;
+		}
+		if (inode->data.start == 0)
+			inode->data.start = new_clst;
+		if (first_new == 0)
+			first_new = new_clst;
+		last_clst = new_clst;
+		zero_cluster (new_clst);
+	}
+
+	inode->data.length = length;
+	disk_write (filesys_disk, inode->sector, &inode->data);
+	return true;
+}
+#endif
 
 /* List of open inodes, so that opening a single inode twice
  * returns the same `struct inode'. */
@@ -90,6 +172,11 @@ inode_init (void) {
  * 메모리 또는 디스크 할당이 실패하면 false를 리턴한다. */
 bool
 inode_create (disk_sector_t sector, off_t length) {
+	return inode_create_typed (sector, length, INODE_FILE);
+}
+
+bool
+inode_create_typed (disk_sector_t sector, off_t length, enum inode_type type) {
 	struct inode_disk *disk_inode = NULL;
 	bool success = false;
 
@@ -106,6 +193,35 @@ inode_create (disk_sector_t sector, off_t length) {
 		size_t sectors = bytes_to_sectors (length);
 		disk_inode->length = length;
 		disk_inode->magic = INODE_MAGIC;
+		disk_inode->type = type;
+#ifdef EFILESYS
+		if (sectors == 0) {
+			disk_write (filesys_disk, sector, disk_inode);
+			success = true;
+		} else {
+			cluster_t last_clst = 0;
+			bool ok = true;
+
+			for (size_t i = 0; i < sectors; i++) {
+				cluster_t new_clst = fat_create_chain (last_clst);
+				if (new_clst == 0) {
+					ok = false;
+					break;
+				}
+				if (disk_inode->start == 0)
+					disk_inode->start = new_clst;
+				last_clst = new_clst;
+				zero_cluster (new_clst);
+			}
+
+			if (ok) {
+				disk_write (filesys_disk, sector, disk_inode);
+				success = true;
+			} else if (disk_inode->start != 0) {
+				fat_remove_chain (disk_inode->start, 0);
+			}
+		}
+#else
 		if (free_map_allocate (sectors, &disk_inode->start)) {
 			disk_write (filesys_disk, sector, disk_inode);
 			if (sectors > 0) {
@@ -117,6 +233,7 @@ inode_create (disk_sector_t sector, off_t length) {
 			}
 			success = true; 
 		} 
+#endif
 		free (disk_inode);
 	}
 	return success;
@@ -199,9 +316,15 @@ inode_close (struct inode *inode) {
 		/* Deallocate blocks if removed. */
 		/* 제거된 상태라면 block들을 deallocate한다. */
 		if (inode->removed) {
+#ifdef EFILESYS
+			if (inode->data.start != 0)
+				fat_remove_chain (inode->data.start, 0);
+			fat_remove_chain (sector_to_cluster (inode->sector), 0);
+#else
 			free_map_release (inode->sector, 1);
 			free_map_release (inode->data.start,
 					bytes_to_sectors (inode->data.length)); 
+#endif
 		}
 
 		free (inode); 
@@ -295,6 +418,13 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
 	if (inode->deny_write_cnt)
 		return 0;
 
+#ifdef EFILESYS
+	if (size > 0 && offset + size > inode->data.length) {
+		if (!inode_extend (inode, offset + size))
+			return 0;
+	}
+#endif
+
 	while (size > 0) {
 		/* Sector to write, starting byte offset within sector. */
 		/* 쓸 sector와 sector 안의 시작 byte offset. */
@@ -379,4 +509,24 @@ inode_allow_write (struct inode *inode) {
 off_t
 inode_length (const struct inode *inode) {
 	return inode->data.length;
+}
+
+bool
+inode_is_dir (const struct inode *inode) {
+	return inode != NULL && inode->data.type == INODE_DIR;
+}
+
+bool
+inode_is_symlink (const struct inode *inode) {
+	return inode != NULL && inode->data.type == INODE_SYMLINK;
+}
+
+enum inode_type
+inode_get_type (const struct inode *inode) {
+	return inode->data.type;
+}
+
+int
+inode_open_count (const struct inode *inode) {
+	return inode->open_cnt;
 }

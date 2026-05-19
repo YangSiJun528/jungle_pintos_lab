@@ -1,6 +1,7 @@
 #include "filesys/fat.h"
 #include "devices/disk.h"
 #include "filesys/filesys.h"
+#include <debug.h>
 #include "threads/malloc.h"
 #include "threads/synch.h"
 #include <stdio.h>
@@ -165,8 +166,12 @@ fat_boot_create (void) {
 
 void
 fat_fs_init (void) {
-	/* TODO: Your code goes here. */
-	/* TODO: 여기에 코드를 작성한다. */
+	fat_fs->data_start = fat_fs->bs.fat_start + fat_fs->bs.fat_sectors;
+	fat_fs->last_clst =
+	    (fat_fs->bs.total_sectors - fat_fs->data_start)
+	    / fat_fs->bs.sectors_per_cluster;
+	fat_fs->fat_length = fat_fs->last_clst + 1;
+	lock_init (&fat_fs->write_lock);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -182,8 +187,24 @@ fat_fs_init (void) {
  * 새 클러스터 할당에 실패하면 0을 리턴한다. */
 cluster_t
 fat_create_chain (cluster_t clst) {
-	/* TODO: Your code goes here. */
-	/* TODO: 여기에 코드를 작성한다. */
+	cluster_t new_clst = 0;
+
+	lock_acquire (&fat_fs->write_lock);
+	for (cluster_t i = 1; i <= fat_fs->last_clst; i++) {
+		if (fat_fs->fat[i] == 0) {
+			new_clst = i;
+			break;
+		}
+	}
+
+	if (new_clst != 0) {
+		fat_fs->fat[new_clst] = EOChain;
+		if (clst != 0)
+			fat_fs->fat[clst] = new_clst;
+	}
+	lock_release (&fat_fs->write_lock);
+
+	return new_clst;
 }
 
 /* Remove the chain of clusters starting from CLST.
@@ -192,30 +213,51 @@ fat_create_chain (cluster_t clst) {
  * PCLST가 0이면 CLST를 체인의 시작으로 간주한다. */
 void
 fat_remove_chain (cluster_t clst, cluster_t pclst) {
-	/* TODO: Your code goes here. */
-	/* TODO: 여기에 코드를 작성한다. */
+	if (clst == 0)
+		return;
+
+	lock_acquire (&fat_fs->write_lock);
+	if (pclst != 0)
+		fat_fs->fat[pclst] = EOChain;
+
+	while (clst != 0 && clst <= fat_fs->last_clst) {
+		cluster_t next = fat_fs->fat[clst];
+		fat_fs->fat[clst] = 0;
+		if (next == EOChain)
+			break;
+		clst = next;
+	}
+	lock_release (&fat_fs->write_lock);
 }
 
 /* Update a value in the FAT table. */
 /* FAT 테이블의 값을 업데이트한다. */
 void
 fat_put (cluster_t clst, cluster_t val) {
-	/* TODO: Your code goes here. */
-	/* TODO: 여기에 코드를 작성한다. */
+	ASSERT (clst <= fat_fs->last_clst);
+	fat_fs->fat[clst] = val;
 }
 
 /* Fetch a value in the FAT table. */
 /* FAT 테이블에서 값을 가져온다. */
 cluster_t
 fat_get (cluster_t clst) {
-	/* TODO: Your code goes here. */
-	/* TODO: 여기에 코드를 작성한다. */
+	if (clst > fat_fs->last_clst)
+		return 0;
+	return fat_fs->fat[clst];
 }
 
 /* Covert a cluster # to a sector number. */
 /* cluster 번호를 sector 번호로 변환한다. */
 disk_sector_t
 cluster_to_sector (cluster_t clst) {
-	/* TODO: Your code goes here. */
-	/* TODO: 여기에 코드를 작성한다. */
+	ASSERT (clst >= 1 && clst <= fat_fs->last_clst);
+	return fat_fs->data_start
+	       + (clst - 1) * fat_fs->bs.sectors_per_cluster;
+}
+
+cluster_t
+sector_to_cluster (disk_sector_t sector) {
+	ASSERT (sector >= fat_fs->data_start);
+	return (sector - fat_fs->data_start) / fat_fs->bs.sectors_per_cluster + 1;
 }

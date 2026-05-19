@@ -59,6 +59,8 @@ static int parse_arg (char *cmd, char **arg_buf);
 static void
 process_init (void) {
 	struct thread *current = thread_current ();
+	if (current->cwd == NULL)
+		current->cwd = dir_open_root ();
 }
 
 /* Starts the first userland program, called "initd", loaded from FILE_NAME.
@@ -311,6 +313,12 @@ __do_fork (void *aux) {
 		e = list_next (e);
 	}
 
+	if (parent->cwd != NULL) {
+		current->cwd = dir_reopen (parent->cwd);
+		if (current->cwd == NULL)
+			goto error;
+	}
+
 	process_init ();
 
 	fork_ctx->success = true;
@@ -468,6 +476,13 @@ process_cleanup_files (void) {
 		file_close (fde->file);
 		lock_release (&filesys_lock);
 		free (fde);
+	}
+
+	if (curr->cwd != NULL) {
+		lock_acquire (&filesys_lock);
+		dir_close (curr->cwd);
+		lock_release (&filesys_lock);
+		curr->cwd = NULL;
 	}
 }
 

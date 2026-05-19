@@ -15,6 +15,7 @@
 #include "threads/mmu.h"
 #include "filesys/filesys.h"
 #include "filesys/file.h"
+#include "filesys/inode.h"
 #include "threads/init.h"
 #include "userprog/process.h"
 #ifdef VM
@@ -61,6 +62,12 @@ static void handle_write (struct syscall_entry *);
 static void handle_seek (struct syscall_entry *);
 static void handle_tell (struct syscall_entry *);
 static void handle_close (struct syscall_entry *);
+static void handle_chdir (struct syscall_entry *);
+static void handle_mkdir (struct syscall_entry *);
+static void handle_readdir (struct syscall_entry *);
+static void handle_isdir (struct syscall_entry *);
+static void handle_inumber (struct syscall_entry *);
+static void handle_symlink (struct syscall_entry *);
 #ifdef VM
 static void handle_mmap (struct syscall_entry *);
 static void handle_munmap (struct syscall_entry *);
@@ -186,6 +193,24 @@ dispatch_syscall (struct intr_frame *f, struct syscall_entry *entry) {
 			break;
 		case SYS_CLOSE:
 			handle_close (entry);
+			break;
+		case SYS_CHDIR:
+			handle_chdir (entry);
+			break;
+		case SYS_MKDIR:
+			handle_mkdir (entry);
+			break;
+		case SYS_READDIR:
+			handle_readdir (entry);
+			break;
+		case SYS_ISDIR:
+			handle_isdir (entry);
+			break;
+		case SYS_INUMBER:
+			handle_inumber (entry);
+			break;
+		case SYS_SYMLINK:
+			handle_symlink (entry);
 			break;
 #ifdef VM
 		case SYS_MMAP:
@@ -499,6 +524,93 @@ handle_close (struct syscall_entry *entry) {
 	lock_release (&filesys_lock);
 	if (!ok)
 		_exit (-1);
+}
+
+static void
+handle_chdir (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	const char *dir = (const char *) entry->args[0];
+
+	if (!is_valid_user_string (dir))
+		_exit (-1);
+
+	lock_acquire (&filesys_lock);
+	entry->return_value = filesys_chdir (dir);
+	lock_release (&filesys_lock);
+}
+
+static void
+handle_mkdir (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	const char *dir = (const char *) entry->args[0];
+
+	if (!is_valid_user_string (dir))
+		_exit (-1);
+
+	lock_acquire (&filesys_lock);
+	entry->return_value = filesys_mkdir (dir);
+	lock_release (&filesys_lock);
+}
+
+static void
+handle_readdir (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	int fd = (int) entry->args[0];
+	char *name = (char *) entry->args[1];
+
+	if (!is_valid_user_buffer (name, NAME_MAX + 1))
+		_exit (-1);
+	if (!is_valid_file_fd (fd))
+		_exit (-1);
+
+	struct file *file = fd_lookup (fd);
+	if (file == NULL)
+		_exit (-1);
+
+	lock_acquire (&filesys_lock);
+	entry->return_value = file_readdir (file, name);
+	lock_release (&filesys_lock);
+}
+
+static void
+handle_isdir (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	int fd = (int) entry->args[0];
+
+	if (!is_valid_file_fd (fd))
+		_exit (-1);
+
+	struct file *file = fd_lookup (fd);
+	entry->return_value = file != NULL && file_is_dir (file);
+}
+
+static void
+handle_inumber (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	int fd = (int) entry->args[0];
+
+	if (!is_valid_file_fd (fd))
+		_exit (-1);
+
+	struct file *file = fd_lookup (fd);
+	if (file == NULL)
+		_exit (-1);
+
+	entry->return_value = inode_get_inumber (file_get_inode (file));
+}
+
+static void
+handle_symlink (struct syscall_entry *entry) {
+	entry->should_return_value = true;
+	const char *target = (const char *) entry->args[0];
+	const char *linkpath = (const char *) entry->args[1];
+
+	if (!is_valid_user_string (target) || !is_valid_user_string (linkpath))
+		_exit (-1);
+
+	lock_acquire (&filesys_lock);
+	entry->return_value = filesys_symlink (target, linkpath);
+	lock_release (&filesys_lock);
 }
 
 #ifdef VM

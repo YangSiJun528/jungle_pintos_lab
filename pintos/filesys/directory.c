@@ -3,6 +3,7 @@
 #include <string.h>
 #include <list.h>
 #include "filesys/filesys.h"
+#include "filesys/fat.h"
 #include "filesys/inode.h"
 #include "threads/malloc.h"
 
@@ -32,7 +33,30 @@ struct dir_entry {
  * 성공하면 true, 실패하면 false를 리턴한다. */
 bool
 dir_create (disk_sector_t sector, size_t entry_cnt) {
+#ifdef EFILESYS
+	(void) entry_cnt;
+	return dir_create_with_parent (sector, sector);
+#else
 	return inode_create (sector, entry_cnt * sizeof (struct dir_entry));
+#endif
+}
+
+bool
+dir_create_with_parent (disk_sector_t sector, disk_sector_t parent_sector) {
+	struct dir *dir;
+	bool success;
+
+	if (!inode_create_typed (sector, 0, INODE_DIR))
+		return false;
+
+	dir = dir_open (inode_open (sector));
+	if (dir == NULL)
+		return false;
+
+	success = dir_add (dir, ".", sector)
+	          && dir_add (dir, "..", parent_sector);
+	dir_close (dir);
+	return success;
 }
 
 /* Opens and returns the directory for the given INODE, of which
@@ -59,7 +83,11 @@ dir_open (struct inode *inode) {
  * 성공하면 true, 실패하면 false를 리턴한다. */
 struct dir *
 dir_open_root (void) {
+#ifdef EFILESYS
+	return dir_open (inode_open (cluster_to_sector (ROOT_DIR_CLUSTER)));
+#else
 	return dir_open (inode_open (ROOT_DIR_SECTOR));
+#endif
 }
 
 /* Opens and returns a new directory for the same inode as DIR.
@@ -256,9 +284,25 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1]) {
 	while (inode_read_at (dir->inode, &e, sizeof e, dir->pos) == sizeof e) {
 		dir->pos += sizeof e;
 		if (e.in_use) {
+			if (!strcmp (e.name, ".") || !strcmp (e.name, ".."))
+				continue;
 			strlcpy (name, e.name, NAME_MAX + 1);
 			return true;
 		}
 	}
 	return false;
+}
+
+bool
+dir_is_empty (struct dir *dir) {
+	struct dir_entry e;
+	off_t ofs;
+
+	ASSERT (dir != NULL);
+	for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
+			ofs += sizeof e) {
+		if (e.in_use && strcmp (e.name, ".") && strcmp (e.name, ".."))
+			return false;
+	}
+	return true;
 }

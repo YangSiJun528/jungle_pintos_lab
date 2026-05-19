@@ -1,7 +1,9 @@
 #ifndef FILESYS_FILE_H
 #define FILESYS_FILE_H
 
+#include <stdbool.h>
 #include "filesys/off_t.h"
+#include "filesys/directory.h"
 
 struct inode;
 
@@ -30,5 +32,7 @@ void file_allow_write (struct file *);
 void file_seek (struct file *, off_t);
 off_t file_tell (struct file *);
 off_t file_length (struct file *);
+bool file_is_dir (struct file *);
+bool file_readdir (struct file *, char name[NAME_MAX + 1]);
 
 #endif /* filesys/file.h */

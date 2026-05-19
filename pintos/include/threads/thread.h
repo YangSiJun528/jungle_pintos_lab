@@ -20,6 +20,7 @@ struct file_descriptor {
 	struct list_elem elem;
 	struct file *file;
 };
+struct dir;
 
 /* States in a thread's life cycle. */
 /* 스레드 생명 주기의 상태들. */
@@ -173,6 +174,7 @@ struct thread {
 	struct child_state *child_state; /* 부모가 접근할 수 있는 내 상태, 공유 목적으로 사용 (자식 입장) */
 
 	struct file *executable; /* 실행 중인 ELF 파일, deny_write를 프로세스 수명 동안 유지 */
+	struct dir *cwd;         /* Current working directory. */
 
 #endif
 #ifdef VM

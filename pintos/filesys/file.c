@@ -1,5 +1,6 @@
 #include "filesys/file.h"
 #include <debug.h>
+#include "filesys/directory.h"
 #include "filesys/inode.h"
 #include "threads/malloc.h"
 
@@ -8,6 +9,8 @@
 struct file {
 	struct inode *inode;        /* File's inode. */
 	/* 파일의 inode. */
+	struct dir *dir;            /* Non-null if this file is a directory. */
+	/* 디렉터리이면 null이 아니다. */
 	off_t pos;                  /* Current position. */
 	/* 현재 위치. */
 	bool deny_write;            /* Has file_deny_write() been called? */
@@ -23,7 +26,16 @@ struct file *
 file_open (struct inode *inode) {
 	struct file *file = calloc (1, sizeof *file);
 	if (inode != NULL && file != NULL) {
-		file->inode = inode;
+		if (inode_is_dir (inode)) {
+			file->dir = dir_open (inode);
+			if (file->dir == NULL) {
+				free (file);
+				return NULL;
+			}
+			file->inode = dir_get_inode (file->dir);
+		} else {
+			file->inode = inode;
+		}
 		file->pos = 0;
 		file->deny_write = false;
 		return file;
@@ -40,7 +52,7 @@ file_open (struct inode *inode) {
  * 실패하면 null pointer를 리턴한다. */
 struct file *
 file_reopen (struct file *file) {
-	return file_open (inode_reopen (file->inode));
+	return file_open (inode_reopen (file_get_inode (file)));
 }
 
 /* Duplicate the file object including attributes and returns a new file for the
@@ -49,7 +61,7 @@ file_reopen (struct file *file) {
  * 리턴한다. 실패하면 null pointer를 리턴한다. */
 struct file *
 file_duplicate (struct file *file) {
-	struct file *nfile = file_open (inode_reopen (file->inode));
+	struct file *nfile = file_open (inode_reopen (file_get_inode (file)));
 	if (nfile) {
 		nfile->pos = file->pos;
 		if (file->deny_write)
@@ -64,7 +76,10 @@ void
 file_close (struct file *file) {
 	if (file != NULL) {
 		file_allow_write (file);
-		inode_close (file->inode);
+		if (file->dir != NULL)
+			dir_close (file->dir);
+		else
+			inode_close (file->inode);
 		free (file);
 	}
 }
@@ -87,6 +102,8 @@ file_get_inode (struct file *file) {
  * 읽은 byte 수만큼 FILE의 위치를 전진시킨다. */
 off_t
 file_read (struct file *file, void *buffer, off_t size) {
+	if (file_is_dir (file))
+		return -1;
 	off_t bytes_read = inode_read_at (file->inode, buffer, size, file->pos);
 	file->pos += bytes_read;
 	return bytes_read;
@@ -103,6 +120,8 @@ file_read (struct file *file, void *buffer, off_t size) {
  * 파일의 현재 위치는 바뀌지 않는다. */
 off_t
 file_read_at (struct file *file, void *buffer, off_t size, off_t file_ofs) {
+	if (file_is_dir (file))
+		return -1;
 	return inode_read_at (file->inode, buffer, size, file_ofs);
 }
 
@@ -120,6 +139,8 @@ file_read_at (struct file *file, void *buffer, off_t size, off_t file_ofs) {
  * 읽은 byte 수만큼 FILE의 위치를 전진시킨다. */
 off_t
 file_write (struct file *file, const void *buffer, off_t size) {
+	if (file_is_dir (file))
+		return -1;
 	off_t bytes_written = inode_write_at (file->inode, buffer, size, file->pos);
 	file->pos += bytes_written;
 	return bytes_written;
@@ -140,6 +161,8 @@ file_write (struct file *file, const void *buffer, off_t size) {
 off_t
 file_write_at (struct file *file, const void *buffer, off_t size,
 		off_t file_ofs) {
+	if (file_is_dir (file))
+		return -1;
 	return inode_write_at (file->inode, buffer, size, file_ofs);
 }
 
@@ -176,6 +199,18 @@ off_t
 file_length (struct file *file) {
 	ASSERT (file != NULL);
 	return inode_length (file->inode);
+}
+
+bool
+file_is_dir (struct file *file) {
+	return file != NULL && file->dir != NULL;
+}
+
+bool
+file_readdir (struct file *file, char name[NAME_MAX + 1]) {
+	if (!file_is_dir (file))
+		return false;
+	return dir_readdir (file->dir, name);
 }
 
 /* Sets the current position in FILE to NEW_POS bytes from the
