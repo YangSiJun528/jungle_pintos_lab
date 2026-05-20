@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="230" viewBox="0 0 920 230">
+  <rect width="920" height="230" rx="18" fill="#1f2328"/>
+  <text x="36" y="58" fill="#9aa4b2" font-family="Menlo, Consolas, monospace" font-size="26">debug_trace.h</text>
+  <text x="36" y="116" fill="#f6f8fa" font-family="Menlo, Consolas, monospace" font-size="25">[DEG] r=thrd tid= 3 p4=0x8004247000</text>
+  <text x="36" y="158" fill="#f6c177" font-family="Menlo, Consolas, monospace" font-size="25">      k=branch fn=load_segment</text>
+  <text x="36" y="200" fill="#8fd694" font-family="Menlo, Consolas, monospace" font-size="25">      expr=&quot;is_init_failed&quot; value=1</text>
+</svg>
